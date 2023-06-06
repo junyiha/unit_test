@@ -1,0 +1,7 @@
+*.exe
+*.jpg
+*.txt
+*.log
+path
+.vscode
+*.json

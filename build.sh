@@ -41,7 +41,7 @@ do
     fi
 
     if [[ ${file} == "test_pic_server" ]]; then 
-        g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt -lpthread
+        g++ -g -std=c++11 "${file}.cc" "ParseFrame.cc" -o ${f} -I./ -lrt -lpthread
         continue
     fi
 

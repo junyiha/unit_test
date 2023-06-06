@@ -3,7 +3,8 @@
 #include "ParseMjpeg.hpp"
 #include "ConsumerIndex.hpp"
 #include "PictureServer.hpp"
-#include "VCAFrame.hpp"
+// #include "VCAFrame.hpp"
+#include "ParseFrame.hpp"
 
 using EnumRET_t = enum 
 {
@@ -101,6 +102,7 @@ int test_v1()
 
 int main()
 {
+    struct Frame_t f;
     std::string json_string;
     std::string prefix {"aaa"};
     PictureServer ps;
@@ -116,6 +118,14 @@ int main()
         if (ps.GetStructData(json_string))
         {
             std::cerr << "Success to get json string: " << json_string << std::endl;
+            if (ParseFrame(json_string, f))
+            {
+                std::cerr << "Success to parse frame data to struct Frame_t "  << std::endl;
+                std::cerr << "task: " << f.task << std::endl;
+                std::cerr << "height: " << f.height << std::endl;
+                std::cerr << "width: " << f.width << std::endl;
+                std::cerr << "monotonic: " << f.monotonic << std::endl;
+            }
         }
     }
 

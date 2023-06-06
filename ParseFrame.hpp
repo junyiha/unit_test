@@ -10,6 +10,9 @@
  */
 #pragma once 
 
+#ifndef PARSE_FRAME_HPP
+#define PARSE_FRAME_HPP
+
 #include <string>
 #include <vector>
 #include <iostream>
@@ -56,3 +59,5 @@ struct Frame_t
 };
 
 bool ParseFrame(std::string &in, struct Frame_t &out);
+
+#endif  // PARSE_FRAME_HPP

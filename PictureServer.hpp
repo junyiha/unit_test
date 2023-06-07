@@ -23,7 +23,9 @@ public:
     void Init();
     int Process();
     bool GetStructData(std::string &out);
+    bool GetOriginPicData(std::vector<char> &out);
     void DeleteQueueFrontData();
+    bool SaveOriginPictureToDir(std::string &in);
 
 public:
     PictureServer() = default;
@@ -127,9 +129,34 @@ inline bool PictureServer::GetStructData(std::string &out)
     return true;
 }
 
+inline bool PictureServer::GetOriginPicData(std::vector<char> &out)
+{
+    int ret {ParseMjpeg::RET_ERR};
+
+    ret = m_pm.GetOriginPicData(out);
+    if (ret == ParseMjpeg::RET_OK)
+        return true;
+
+    return false;
+}
+
 inline void PictureServer::DeleteQueueFrontData()
 {
     m_struct_queue.pop();
+}
+
+inline bool PictureServer::SaveOriginPictureToDir(std::string &in)
+{
+    int ret {ParseMjpeg::RET_ERR};
+    std::string pic_name;
+
+    GetPictureName(pic_name);
+    in += pic_name;
+    ret = m_pm.SaveOriginPicFile(in);
+    if (ret == ParseMjpeg::RET_OK)
+        return true;
+
+    return false;
 }
 
 inline void PictureServer::InitConsumer()

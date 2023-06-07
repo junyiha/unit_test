@@ -21,7 +21,8 @@ file_arr=(get_file_size
           test_pic_server
           test_remove
           test_thread
-          test_parse_frame )
+          test_parse_frame
+          test_video_stream )
 
 for file in "${file_arr[@]}"
 do 
@@ -37,6 +38,11 @@ do
 
     if [[ ${file} == "test_thread" ]]; then 
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lpthread
+        continue
+    fi
+
+    if [[ ${file} == "test_video_stream" ]]; then 
+        g++ -g -std=c++11 "${file}.cc" "mongoose.c" -o ${f} -I./ -lpthread -lrt
         continue
     fi
 

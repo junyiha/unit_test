@@ -100,11 +100,19 @@ int test_v1()
     return 0;
 }
 
+using EnumLabel_t = enum 
+{
+    FULL_BODY = 10001,
+};
+
+std::size_t threshold {60};
+
 int main()
 {
     struct Frame_t f;
     std::string json_string;
     std::string prefix {"aaa"};
+    std::string save_origin_path {"path/to/"};
     PictureServer ps;
 
     ps.SetPrefix(prefix);   
@@ -117,16 +125,36 @@ int main()
     {
         if (ps.GetStructData(json_string))
         {
-            std::cerr << "Success to get json string: " << json_string << std::endl;
             if (ParseFrame(json_string, f))
             {
-                std::cerr << "Success to parse frame data to struct Frame_t "  << std::endl;
-                std::cerr << "task: " << f.task << std::endl;
-                std::cerr << "height: " << f.height << std::endl;
-                std::cerr << "width: " << f.width << std::endl;
-                std::cerr << "monotonic: " << f.monotonic << std::endl;
-            }
-        }
+                if (!f.detector_arr.empty())
+                {
+                    for (auto &detector : f.detector_arr)
+                    {
+                        if (!detector.box_arr.empty())
+                        {
+                            for (auto &box : detector.box_arr)
+                            {
+                                if (box.label == FULL_BODY && box.score > threshold)
+                                {
+                                    save_origin_path = "path/to/";
+                                    if (ps.SaveOriginPictureToDir(save_origin_path))
+                                    {
+                                        std::cerr << "Success to save record picture, and the information : " << std::endl;
+                                        std::cerr << "\n++++++++++++++++++++++++++" << std::endl;
+                                        std::cerr << "task: " << f.task << std::endl;
+                                        std::cerr << "index: " << box.index << std::endl;
+                                        std::cerr << "label: " << box.label << std::endl;
+                                        std::cerr << "score: " << box.score << std::endl;
+                                        std::cerr << "++++++++++++++++++++++++++\n" << std::endl;
+                                    }  // 判断是否保存图片
+                                }  // 判断检测框的标签和阈值
+                            }  // 遍历检测器中的检测框
+                        }  // 判断检测器中检测框是否为空
+                    }  // 遍历检测器
+                }  // 判断检测器是否为空
+            }  // 判断是否成功解析字符串
+        }  // 判断是否获取json字符串
     }
 
     return 0;

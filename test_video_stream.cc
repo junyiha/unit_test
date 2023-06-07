@@ -1,3 +1,17 @@
+/**
+ * @file test_video_stream.cc
+ * @author your name (you@domain.com)
+ * @brief 
+ * 
+ * http://192.169.4.16:8200/api/video1
+ * 
+ * @version 0.1
+ * @date 2023-06-07
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #include <vector>
 #include <string>
 #include <thread>
@@ -8,6 +22,39 @@
 PictureServer ps;
 std::string prefix {"aaa"};
 
+static void CreateHeader(std::string &out)
+{
+    out =  "Content-Type: application/json\r\n";
+    out += "Connection: keep-alive\r\n";
+    out += "Server: mnc.exe\r\n";
+    out += "Cache-control: no-cache, max-age=0, must-revalidate\r\n";
+    out += "Access-Control-Allow-Origin: *\r\n";
+    out += "Access-Control-Allow-Methods: *\r\n";
+}
+
+static bool ProcessHttpMsg(struct mg_http_message *hm)
+{
+    std::string query_string;
+
+    if (hm->query.ptr == nullptr)
+        return false;
+
+    query_string = hm->query.ptr;
+    query_string = query_string.substr(0, hm->query.len);
+    std::size_t p = query_string.find('=');
+    std::string key = query_string.substr(0, p);
+    std::string value = query_string.substr(p+1);
+
+    if (key.compare("play") == 0)
+    {
+        if (value.compare("1") == 0)
+            return true;
+    }
+
+    return false;
+}
+
+
 static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) 
 {
     if (ev == MG_EV_HTTP_MSG)
@@ -15,13 +62,23 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
         struct mg_http_message *hm = (struct mg_http_message *) ev_data;
         if (mg_http_match_uri(hm, "/api/video1"))
         {
-            c->data[0] = 'S';
-            mg_printf(
-                c, "%s",
-                "HTTP/1.0 200 OK\r\n"
-                "Cache-Control: no-cache\r\n"
-                "Pragma: no-cache\r\nExpires: Thu, 01 Dec 1994 16:00:00 GMT\r\n"
-                "Content-Type: multipart/x-mixed-replace; boundary=--foo\r\n\r\n");
+            if (ProcessHttpMsg(hm))
+            {
+                c->data[0] = 'S';
+                mg_printf(
+                    c, "%s",
+                    "HTTP/1.0 200 OK\r\n"
+                    "Cache-Control: no-cache\r\n"
+                    "Pragma: no-cache\r\nExpires: Thu, 01 Dec 1994 16:00:00 GMT\r\n"
+                    "Content-Type: multipart/x-mixed-replace; boundary=--foo\r\n\r\n");
+            }
+            else 
+            {
+                c->data[0] = ' ';
+                std::string header_string;
+                CreateHeader(header_string);
+                mg_http_reply(c, 200, header_string.c_str(), "close");
+            }
         }
         else 
         {

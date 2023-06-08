@@ -24,7 +24,10 @@ file_arr=(get_file_size
           test_parse_frame
           test_video_stream
           test_opencv
-          test_std_system )
+          test_std_system
+          test_opencv_get_position
+          test_point_in_region
+          test_point_in_region_v2 )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -32,10 +35,16 @@ opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/insta
 for file in "${file_arr[@]}"
 do 
     f="${file}.exe"
+    # if [[ -e ${f} ]]; then 
+    #     echo "Exist file: " ${f} ", and delete it"
+    #     rm ${f}
+    # fi 
+
     if [[ -e ${f} ]]; then 
-        echo "Exist file: " ${f} ", and delete it"
-        rm ${f}
+        echo "Exist file: " ${f} ", and continue"
+        continue
     fi 
+
     if [[ ${file} == "shm_open_unlink" ]]; then 
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
         continue
@@ -57,6 +66,11 @@ do
     fi
 
     if [[ ${file} == "test_opencv" ]]; then 
+        g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
+        continue
+    fi 
+
+    if [[ ${file} == "test_opencv_get_position" ]]; then 
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
     fi 

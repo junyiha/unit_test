@@ -16,9 +16,11 @@ class ServiceLogic final : public BaseServiceLogic
 {
 public:
     virtual int ConfigDetectionArea(Box_t &b) override;
+    virtual int SetDetectionRegion(std::vector<Point> &in) override;
     virtual int ConfigThreshold(int threshold) override;
     virtual int Process(Logic_t &l, int &event) override;
     virtual void InitLimitTime() override;
+    virtual void InitLimitArea() override;
     virtual int SetLimitBeginTime(LogicTime_t &in) override;
     virtual int SetLimitEndTime(LogicTime_t &in) override;
 
@@ -26,6 +28,9 @@ public:
     virtual void DetectPerson(Logic_t &l, int &event) override;
     virtual void GetCurrentTime(LogicTime_t &lt) override;
     virtual int CheckAlarmTime() override;
+    virtual bool isInsidePolygon(const Point& point, const std::vector<Point>& region) override;
+    virtual bool isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region) override;
+    virtual int CheckAlarmArea() override;
 
 public:
     ServiceLogic();
@@ -36,6 +41,7 @@ private:
 
 private:
     struct Box_t m_b {};
+    std::vector<Point> m_region;
     struct Logic_t m_l {};
     std::pair<LogicTime_t, LogicTime_t> m_time_limit;
 };
@@ -43,6 +49,7 @@ private:
 inline ServiceLogic::ServiceLogic()
 {
     InitLimitTime();
+    InitLimitArea();
 }
 
 inline int ServiceLogic::ConfigDetectionArea(Box_t &b)
@@ -52,6 +59,16 @@ inline int ServiceLogic::ConfigDetectionArea(Box_t &b)
     
     m_b = b;
     
+    return RET_OK;
+}
+
+inline int ServiceLogic::SetDetectionRegion(std::vector<Point> &in)
+{
+    if (in.size() < 3)
+        return RET_ERR;
+    
+    m_region = in;
+
     return RET_OK;
 }
 
@@ -120,6 +137,21 @@ inline void ServiceLogic::InitLimitTime()
     m_time_limit = std::make_pair(lt_begin, lt_end);
 }
 
+inline void ServiceLogic::InitLimitArea()
+{
+    m_b.x1 = 9;
+    m_b.y1 = 7;
+    m_b.x2 = 1836;
+    m_b.y2 = 1038;
+    m_region = 
+    {
+        {0, 0},
+        {1920, 0},
+        {1920, 1080},
+        {0, 1080}
+    };
+}
+
 inline void ServiceLogic::DetectPerson(Logic_t &l, int &event)
 {
     int ret {RET_ERR};
@@ -130,7 +162,12 @@ inline void ServiceLogic::DetectPerson(Logic_t &l, int &event)
         ret = CheckAlarmTime();
         if ( ret == RET_OK)
         {
-            event = EVENT_AREA_INVASION;
+            m_l = l;
+            ret = CheckAlarmArea();
+            if (ret == RET_OK)
+            {
+                event = EVENT_AREA_INVASION;
+            }
         }
     }
 }
@@ -225,4 +262,53 @@ inline int ServiceLogic::CheckAlarmTime()
         return RET_OK;
 
     return RET_ERR;
+}
+
+inline bool ServiceLogic::isInsidePolygon(const Point& point, const std::vector<Point>& region)
+{
+    int count = 0;
+    int n = region.size();
+
+    for (int i = 0; i < n; ++i) {
+        const Point& p1 = region[i];
+        const Point& p2 = region[(i + 1) % n];
+
+        if ((p1.y > point.y) != (p2.y > point.y) &&
+            point.x < (p2.x - p1.x) * (point.y - p1.y) / (p2.y - p1.y) + p1.x) {
+            ++count;
+        }
+    }
+
+    return count % 2 == 1;
+}
+
+inline bool ServiceLogic::isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region)
+{
+    for (const Point& point : rectangle) {
+        if (!isInsidePolygon(point, region)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+inline int ServiceLogic::CheckAlarmArea()
+{
+    std::vector<Point> rectangle = 
+    {
+        {m_l.box.x1, m_l.box.y1},
+        {m_l.box.x1, m_l.box.y2 - m_l.box.y1},
+        {m_l.box.x2, m_l.box.y2},
+        {m_l.box.x2, m_l.box.y1}
+    };
+
+    if (isRectangleInsidePolygon(rectangle, m_region))
+    {
+        return RET_OK;
+    }
+    else 
+    {
+        return RET_ERR;
+    }
 }

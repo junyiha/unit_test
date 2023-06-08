@@ -36,6 +36,14 @@ struct LogicTime_t
     int second;
 };
 
+struct Point {
+    int x;
+    int y;
+
+    Point() {}
+    Point(int x, int y) : x(x), y(y) {}
+};
+
 class BaseServiceLogic
 {
 public:
@@ -82,9 +90,11 @@ public:
 
 public:
     virtual int ConfigDetectionArea(Box_t &b) {}
+    virtual int SetDetectionRegion(std::vector<Point> &in) {}
     virtual int ConfigThreshold(int threshold) {}
     virtual int Process(Logic_t &l, int &event) {}
     virtual void InitLimitTime() {}
+    virtual void InitLimitArea() {}
     virtual int SetLimitBeginTime(LogicTime_t &in) {}
     virtual int SetLimitEndTime(LogicTime_t &in) {}
 
@@ -92,6 +102,9 @@ protected:
     virtual void DetectPerson(Logic_t &l, int &event) {}
     virtual void GetCurrentTime(LogicTime_t &lt) {}
     virtual int CheckAlarmTime() {}
+    virtual bool isInsidePolygon(const Point& point, const std::vector<Point>& region) {}
+    virtual bool isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region) {}
+    virtual int CheckAlarmArea() {}
 
 public:
     BaseServiceLogic() = default;

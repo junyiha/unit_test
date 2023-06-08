@@ -10,7 +10,9 @@
  */
 #pragma once 
 
+#include <atomic>
 #include "ParseFrame.hpp"
+#include "ServiceLogic.hpp"
 #include "opencv2/opencv.hpp"
 
 
@@ -20,6 +22,9 @@ class ProcessPicture
 public:
     bool Process(std::string &in);
     bool Process(std::string &image, std::string &json_string);
+
+private:
+    void DrawBox();
 
 public:
     ProcessPicture() = default;
@@ -34,6 +39,13 @@ private:
     std::pair<int, int> m_point2;
     std::pair<std::pair<int, int>, std::pair<int, int>> m_point;
     std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> m_point_arr;
+
+private:
+    std::atomic<bool> m_draw_flag {false};
+    cv::Mat m_img;
+
+private:
+    ServiceLogic m_sl;
 };
 
 inline bool ProcessPicture::Process(std::string &in)
@@ -47,6 +59,7 @@ inline bool ProcessPicture::Process(std::string &in)
         return -1;
     }
 
+    m_img = image;
     // 定义边框的位置和大小
     int x = 100;
     int y = 100;
@@ -55,10 +68,14 @@ inline bool ProcessPicture::Process(std::string &in)
 
     // 在图像上绘制边框
     // cv::rectangle(image, cv::Point(x, y), cv::Point(x + width, y + height), cv::Scalar(0, 255, 0), 2);
-    for (auto &point : m_point_arr)
+    if (m_draw_flag.load())
     {
-        cv::rectangle(image, cv::Point(point.first.first, point.first.second), cv::Point(point.second.first, point.second.second), cv::Scalar(0, 255, 0), 2);
+        for (auto &point : m_point_arr)
+        {
+            cv::rectangle(image, cv::Point(point.first.first, point.first.second), cv::Point(point.second.first, point.second.second), cv::Scalar(0, 255, 0), 2);
+        }
     }
+    m_draw_flag.store(false);
 
     // 创建窗口
     cv::namedWindow("Image", cv::WINDOW_NORMAL);
@@ -92,21 +109,43 @@ inline bool ProcessPicture::Process(std::string &image, std::string &json_string
                     m_point_arr.clear();
                     for (auto &box : detector.box_arr)
                     {
-                        m_x1 = box.x1;
-                        m_y1 = box.y1;
-                        m_x2 = box.y2;
-                        m_y2 = box.y2;
-                        m_point1.first = box.x1;
-                        m_point1.second = box.y1;
-                        m_point2.first = box.x2;
-                        m_point2.second = box.y2;
-                        m_point.first = m_point1;
-                        m_point.second = m_point2;
-                        m_point_arr.push_back(m_point);
+                        int ret {ServiceLogic::RET_ERR};
+                        int event {ServiceLogic::EVENT_ERROR};
+                        Logic_t l;
+
+                        l.label = box.label;
+                        l.score = box.score;
+                        l.box.x1 = box.x1;
+                        l.box.x2 = box.x2;
+                        l.box.y1 = box.y1;
+                        l.box.y2 = box.y2;
+                        m_sl.ConfigThreshold(50);
+                        ret = m_sl.Process(l, event);
                         Process(image);
+                        if (ret == ServiceLogic::RET_OK && event != ServiceLogic::EVENT_ERROR)
+                        {
+                            m_point1 = std::make_pair(box.x1, box.y1);
+
+                            m_point2 = std::make_pair(box.x2, box.y2);
+                            
+                            m_point = std::make_pair(m_point1, m_point2);
+                            m_point_arr.push_back(m_point);
+
+                            DrawBox();
+                            std::cerr << "an alarm is generated, the event id: " << event << std::endl;
+                        }
                     }
                 }
             }
         }
     }
+}
+
+inline void ProcessPicture::DrawBox()
+{
+    // for (auto &point : m_point_arr)
+    // {
+    //     cv::rectangle(m_img, cv::Point(point.first.first, point.first.second), cv::Point(point.second.first, point.second.second), cv::Scalar(0, 255, 0), 2);
+    // }
+    m_draw_flag.store(true);
 }

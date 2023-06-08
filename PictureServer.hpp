@@ -89,8 +89,6 @@ inline int PictureServer::Process()
             std::cerr << "Failed to read producer index, break"<< std::endl;
             break;
         }
-        std::cerr << "consumer index: " << m_consumer_idx << std::endl;
-        std::cerr << "producer index: " << m_producer_idx << std::endl;
         
         if (m_consumer_idx > m_producer_idx)
         {
@@ -108,8 +106,8 @@ inline int PictureServer::Process()
                 SaveDataToQueue(json_string);
                 ProcessFrame(pic_name, json_string);
                     
-                if (RemoveShmFile(pic_name))
-                    std::cerr << "Success to remove file: " << pic_name << std::endl;
+                if (!RemoveShmFile(pic_name))
+                    std::cerr << "Failed to remove file: " << pic_name << std::endl;
             }
         }
         ret = m_ci.WriteIndex(m_consumer_idx);

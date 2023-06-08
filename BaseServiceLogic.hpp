@@ -11,6 +11,8 @@
 #pragma once 
 
 #include <iostream>
+#include <ctime>
+#include <cassert>
 
 struct Box_t 
 {
@@ -25,6 +27,13 @@ struct Logic_t
     int label;
     int score;
     Box_t box;
+};
+
+struct LogicTime_t 
+{
+    int hour;
+    int minute;
+    int second;
 };
 
 class BaseServiceLogic
@@ -72,12 +81,17 @@ public:
     };
 
 public:
-    virtual int ConfigDetectionArea(struct Box_t &b) {}
+    virtual int ConfigDetectionArea(Box_t &b) {}
     virtual int ConfigThreshold(int threshold) {}
-    virtual int Process(struct Logic_t &l, int &event) {}
+    virtual int Process(Logic_t &l, int &event) {}
+    virtual void InitLimitTime() {}
+    virtual int SetLimitBeginTime(LogicTime_t &in) {}
+    virtual int SetLimitEndTime(LogicTime_t &in) {}
 
 protected:
-    virtual void DetectPerson(struct Logic_t &l, int &event) {}
+    virtual void DetectPerson(Logic_t &l, int &event) {}
+    virtual void GetCurrentTime(LogicTime_t &lt) {}
+    virtual int CheckAlarmTime() {}
 
 public:
     BaseServiceLogic() = default;

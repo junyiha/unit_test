@@ -119,20 +119,33 @@ inline bool ProcessPicture::Process(std::string &image, std::string &json_string
                         l.box.x2 = box.x2;
                         l.box.y1 = box.y1;
                         l.box.y2 = box.y2;
-                        m_sl.ConfigThreshold(50);
-                        ret = m_sl.Process(l, event);
-                        Process(image);
-                        if (ret == ServiceLogic::RET_OK && event != ServiceLogic::EVENT_ERROR)
+                        LogicTime_t lt;
+                        lt.hour = 16;
+                        lt.minute = 43;
+                        lt.second = 0;
+                        ret = m_sl.SetLimitBeginTime(lt);
+                        if (ret == ServiceLogic::RET_OK)
                         {
-                            m_point1 = std::make_pair(box.x1, box.y1);
+                            lt.minute = 45;
+                            ret = m_sl.SetLimitEndTime(lt);
+                            if (ret == ServiceLogic::RET_OK)
+                            {
+                                m_sl.ConfigThreshold(50);
+                                ret = m_sl.Process(l, event);
+                                Process(image);
+                                if (ret == ServiceLogic::RET_OK && event != ServiceLogic::EVENT_ERROR)
+                                {
+                                    m_point1 = std::make_pair(box.x1, box.y1);
 
-                            m_point2 = std::make_pair(box.x2, box.y2);
-                            
-                            m_point = std::make_pair(m_point1, m_point2);
-                            m_point_arr.push_back(m_point);
+                                    m_point2 = std::make_pair(box.x2, box.y2);
+                                    
+                                    m_point = std::make_pair(m_point1, m_point2);
+                                    m_point_arr.push_back(m_point);
 
-                            DrawBox();
-                            std::cerr << "an alarm is generated, the event id: " << event << std::endl;
+                                    DrawBox();
+                                    std::cerr << "an alarm is generated, the event id: " << event << std::endl;
+                                }
+                            }
                         }
                     }
                 }

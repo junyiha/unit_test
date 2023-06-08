@@ -22,7 +22,12 @@ file_arr=(get_file_size
           test_remove
           test_thread
           test_parse_frame
-          test_video_stream )
+          test_video_stream
+          test_opencv
+          test_std_system )
+
+opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
+opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
 
 for file in "${file_arr[@]}"
 do 
@@ -42,14 +47,19 @@ do
     fi
 
     if [[ ${file} == "test_video_stream" ]]; then 
-        g++ -g -std=c++11 "${file}.cc" "mongoose.c" -o ${f} -I./ -lpthread -lrt
+        g++ -g -std=c++11 "${file}.cc" "mongoose.c" "ParseFrame.cc" -o ${f} -I./ -lpthread -lrt -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
     fi
 
     if [[ ${file} == "test_pic_server" ]]; then 
-        g++ -g -std=c++11 "${file}.cc" "ParseFrame.cc" -o ${f} -I./ -lrt -lpthread
+        g++ -g -std=c++11 "${file}.cc" "ParseFrame.cc" -o ${f} -I./ -lrt -lpthread -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
     fi
+
+    if [[ ${file} == "test_opencv" ]]; then 
+        g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
+        continue
+    fi 
 
     g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
 done 

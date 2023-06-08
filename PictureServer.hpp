@@ -15,6 +15,7 @@
 #include "ParseMjpeg.hpp"
 #include "ConsumerIndex.hpp"
 #include "ProducerIndex.hpp"
+#include "ProcessFrame.hpp"
 
 class PictureServer
 {
@@ -43,9 +44,13 @@ private:
     void SaveDataToQueue(std::string &in);
 
 private:
+    bool ProcessFrame(std::string &pic_name, std::string &json_string);
+
+private:
     ParseMjpeg m_pm;
     ConsumerIndex m_ci;
     ProducerIndex m_pi;
+    ProcessPicture m_pp;
 
 private:
     std::string m_prefix {"aaa"};
@@ -101,6 +106,7 @@ inline int PictureServer::Process()
             if (ret == ParseMjpeg::RET_OK)
             {
                 SaveDataToQueue(json_string);
+                ProcessFrame(pic_name, json_string);
                     
                 if (RemoveShmFile(pic_name))
                     std::cerr << "Success to remove file: " << pic_name << std::endl;
@@ -225,4 +231,10 @@ inline void PictureServer::SaveDataToQueue(std::string &in)
     }
 
     m_struct_queue.push(in);
+}
+
+inline bool PictureServer::ProcessFrame(std::string &pic_name, std::string &json_string)
+{
+    // m_pp.Process(pic_name);
+    m_pp.Process(pic_name, json_string);
 }

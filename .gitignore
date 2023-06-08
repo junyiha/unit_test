@@ -6,3 +6,4 @@ path
 .vscode
 *.json
 web_root
+*.zip

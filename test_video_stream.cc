@@ -275,13 +275,15 @@ int main ()
     ps.SetPrefix(prefix);
     ps.Init();
     std::thread ps_thread {&PictureServer::Process, &ps};
+    if (ps_thread.joinable())
+        ps_thread.join();
 
-    std::thread t {server};
+    // std::thread t {server};
 
-    while (true)
-    {
-        std::cerr << "sleep 1 second, cnt: " << cnt << std::endl;
-        sleep(1);
-        cnt++;
-    }
+    // while (true)
+    // {
+    //     std::cerr << "sleep 1 second, cnt: " << cnt << std::endl;
+    //     sleep(1);
+    //     cnt++;
+    // }
 }

@@ -22,6 +22,8 @@
 PictureServer ps;
 std::string prefix {"aaa"};
 
+std::string fire_prefix {"fire"};
+
 static void CreateHeader(std::string &out)
 {
     out =  "Content-Type: application/json\r\n";
@@ -273,6 +275,7 @@ int main ()
     std::size_t cnt {0};
 
     ps.SetPrefix(prefix);
+    // ps.SetPrefix(fire_prefix);
     ps.Init();
     std::thread ps_thread {&PictureServer::Process, &ps};
     if (ps_thread.joinable())

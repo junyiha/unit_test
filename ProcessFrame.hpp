@@ -132,12 +132,12 @@ inline bool ProcessPicture::Process(std::string &image, std::string &json_string
                             if (ret == ServiceLogic::RET_OK)
                             {
                                 m_sl.ConfigThreshold(50);
-                                Point p1(495, 68);
-                                Point p2(1206, 41);
-                                Point p3(1116, 580);
-                                Point p4(401, 580);
-                                std::vector<Point> region {p1, p2, p3, p4};
-                                ret = m_sl.SetDetectionRegion(region);
+                                // Point p1(495, 68);
+                                // Point p2(1206, 41);
+                                // Point p3(1116, 580);
+                                // Point p4(401, 580);
+                                // std::vector<Point> region {p1, p2, p3, p4};
+                                // ret = m_sl.SetDetectionRegion(region);
                                 if (ret == ServiceLogic::RET_OK)
                                 {
                                     ret = m_sl.Process(l, event);

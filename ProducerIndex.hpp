@@ -92,9 +92,17 @@ inline int ProducerIndex::ReadIndex(std::size_t &out)
                 
                 m_idx_string += it;
             }
-
-            out = std::stoi(m_idx_string);
-            return RET_OK;
+            try
+            {
+                out = std::stoi(m_idx_string);
+                return RET_OK;
+            }
+            catch (std::invalid_argument &e)
+            {
+                std::cerr << "error message: " << e.what() << std::endl;
+                std::cerr <<"invalid m_idx_string: " << m_idx_string << std::endl;
+                return RET_ERR;
+            }
         }
     }
     

@@ -15,7 +15,6 @@
 class ServiceLogic final : public BaseServiceLogic
 {
 public:
-    virtual int ConfigDetectionArea(Box_t &b) override;
     virtual int SetDetectionRegion(std::vector<Point> &in) override;
     virtual int ConfigThreshold(int threshold) override;
     virtual int Process(Logic_t &l, int &event) override;
@@ -24,8 +23,14 @@ public:
     virtual int SetLimitBeginTime(LogicTime_t &in) override;
     virtual int SetLimitEndTime(LogicTime_t &in) override;
 
-public:
+private:
     virtual void DetectPerson(Logic_t &l, int &event) override;
+    virtual void DetectFire(Logic_t &l, int &event) override;
+    virtual void DetectSmoke(Logic_t &l, int &event) override;
+    virtual void DetectHelmet(Logic_t &l, int &event) override;
+    virtual void DetectReflectClothing(Logic_t &l, int &event) override;
+
+private:
     virtual void GetCurrentTime(LogicTime_t &lt) override;
     virtual int CheckAlarmTime() override;
     virtual bool isInsidePolygon(const Point& point, const std::vector<Point>& region) override;
@@ -40,7 +45,6 @@ private:
     int m_threshold {60};
 
 private:
-    struct Box_t m_b {};
     std::vector<Point> m_region;
     struct Logic_t m_l {};
     std::pair<LogicTime_t, LogicTime_t> m_time_limit;
@@ -50,16 +54,6 @@ inline ServiceLogic::ServiceLogic()
 {
     InitLimitTime();
     InitLimitArea();
-}
-
-inline int ServiceLogic::ConfigDetectionArea(Box_t &b)
-{
-    if (b.x1 < 0 || b.x2 < 0 || b.y1 < 0 || b.y2 < 0)
-        return RET_ERR;
-    
-    m_b = b;
-    
-    return RET_OK;
 }
 
 inline int ServiceLogic::SetDetectionRegion(std::vector<Point> &in)
@@ -90,7 +84,7 @@ inline int ServiceLogic::Process(Logic_t &l, int &event)
     }
     else if (l.label == LABEL_WEAR_HELMET)
     {
-
+        DetectHelmet(l, event);
     }
     else if (l.label == LABEL_UNWEAR_HELMET)
     {
@@ -98,7 +92,7 @@ inline int ServiceLogic::Process(Logic_t &l, int &event)
     }
     else if (l.label == LABEL_WEAR_REFLECTIVE_CLOTHING)
     {
-
+        DetectReflectClothing(l, event);
     }
     else if (l.label == LABEL_UNWEAR_REFLECTIVE_CLOTHING)
     {
@@ -106,11 +100,11 @@ inline int ServiceLogic::Process(Logic_t &l, int &event)
     }
     else if (l.label == LABEL_SMOKE)
     {
-
+        DetectSmoke(l, event);
     }
     else if (l.label == LABEL_FIRE)
     {
-
+        DetectFire(l, event);
     }
     else 
     {
@@ -139,10 +133,6 @@ inline void ServiceLogic::InitLimitTime()
 
 inline void ServiceLogic::InitLimitArea()
 {
-    m_b.x1 = 9;
-    m_b.y1 = 7;
-    m_b.x2 = 1836;
-    m_b.y2 = 1038;
     m_region = 
     {
         {0, 0},
@@ -167,6 +157,86 @@ inline void ServiceLogic::DetectPerson(Logic_t &l, int &event)
             if (ret == RET_OK)
             {
                 event = EVENT_AREA_INVASION;
+            }
+        }
+    }
+}
+
+inline void ServiceLogic::DetectFire(Logic_t &l, int &event)
+{
+    int ret {RET_ERR};
+    event = EVENT_ERROR;
+
+    if (l.score >= m_threshold)
+    {
+        ret = CheckAlarmTime();
+        if (ret == RET_OK)
+        {
+            m_l = l;
+            ret = CheckAlarmArea();
+            if (ret == RET_OK)
+            {
+                event = EVENT_FIRE;
+            }
+        }
+    }
+}
+
+inline void ServiceLogic::DetectSmoke(Logic_t &l, int &event)
+{
+    int ret {RET_ERR};
+    event = EVENT_ERROR;
+
+    if (l.score >= m_threshold)
+    {
+        ret = CheckAlarmTime();
+        if (ret == RET_OK)
+        {
+            m_l = l;
+            ret = CheckAlarmArea();
+            if (ret == RET_OK)
+            {
+                event = EVENT_SMOKE;
+            }
+        }
+    }
+}
+
+inline void ServiceLogic::DetectHelmet(Logic_t &l, int &event)
+{
+    int ret {RET_ERR};
+    event = EVENT_ERROR;
+
+    if (l.score >= m_threshold)
+    {
+        ret = CheckAlarmTime();
+        if (ret == RET_OK)
+        {
+            m_l = l;
+            ret = CheckAlarmArea();
+            if (ret == RET_OK)
+            {
+                event = EVENT_WEAR_HELMET;
+            }
+        }
+    }
+}
+
+inline void ServiceLogic::DetectReflectClothing(Logic_t &l, int &event)
+{
+    int ret {RET_ERR};
+    event = EVENT_ERROR;
+
+    if (l.score >= m_threshold)
+    {
+        ret = CheckAlarmTime();
+        if (ret == RET_OK)
+        {
+            m_l = l;
+            ret = CheckAlarmArea();
+            if (ret == RET_OK)
+            {
+                event = EVENT_WEAR_REFLECTIVE_CLOTHING;
             }
         }
     }

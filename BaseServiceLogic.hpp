@@ -89,7 +89,6 @@ public:
     };
 
 public:
-    virtual int ConfigDetectionArea(Box_t &b) {}
     virtual int SetDetectionRegion(std::vector<Point> &in) {}
     virtual int ConfigThreshold(int threshold) {}
     virtual int Process(Logic_t &l, int &event) {}
@@ -100,6 +99,11 @@ public:
 
 protected:
     virtual void DetectPerson(Logic_t &l, int &event) {}
+    virtual void DetectFire(Logic_t &l, int &event) {}
+    virtual void DetectSmoke(Logic_t &l, int &event) {}
+    virtual void DetectHelmet(Logic_t &l, int &event) {}
+    virtual void DetectReflectClothing(Logic_t &l, int &event) {}
+protected:
     virtual void GetCurrentTime(LogicTime_t &lt) {}
     virtual int CheckAlarmTime() {}
     virtual bool isInsidePolygon(const Point& point, const std::vector<Point>& region) {}

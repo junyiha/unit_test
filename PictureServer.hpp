@@ -180,17 +180,17 @@ inline void PictureServer::InitConsumer()
 
 inline void PictureServer::InitProducer()
 {
-    int ret {ConsumerIndex::RET_ERR};
+    int ret {ProducerIndex::RET_ERR};
     
     GetProducerName(m_producer_name);
     ret = m_pi.SetFileName(m_producer_name);
-    assert(ret == ConsumerIndex::RET_OK);
+    assert(ret == ProducerIndex::RET_OK);
 
     ret = m_pi.Open();
-    assert(ret == ConsumerIndex::RET_OK);
+    assert(ret == ProducerIndex::RET_OK);
 
     ret = m_pi.ReadIndex(m_producer_idx);
-    assert(ret == ConsumerIndex::RET_OK);
+    assert(ret == ProducerIndex::RET_OK);
 }
 
 inline void PictureServer::GetProducerName(std::string &out)

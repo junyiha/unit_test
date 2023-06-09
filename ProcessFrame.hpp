@@ -111,7 +111,7 @@ inline bool ProcessPicture::Process(std::string &image, std::string &json_string
                     {
                         int ret {ServiceLogic::RET_ERR};
                         int event {ServiceLogic::EVENT_ERROR};
-                        Logic_t l;
+                        ServiceLogic::Logic_t l;
 
                         l.label = box.label;
                         l.score = box.score;
@@ -119,7 +119,7 @@ inline bool ProcessPicture::Process(std::string &image, std::string &json_string
                         l.box.x2 = box.x2;
                         l.box.y1 = box.y1;
                         l.box.y2 = box.y2;
-                        LogicTime_t lt;
+                        ServiceLogic::LogicTime_t lt;
                         lt.hour = 16;
                         lt.minute = 43;
                         lt.second = 0;

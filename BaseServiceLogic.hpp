@@ -14,38 +14,40 @@
 #include <ctime>
 #include <cassert>
 
-struct Box_t 
-{
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-};
-
-struct Logic_t 
-{
-    int label;
-    int score;
-    Box_t box;
-};
-
-struct LogicTime_t 
-{
-    int hour;
-    int minute;
-    int second;
-};
-
-struct Point {
-    int x;
-    int y;
-
-    Point() {}
-    Point(int x, int y) : x(x), y(y) {}
-};
 
 class BaseServiceLogic
 {
+public:
+    struct Box_t 
+    {
+        int x1;
+        int y1;
+        int x2;
+        int y2;
+    };
+
+    struct Logic_t 
+    {
+        int label;
+        int score;
+        Box_t box;
+    };
+
+    struct LogicTime_t 
+    {
+        int hour;
+        int minute;
+        int second;
+    };
+
+    struct Point {
+        int x;
+        int y;
+
+        Point() {}
+        Point(int x, int y) : x(x), y(y) {}
+    };
+
 public:
     using EnumRET_t = enum 
     {
@@ -113,5 +115,4 @@ protected:
 public:
     BaseServiceLogic() = default;
     virtual ~BaseServiceLogic() = default;
-
 };

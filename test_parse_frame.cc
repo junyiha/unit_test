@@ -1,8 +1,9 @@
 #include <iostream>
 #include "VCAFrame.hpp"
 #include "json.hpp"
+#include "VcaTool.hpp"
 
-int main ()
+int Func_1 ()
 {
     std::string frame_string = R"({"frame":{"detector":[{"boxs":[{"index":836,"index2":"836","label":10001,"number":54801,"score":79,"x1":707,"x2":762,"y1":233,"y2":337},{"index":-1,"index2":"-1","label":10001,"number":54802,"score":10,"x1":723,"x2":764,"y1":219,"y2":274}],"id":"1"}],"height":1080,"index":133223,"number":133230,"width":1920},"monotonic":115081724,"next_protocol":{"param":"","seqnum":1},"realtime":1686044277818,"task":"aaa","version":"6.1.1"})";
 
@@ -62,5 +63,23 @@ int main ()
         return -1;
     }
 
+    return 0;
+}
+
+int main ()
+{
+    std::string frame_string = R"({"frame":{"detector":[{"boxs":[{"index":836,"index2":"836","label":10001,"number":54801,"score":79,"x1":707,"x2":762,"y1":233,"y2":337},{"index":-1,"index2":"-1","label":10001,"number":54802,"score":10,"x1":723,"x2":764,"y1":219,"y2":274}],"id":"1"}],"height":1080,"index":133223,"number":133230,"width":1920},"monotonic":115081724,"next_protocol":{"param":"","seqnum":1},"realtime":1686044277818,"task":"aaa","version":"6.1.1"})";
+
+    bool result {false};
+    VcaTool vt;
+    VcaTool::Frame_t vf;
+
+    result = vt.ParseFrameString(frame_string, vf);
+    if (result)
+    {
+        std::cerr << "Success to parse frame string" << std::endl;
+        std::cerr << "task name: " << vf.task << std::endl;
+    }
+    
     return 0;
 }

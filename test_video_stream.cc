@@ -18,6 +18,7 @@
 #include <iostream>
 #include "mongoose.h"
 #include "PictureServer.hpp"
+#include "ProcessFrame.hpp"
 
 PictureServer ps;
 std::string prefix {"aaa"};
@@ -103,104 +104,6 @@ static void broadcast_mjpeg_frame(struct mg_mgr *mgr)
     std::vector<std::string> file_arr = 
     {
         "path/to/aaa-frame-6123.jpg",  
-        "path/to/aaa-frame-6175.jpg",  
-        "path/to/aaa-frame-6221.jpg",  
-        "path/to/aaa-frame-6270.jpg",  
-        "path/to/aaa-frame-6313.jpg",  
-        "path/to/aaa-frame-6363.jpg",  
-        "path/to/aaa-frame-6412.jpg",  
-        "path/to/aaa-frame-6462.jpg",
-        "path/to/aaa-frame-6128.jpg",  
-        "path/to/aaa-frame-6179.jpg",  
-        "path/to/aaa-frame-6223.jpg",  
-        "path/to/aaa-frame-6274.jpg",  
-        "path/to/aaa-frame-6316.jpg",  
-        "path/to/aaa-frame-6367.jpg",  
-        "path/to/aaa-frame-6416.jpg",  
-        "path/to/aaa-frame-6466.jpg",
-        "path/to/aaa-frame-6132.jpg",  
-        "path/to/aaa-frame-6181.jpg",  
-        "path/to/aaa-frame-6227.jpg",  
-        "path/to/aaa-frame-6278.jpg",  
-        "path/to/aaa-frame-6317.jpg",  
-        "path/to/aaa-frame-6370.jpg",  
-        "path/to/aaa-frame-6420.jpg",  
-        "path/to/aaa-frame-6471.jpg",
-        "path/to/aaa-frame-6137.jpg",  
-        "path/to/aaa-frame-6184.jpg",  
-        "path/to/aaa-frame-6230.jpg",  
-        "path/to/aaa-frame-6282.jpg",  
-        "path/to/aaa-frame-6320.jpg",  
-        "path/to/aaa-frame-6371.jpg",  
-        "path/to/aaa-frame-6424.jpg",  
-        "path/to/aaa-frame-6475.jpg",
-        "path/to/aaa-frame-6141.jpg",  
-        "path/to/aaa-frame-6188.jpg",  
-        "path/to/aaa-frame-6232.jpg",  
-        "path/to/aaa-frame-6286.jpg",  
-        "path/to/aaa-frame-6324.jpg",  
-        "path/to/aaa-frame-6375.jpg",  
-        "path/to/aaa-frame-6429.jpg",  
-        "path/to/aaa-frame-6477.jpg",
-        "path/to/aaa-frame-6144.jpg",  
-        "path/to/aaa-frame-6192.jpg",  
-        "path/to/aaa-frame-6236.jpg",  
-        "path/to/aaa-frame-6290.jpg",  
-        "path/to/aaa-frame-6329.jpg",  
-        "path/to/aaa-frame-6378.jpg",  
-        "path/to/aaa-frame-6146.jpg",  
-        "path/to/aaa-frame-6196.jpg",  
-        "path/to/aaa-frame-6240.jpg",  
-        "path/to/aaa-frame-6291.jpg",  
-        "path/to/aaa-frame-6333.jpg",  
-        "path/to/aaa-frame-6379.jpg",  
-        "path/to/aaa-frame-6147.jpg",  
-        "path/to/aaa-frame-6200.jpg",  
-        "path/to/aaa-frame-6244.jpg",  
-        "path/to/aaa-frame-6294.jpg",  
-        "path/to/aaa-frame-6338.jpg",  
-        "path/to/aaa-frame-6383.jpg",  
-        "path/to/aaa-frame-6441.jpg",
-        "path/to/aaa-frame-6150.jpg",  
-        "path/to/aaa-frame-6201.jpg",  
-        "path/to/aaa-frame-6249.jpg",  
-        "path/to/aaa-frame-6299.jpg",  
-        "path/to/aaa-frame-6342.jpg",  
-        "path/to/aaa-frame-6388.jpg",  
-        "path/to/aaa-frame-6445.jpg",
-        "path/to/aaa-frame-6154.jpg",  
-        "path/to/aaa-frame-6205.jpg",  
-        "path/to/aaa-frame-6253.jpg",  
-        "path/to/aaa-frame-6303.jpg",  
-        "path/to/aaa-frame-6346.jpg",  
-        "path/to/aaa-frame-6391.jpg",  
-        "path/to/aaa-frame-6446.jpg",
-        "path/to/aaa-frame-6159.jpg",  
-        "path/to/aaa-frame-6208.jpg",  
-        "path/to/aaa-frame-6257.jpg",  
-        "path/to/aaa-frame-6305.jpg",  
-        "path/to/aaa-frame-6350.jpg",  
-        "path/to/aaa-frame-6396.jpg",  
-        "path/to/aaa-frame-6447.jpg",
-        "path/to/aaa-frame-6163.jpg",  
-        "path/to/aaa-frame-6210.jpg",  
-        "path/to/aaa-frame-6261.jpg",  
-        "path/to/aaa-frame-6307.jpg",  
-        "path/to/aaa-frame-6354.jpg",  
-        "path/to/aaa-frame-6400.jpg",  
-        "path/to/aaa-frame-6449.jpg",
-        "path/to/aaa-frame-6167.jpg",  
-        "path/to/aaa-frame-6214.jpg",  
-        "path/to/aaa-frame-6264.jpg",  
-        "path/to/aaa-frame-6308.jpg",  
-        "path/to/aaa-frame-6356.jpg",  
-        "path/to/aaa-frame-6404.jpg",  
-        "path/to/aaa-frame-6453.jpg",
-        "path/to/aaa-frame-6171.jpg",  
-        "path/to/aaa-frame-6218.jpg",  
-        "path/to/aaa-frame-6266.jpg",  
-        "path/to/aaa-frame-6312.jpg",  
-        "path/to/aaa-frame-6359.jpg",  
         "path/to/aaa-frame-6408.jpg",  
         "path/to/aaa-frame-6457.jpg"
     };
@@ -225,16 +128,21 @@ static void broadcast_mjpeg_frame(struct mg_mgr *mgr)
     char *data = mg_file_read(&mg_fs_posix, file_path.c_str(), &size);  // Read next file
     struct mg_connection *c;
     std::vector<char> pic_data;
+    ParseMjpeg::Mjpeg_t m;
+    ps.GetMjpegData(m);
     ps.GetOriginPicData(pic_data);
     for (c = mgr->conns; c != nullptr; c = c->next)
     {
         if (c->data[0] != 'S') 
             continue;
         
-        if (data == nullptr || size == 0)
-            continue;
+        // if (data == nullptr || size == 0)
+        //     continue;
 
-        if (pic_data.empty())
+        // if (pic_data.empty())
+        //     continue;
+
+        if (m.origin_pic_data.empty())
             continue;
 
         mg_printf(c,
@@ -242,7 +150,8 @@ static void broadcast_mjpeg_frame(struct mg_mgr *mgr)
                     "Content-Length: %lu\r\n\r\n",
                     (unsigned long) size);
         // mg_send(c, data, size);
-        mg_send(c, pic_data.data(), pic_data.size());
+        // mg_send(c, pic_data.data(), pic_data.size());
+        mg_send(c, m.origin_pic_data.data(), m.origin_pic_data.size());
         mg_send(c, "\r\n", 2);
     }
 
@@ -270,6 +179,7 @@ int server ()
     return 0;
 }
 
+
 int main ()
 {
     std::size_t cnt {0};
@@ -278,15 +188,15 @@ int main ()
     // ps.SetPrefix(fire_prefix);
     ps.Init();
     std::thread ps_thread {&PictureServer::Process, &ps};
-    if (ps_thread.joinable())
-        ps_thread.join();
+    // if (ps_thread.joinable())
+    //     ps_thread.join();
 
-    // std::thread t {server};
+    std::thread t {server};
 
-    // while (true)
-    // {
-    //     std::cerr << "sleep 1 second, cnt: " << cnt << std::endl;
-    //     sleep(1);
-    //     cnt++;
-    // }
+    while (true)
+    {
+        std::cerr << "sleep 1 second, cnt: " << cnt << std::endl;
+        sleep(1);
+        cnt++;
+    }
 }

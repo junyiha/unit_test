@@ -120,7 +120,7 @@ inline bool ProcessPicture::Process(std::string &image, std::string &json_string
                         l.box.y1 = box.y1;
                         l.box.y2 = box.y2;
                         ServiceLogic::LogicTime_t lt;
-                        lt.hour = 16;
+                        lt.hour = 1;
                         lt.minute = 43;
                         lt.second = 0;
                         ret = m_sl.SetLimitBeginTime(lt);

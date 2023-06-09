@@ -27,6 +27,14 @@ public:
         RET_OK = 0
     };
 
+    struct Mjpeg_t 
+    {
+        std::vector<char> origin_pic_data;
+        std::vector<char> thumb_pic_data;
+        std::string struct_string;
+        std::string mjpeg_file;
+    };
+
 public:
     int ParseMjpegFile(std::string file);
     int ParseShmMjpegFile(std::string file);
@@ -37,6 +45,7 @@ public:
     int GetThumbPicData(std::vector<char> &out);
     int GetStructData(std::vector<char> &out);
     int GetStructData(std::string &out);
+    int GetMjpegData(Mjpeg_t &out);
 
 private:
     std::vector<char> ReadFileToMemory(const std::string& filename);
@@ -55,6 +64,7 @@ private:
 
 private:
     int m_shm_fd;
+    std::string m_file_name {};
     std::vector<char> m_file_data {};
 
     std::vector<char> m_origin_pic_data {};
@@ -138,6 +148,7 @@ inline int ParseMjpeg::ParseShmMjpegFile(std::string file)
 {
     int ret {RET_ERR};
     m_shm_fd = shm_open(file.c_str(), O_RDWR, 0666);
+    m_file_name = file;
     if (m_shm_fd == RET_ERR)
         return RET_ERR;
     
@@ -246,6 +257,18 @@ inline int ParseMjpeg::GetStructData(std::string &out)
     }
 
     return RET_OK;
+}
+
+inline int ParseMjpeg::GetMjpegData(Mjpeg_t &out)
+{
+    int ret {RET_ERR};
+
+    out.origin_pic_data = m_origin_pic_data;
+    out.thumb_pic_data = m_thumb_pic_data;
+    out.mjpeg_file = m_file_name;
+    ret = GetStructData(out.struct_string);
+
+    return ret;
 }
 
 // 读取文件内容到内存

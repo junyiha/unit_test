@@ -12,25 +12,36 @@
 
 #include <cassert>
 #include <queue>
+#include <atomic>
 #include "ParseMjpeg.hpp"
 #include "ConsumerIndex.hpp"
 #include "ProducerIndex.hpp"
-#include "ProcessFrame.hpp"
 
 class PictureServer
 {
 public:
+    using EnumServerFlag_t = enum 
+    {
+        EXIT_FLAG = -1,
+        RUN_FLAG = 0,
+        SLEEP_FLAG = 1
+    };
+
+public:
     void SetPrefix(std::string &in);
     void Init();
     int Process();
+    void GetServerFlag(int &out);
+    void SetServerFlag(EnumServerFlag_t in);
     bool GetStructData(std::string &out);
     bool GetOriginPicData(std::vector<char> &out);
+    bool GetMjpegData(ParseMjpeg::Mjpeg_t &out);
     void DeleteQueueFrontData();
     bool SaveOriginPictureToDir(std::string &in);
 
 public:
-    PictureServer() = default;
-    virtual ~PictureServer() = default;
+    PictureServer() ;
+    virtual ~PictureServer() ;
 
 private:
     void InitConsumer();
@@ -42,15 +53,12 @@ private:
     void GetPictureName(std::string &out);
     bool RemoveShmFile(std::string &in);
     void SaveDataToQueue(std::string &in);
-
-private:
-    bool ProcessFrame(std::string &pic_name, std::string &json_string);
+    void SaveDataToQueue(ParseMjpeg::Mjpeg_t &in);
 
 private:
     ParseMjpeg m_pm;
     ConsumerIndex m_ci;
     ProducerIndex m_pi;
-    ProcessPicture m_pp;
 
 private:
     std::string m_prefix {"aaa"};
@@ -61,7 +69,9 @@ private:
     std::size_t m_total_queue_size {5};
 
 private:
+    std::atomic<int> m_server_flag {EXIT_FLAG};
     std::queue<std::string> m_struct_queue;
+    std::queue<ParseMjpeg::Mjpeg_t> m_mjpeg_queue;
 };
 
 inline void PictureServer::SetPrefix(std::string &in)
@@ -80,9 +90,13 @@ inline int PictureServer::Process()
     int ret;
     std::string pic_name {};
     std::string json_string {};
+    m_server_flag = RUN_FLAG;
 
     while (true)
     {
+        if (m_server_flag.load() == EXIT_FLAG)
+            break;
+
         ret = m_pi.ReadIndex(m_producer_idx);
         if (ret != ProducerIndex::RET_OK)
         {
@@ -100,12 +114,15 @@ inline int PictureServer::Process()
         ret = m_pm.ParseShmMjpegFile(pic_name);
         if (ret == ParseMjpeg::RET_OK)
         {
+            ParseMjpeg::Mjpeg_t m;
+
             ret = m_pm.GetStructData(json_string);
+            ret = m_pm.GetMjpegData(m);
             if (ret == ParseMjpeg::RET_OK)
             {
+                SaveDataToQueue(m);
                 SaveDataToQueue(json_string);
-                ProcessFrame(pic_name, json_string);
-                    
+                
                 if (!RemoveShmFile(pic_name))
                     std::cerr << "Failed to remove file: " << pic_name << std::endl;
             }
@@ -120,6 +137,16 @@ inline int PictureServer::Process()
     }
 
     return 0;
+}
+
+inline void PictureServer::GetServerFlag(int &out)
+{
+    out = m_server_flag.load();
+}
+
+inline void PictureServer::SetServerFlag(EnumServerFlag_t in)
+{
+    m_server_flag.store(in);
 }
 
 inline bool PictureServer::GetStructData(std::string &out)
@@ -144,9 +171,21 @@ inline bool PictureServer::GetOriginPicData(std::vector<char> &out)
     return false;
 }
 
+inline bool PictureServer::GetMjpegData(ParseMjpeg::Mjpeg_t &out)
+{
+    if (m_struct_queue.empty())
+        return false;
+
+    out = m_mjpeg_queue.front();
+    DeleteQueueFrontData();
+
+    return true;
+}
+
 inline void PictureServer::DeleteQueueFrontData()
 {
     m_struct_queue.pop();
+    m_mjpeg_queue.pop();
 }
 
 inline bool PictureServer::SaveOriginPictureToDir(std::string &in)
@@ -161,6 +200,16 @@ inline bool PictureServer::SaveOriginPictureToDir(std::string &in)
         return true;
 
     return false;
+}
+
+inline PictureServer::PictureServer()
+{
+    m_server_flag.store(RUN_FLAG);
+}
+
+inline PictureServer::~PictureServer()
+{
+    m_server_flag.store(EXIT_FLAG);
 }
 
 inline void PictureServer::InitConsumer()
@@ -231,8 +280,12 @@ inline void PictureServer::SaveDataToQueue(std::string &in)
     m_struct_queue.push(in);
 }
 
-inline bool PictureServer::ProcessFrame(std::string &pic_name, std::string &json_string)
+inline void PictureServer::SaveDataToQueue(ParseMjpeg::Mjpeg_t &in)
 {
-    // m_pp.Process(pic_name);
-    m_pp.Process(pic_name, json_string);
+    if (m_mjpeg_queue.size() >= m_total_queue_size)
+    {
+        m_mjpeg_queue.pop();
+    }
+
+    m_mjpeg_queue.push(in);
 }

@@ -184,12 +184,17 @@ int main ()
 {
     std::size_t cnt {0};
 
-    ps.SetPrefix(prefix);
+    prefix = "cxsLw";
+    // ps.SetPrefix(prefix);
     // ps.SetPrefix(fire_prefix);
-    ps.Init();
-    std::thread ps_thread {&PictureServer::Process, &ps};
+    // ps.Init();
+    // std::thread ps_thread {&PictureServer::Process, &ps};
     // if (ps_thread.joinable())
     //     ps_thread.join();
+    std::shared_ptr<PictureServer> ps_ptr = std::make_shared<PictureServer>();
+    ps_ptr->SetPrefix(prefix);
+    ps_ptr->Init();
+    std::thread ps_shared_thread {&PictureServer::Process, ps_ptr};
 
     std::thread t {server};
 

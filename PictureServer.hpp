@@ -33,9 +33,11 @@ public:
     int Process();
     void GetServerFlag(int &out);
     void SetServerFlag(EnumServerFlag_t in);
+    
     bool GetStructData(std::string &out);
     bool GetOriginPicData(std::vector<char> &out);
     bool GetMjpegData(ParseMjpeg::Mjpeg_t &out);
+
     void DeleteQueueFrontData();
     bool SaveOriginPictureToDir(std::string &in);
 

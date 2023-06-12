@@ -7,3 +7,4 @@ path
 *.json
 web_root
 *.zip
+.*

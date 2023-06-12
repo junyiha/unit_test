@@ -14,10 +14,18 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <signal.h>
 #include "json.hpp"
 
 class VcaTool 
 {
+public:
+    using EnumRET_t = enum 
+    {
+        RET_ERR = -1,
+        RET_OK = 0
+    };
+
 public:
     struct FrameDetectorBox_t
     {
@@ -60,7 +68,27 @@ public:
     };
 
 public:
+    struct Command_t 
+    {
+        std::string path;
+        int cmd;
+        int service_mode;
+        bool daemon_mode;
+        std::string id;
+        bool detector_conf_inline;
+        std::string detector_conf;
+        std::string input_video_name;
+        int output_type;
+    };
+
+public:
     virtual bool ParseFrameString(std::string &in, Frame_t &out);
+    int SendCommand(Command_t &in);
+    bool StartVcaTask(pid_t &out);
+    bool KillVcaTask();
+
+private:
+    pid_t findProcessIdByName(const char* processName);
 
 public:
     VcaTool() = default;
@@ -68,7 +96,8 @@ public:
 
 private:
     std::string m_json_string {};
-
+    pid_t m_vca_pid;
+    std::string m_program_name {"/home/user/zjy-190/workspace/video_process/build/vca.exe"};
 };
 
 inline bool VcaTool::ParseFrameString(std::string &in, Frame_t &out)
@@ -127,4 +156,89 @@ inline bool VcaTool::ParseFrameString(std::string &in, Frame_t &out)
     }
 
     return true;
+}
+
+inline int VcaTool::SendCommand(Command_t &in)
+{
+    int ret {RET_ERR};
+    std::string cmd {};
+
+    cmd = in.path;
+    cmd += " --cmd " + std::to_string(in.cmd) + " ";
+    if (in.daemon_mode)
+        cmd += " --daemon ";
+    cmd += " --service-mode " + std::to_string(in.service_mode) + " ";
+    cmd += " --id " + in.id + " ";
+    if (in.detector_conf_inline)
+    {
+        cmd += " --detector-conf-inline --detector-conf " + in.detector_conf + " ";
+    }
+    else 
+    {
+        return RET_ERR;
+    }
+    cmd += " --input-video-name " + in.input_video_name + " ";
+    cmd += " --output-type " + std::to_string(in.output_type) + " ";
+
+    ret = std::system(cmd.c_str());
+    if (ret == RET_OK)
+    {
+        m_vca_pid = findProcessIdByName(in.path.c_str());
+        if (m_vca_pid != RET_ERR)
+            return RET_OK;
+    }
+
+    return RET_ERR;
+}
+
+inline bool VcaTool::StartVcaTask(pid_t &out)
+{
+    int ret {-1};
+    std::string program_name {"/home/user/zjy-190/workspace/video_process/build/vca.exe"};
+    std::string start_vca_cmd {};
+
+    start_vca_cmd = program_name + " --daemon --service-mode 0 --id aaa --detector-conf-inline --detector-conf @--detector-models@/data/models/PERSON/DETECT.conf@xxxx@yyyy@ --input-video-name rtsp://admin:a1234567@192.169.7.123:554  --output-type 5";
+
+    ret = std::system(start_vca_cmd.c_str());
+    if (ret == 0)
+    {
+        out = findProcessIdByName(program_name.c_str());
+        if (out != -1)
+        {
+            m_vca_pid = out;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+inline pid_t VcaTool::findProcessIdByName(const char* processName) 
+{
+    char command[256];
+    sprintf(command, "pgrep -f %s", processName);
+    FILE* fp = popen(command, "r");
+    if (fp != nullptr) {
+        char buffer[16];
+        if (fgets(buffer, sizeof(buffer), fp)) {
+            pclose(fp);
+            return atoi(buffer);
+        }
+        pclose(fp);
+    }
+    
+    return -1;
+}
+
+inline bool VcaTool::KillVcaTask()
+{
+    int ret {RET_ERR};
+
+    m_vca_pid = findProcessIdByName(m_program_name.c_str());
+
+    ret = kill(m_vca_pid, SIGKILL);
+    if (ret == RET_OK)
+        return true;
+
+    return false;
 }

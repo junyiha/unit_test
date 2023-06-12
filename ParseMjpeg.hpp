@@ -38,13 +38,16 @@ public:
 public:
     int ParseMjpegFile(std::string file);
     int ParseShmMjpegFile(std::string file);
+
     int SaveOriginPicFile(std::string origin_file);
     int SaveThumbPicFile(std::string thumb_file);
     int SaveStructDataFile(std::string struct_data_file);
+    
     int GetOriginPicData(std::vector<char> &out);
     int GetThumbPicData(std::vector<char> &out);
     int GetStructData(std::vector<char> &out);
     int GetStructData(std::string &out);
+    
     int GetMjpegData(Mjpeg_t &out);
 
 private:

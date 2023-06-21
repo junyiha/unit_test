@@ -35,7 +35,9 @@ file_arr=(get_file_size
           test_kill
           test_friend
           test_callback
-          test_polymorphism )
+          test_polymorphism
+          test_extract_path
+          test_static_file )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -82,6 +84,11 @@ do
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
     fi 
+
+    if [[ ${file} == "test_static_file" ]]; then 
+        g++ -g -std=c++11 "${file}.cc" "mongoose.c" -o ${f} -I./ 
+        continue
+    fi
 
     g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
 done 

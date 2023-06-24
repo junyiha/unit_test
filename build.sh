@@ -37,7 +37,12 @@ file_arr=(get_file_size
           test_callback
           test_polymorphism
           test_extract_path
-          test_static_file )
+          test_static_file
+          test_parse_time
+          test_queue
+          test_stl
+          test_mongoose_client
+          test_mongoose_server )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -85,8 +90,15 @@ do
         continue
     fi 
 
-    if [[ ${file} == "test_static_file" ]]; then 
+    if [[ ${file} == "test_static_file"  || 
+          ${file} == "test_mongoose_client" || 
+          ${file} == "test_mongoose_server" ]]; then 
         g++ -g -std=c++11 "${file}.cc" "mongoose.c" -o ${f} -I./ 
+        continue
+    fi
+
+    if [[ ${file} == "test_stl" ]]; then 
+        g++ -g -std=c++11 "${file}.cc"  -o ${f} -I./ -lpthread
         continue
     fi
 

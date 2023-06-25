@@ -16,6 +16,7 @@
 #include <iostream>
 #include <signal.h>
 #include "json.hpp"
+#include "httplib.h"
 
 class VcaTool 
 {
@@ -24,6 +25,22 @@ public:
     {
         RET_ERR = -1,
         RET_OK = 0
+    };
+
+    using EnumVCACommand_t = enum 
+    {
+        VCA_LIST_TASK = 1,           // 1：任务列表
+        VCA_START_TASK = 2,          // 2：启动任务
+        VCA_STOP_TASK = 3,           // 3：停止任务
+        VCA_DELETE_TASK = 4,         // 4：删除任务
+        VCA_UPDATE_TASK = 5,         // 5：更新任务
+        VCA_STATUS_TASK = 6,         // 6：任务状态
+        VCA_SET_DOWN_PROTOCOL = 7,   // 7：设置下层协议
+        VCA_DEVICE_INFO = 101,       // 101：设备信息
+        VCA_LICENCE_INFO = 201,      // 201：许可证信息
+        VCA_UPDATE_LICENCE = 202,    // 202：更新许可证
+        VCA_GET_MACHINE_CODE = 203,  // 203：获取机器码
+        VCA_LIST_SLAVE = 301         // 301：从站列表
     };
 
 public:
@@ -82,10 +99,91 @@ public:
     };
 
 public:
+    struct ReplyCommon_t 
+    {
+        std::size_t monotonic;
+        std::size_t realtime;
+        std::string version;
+        int vca_errno;
+    };
+
+    struct ReplyListTask_t 
+    {
+        ReplyCommon_t vca_common;  // 出错码(整型)。0：成功，3：空的
+        std::vector<std::string> id_arr;
+    };
+
+    using ReplyStartTask_t = ReplyCommon_t;  // 出错码(整型)。0：成功，9：ID不存在，13：未授权，17：ID已存在，24：试用版最多启动两个任务
+
+    using StartTaskParam_t = Command_t;  // 启动任务需要的参数结构体
+
+    using ReplyStopTask_t = ReplyCommon_t;  // 出错码(整型)。0：成功，3：ID不存在
+
+    using ReplyDeleteTask_t = ReplyCommon_t;  // 出错码(整型)。0：成功，3：ID不存在，16：运行中
+
+    using ReplyUpdateTask_t = ReplyCommon_t;  // 出错码(整型)。0：成功，3：ID不存在
+
+    struct ReplyTaskDetector_t 
+    {
+        std::string detector_id;
+        std::vector<std::pair<std::string, std::string>> detector_status;  // Ok/Failed/Unknown(未加载或无输入)
+    };
+
+    struct ReplyStatusTask_t 
+    {
+        ReplyCommon_t vca_common;  // 出错码(整型)。0：成功，3：ID不存在
+        std::vector<ReplyTaskDetector_t> detector_arr;
+        std::pair<std::string, int> input;  // Ok/Failed/Unknown(未启用)
+        std::pair<std::string, int> output;  // Ok/Unknown(无输入或未启用)
+    };
+
+    using ReplySetDownProtocol_t = ReplyCommon_t;  // 出错码(整型)。0：成功，3：ID不存在
+
+    struct ReplyDeviceInfo_t 
+    {
+        ReplyCommon_t vca_common;  // 出错码(整型)。0：成功
+        std::string product;
+        std::string vendor;
+        int socket;
+    };
+
+    struct ReplyLicenceInfo_t 
+    {
+        ReplyCommon_t vca_common;  // 出错码(整型)。0：成功，1：不支持的操作
+        std::size_t duration;
+        int nodes;
+        int type;  // 类型(整型)。0：正式版，128：试用版
+    };
+
+    using ReplyUpdateLicence_t = ReplyCommon_t;  // 出错码(整型)。0：成功，1：不支持的操作，22：未生效、已过期、不适用，93：运行模式不匹配
+
+    struct ReplyGetMachineCode 
+    {
+        ReplyCommon_t vca_common;  // 出错码(整型)。0：成功，1：不支持的操作
+        std::string machine_code;
+    };
+
+    struct ReplyListSlave_t 
+    {
+        ReplyCommon_t vca_common;  // 出错码(整型)。0：成功，1：不支持的操作，3：空的
+        std::string id;  // 节点ID(字符串)
+        int granted;  // 是否授权(整型)。1：未授权，2：已授权
+        int ctime;  // 上线时间(秒，整型)。自然时间
+        int atime;  // 活动时间(秒，整型)。自然时间
+        std::string remote_addr;  // 远程地址(字符串)。
+    };
+
+public:
     virtual bool ParseFrameString(std::string &in, Frame_t &out);
     int SendCommand(Command_t &in);
     bool StartVcaTask(pid_t &out);
     bool KillVcaTask();
+
+public:
+    int LicenceInfo(ReplyLicenceInfo_t &out);
+    int UpdateLicence(std::string licence, ReplyUpdateLicence_t &out);
+    int ListTask(ReplyListTask_t &out);
+    int StartTask(StartTaskParam_t in, ReplyStartTask_t &out);
 
 private:
     pid_t findProcessIdByName(const char* processName);
@@ -95,9 +193,13 @@ public:
     virtual ~VcaTool() = default;
 
 private:
+    std::string m_vca_listen {"http://127.0.0.1:17008"};
+    std::string m_vca_api {"/api"};
+
+private:
     std::string m_json_string {};
     pid_t m_vca_pid;
-    std::string m_program_name {"/home/user/zjy-190/workspace/video_process/build/vca.exe"};
+    std::string m_program_name {"vca.exe"};
 };
 
 inline bool VcaTool::ParseFrameString(std::string &in, Frame_t &out)
@@ -180,6 +282,8 @@ inline int VcaTool::SendCommand(Command_t &in)
     cmd += " --input-video-name " + in.input_video_name + " ";
     cmd += " --output-type " + std::to_string(in.output_type) + " ";
 
+    std::cerr << "\nVcaTool: " << "the command of sended vca: " << cmd << std::endl;
+
     ret = std::system(cmd.c_str());
     if (ret == RET_OK)
     {
@@ -241,4 +345,181 @@ inline bool VcaTool::KillVcaTask()
         return true;
 
     return false;
+}
+
+inline int VcaTool::LicenceInfo(ReplyLicenceInfo_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params licence_info_params = 
+    {
+        {"cmd", std::to_string(VCA_LICENCE_INFO)}
+    };
+
+    auto ret = client.Post(m_vca_api, licence_info_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.vca_common.monotonic = parsed_data["monotonic"];
+        out.vca_common.realtime = parsed_data["realtime"];
+        out.vca_common.version = parsed_data["version"];
+        out.vca_common.vca_errno = parsed_data["errno"];
+        if (parsed_data["duration"].is_null())
+        {
+            out.duration = 0;
+            out.nodes = 0;
+            out.type = 0;
+        }
+        else 
+        {
+            out.duration = parsed_data["duration"];
+            out.nodes = parsed_data["nodes"];
+            out.type = parsed_data["type"];
+        }
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
+}
+
+inline int VcaTool::UpdateLicence(std::string licence, ReplyUpdateLicence_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params update_licence_params = 
+    {
+        {"cmd", std::to_string(VCA_UPDATE_LICENCE)},
+        {"licence", licence}
+    };
+
+    auto ret = client.Post(m_vca_api, update_licence_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.monotonic = parsed_data["monotonic"];
+        out.realtime = parsed_data["realtime"];
+        out.version = parsed_data["version"];
+        out.vca_errno = parsed_data["errno"];
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
+}
+
+inline int VcaTool::ListTask(ReplyListTask_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params list_task_params = 
+    {
+        {"cmd", std::to_string(VCA_LIST_TASK)}
+    };
+
+    auto ret = client.Post(m_vca_api, list_task_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.vca_common.monotonic = parsed_data["monotonic"];
+        out.vca_common.realtime = parsed_data["realtime"];
+        out.vca_common.version = parsed_data["version"];
+        out.vca_common.vca_errno = parsed_data["errno"];
+        if (out.vca_common.vca_errno == 0 && parsed_data["ids"].is_array())
+        {
+            for (auto &it : parsed_data["ids"])
+            {
+                out.id_arr.push_back(it);
+            }
+        }
+        else 
+        {
+            std::cerr << "VcaTool: Empty task list or Error json string : " << ret->body << std::endl;
+            return RET_ERR;
+        }
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
+}
+
+inline int VcaTool::StartTask(StartTaskParam_t in, ReplyStartTask_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params start_task_params = 
+    {
+        {"cmd", std::to_string(VCA_START_TASK)},
+        {"id", in.id},
+        {"detector-conf-inline", ""},
+        {"detector-conf", in.detector_conf},
+        {"input-video-name", in.input_video_name},
+        {"output-type", std::to_string(in.output_type)}
+    };
+
+    auto ret = client.Post(m_vca_api, start_task_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.monotonic = parsed_data["monotonic"];
+        out.realtime = parsed_data["realtime"];
+        out.version = parsed_data["version"];
+        out.vca_errno = parsed_data["errno"];
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
 }

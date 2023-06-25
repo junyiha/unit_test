@@ -12,7 +12,7 @@
 #include <string>
 #include "mongoose.h"
 
-static std::string url {"http://127.0.0.1:8989"};
+static std::string url {"http://192.169.4.16:17008"};
 static const char *s_post_data = nullptr;      // POST data
 
 struct Client_t 
@@ -39,15 +39,30 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
          */
         std::cerr << "HTTP connection is connected" << std::endl;
         struct mg_str host = mg_url_host(url.c_str());
-        mg_printf(c,
-                "%s %s HTTP/1.0\r\n"
-                "Host: %.*s\r\n"
-                "Content-Type: octet-stream\r\n"
-                "Content-Length: %d\r\n"
-                "\r\n",
-                s_post_data ? "POST" : "GET", mg_url_uri(url.c_str()), (int) host.len,
-                host.ptr, 0);
-        mg_send(c, "hello world", strlen("hello world"));
+        // mg_printf(c,
+        //             "%s %s HTTP/1.0\r\n"
+        //             "Host: %.*s\r\n"
+        //             "Content-Type: octet-stream\r\n"
+        //             "Content-Length: %d\r\n"
+        //             "\r\n",
+        //             s_post_data ? "POST" : "GET", mg_url_uri(url.c_str()), (int) host.len,
+        //             host.ptr, 0);
+        std::string request_string {R"(
+            POST /api HTTP/1.1
+            Host: 127.0.0.1:17008
+            User-Agent: Apifox/1.0.0 (https://www.apifox.cn)
+            Accept: */*
+            Host: 127.0.0.1:17008
+            Connection: keep-alive
+            Content-Type: application/x-www-form-urlencoded
+
+            cmd=201
+        )"};
+        // mg_printf(c, "%s %s", "POST /api HTTP/1.1\r\n", "Content-Type: application/x-www-form-urlencoded\r\n");
+        mg_printf(c, "%s", request_string.c_str());
+        // mg_send(c, "\r\n", 0);
+        // mg_send(c, "cmd=201", strlen("cmd=201"));
+        // mg_send(c, "", 0);
     }
     else if (ev == MG_EV_HTTP_MSG)
     {

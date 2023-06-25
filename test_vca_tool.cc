@@ -12,7 +12,22 @@
 #include "VcaTool.hpp"
 #include <unistd.h>
 
-int main(int argv, char *argc[])
+static void Help()
+{
+    std::string help_info =
+    {
+        R"(
+            -h, --help  打印帮助信息
+            --list-task  查看任务列表
+            --start-task  启动任务
+            --check-licence 查看授权信息
+            --update-licence 更新授权码
+        )"
+    };
+    std::cerr << help_info << std::endl;
+}
+
+int old_version(int argv, char *argc[])
 {
     int ret {VcaTool::RET_ERR};
     pid_t p;
@@ -74,4 +89,69 @@ int main(int argv, char *argc[])
     }
 
     return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    VcaTool vca_tool;
+    std::string arg {};
+    int ret {VcaTool::RET_ERR};
+    for (int col {1}; col < argc; ++col)
+    {
+        arg = argv[col];
+        if (arg == "-h" || arg == "--help")
+        {
+            Help();
+            return 0;
+        }
+        else if (arg == "--list-task")
+        {
+            VcaTool::ReplyListTask_t vca_list_task;
+            ret = vca_tool.ListTask(vca_list_task);
+            if (ret == VcaTool::RET_OK)
+            {
+                std::cerr << "Success to list task" << std::endl;
+                for (auto &it : vca_list_task.id_arr)
+                {
+                    std::cerr << "id: " << it << std::endl;
+                }
+            }
+        }
+        else if (arg == "--start-task")
+        {
+            VcaTool::ReplyStartTask_t reply_start_task;
+            VcaTool::StartTaskParam_t in;
+            in.detector_conf = "@--detector-models@/data/models/PERSON/DETECT.conf@xxxx@yyyy@";
+            in.input_video_name = "rtsp://192.169.4.16/test_fire_smoke.mp4";
+            in.output_type = 5;
+            in.id = "aaa";
+            ret = vca_tool.StartTask(in, reply_start_task);
+            if (ret == VcaTool::RET_OK && reply_start_task.vca_errno == 0)
+            {
+                std::cerr << "Success to list task" << std::endl;
+            }
+        }
+        else if (arg == "--check-licence")
+        {
+            VcaTool::ReplyLicenceInfo_t reply_licence_info;
+            ret = vca_tool.LicenceInfo(reply_licence_info);
+            if (ret == VcaTool::RET_OK && reply_licence_info.vca_common.vca_errno == 0)
+            {
+                std::cerr << "Success to list licence" << std::endl;
+                std::cerr << "duration: " << reply_licence_info.duration << std::endl;
+                std::cerr << "nodes: " << reply_licence_info.nodes << std::endl;
+                std::cerr << "type: " << reply_licence_info.type << std::endl;
+            }
+        }
+        else if (arg == "--update-licence")
+        {
+            VcaTool::ReplyUpdateLicence_t reply_update_licence;
+            std::string licence {"HFWYU4MP-NEW6GQLD-HFWYU4MK-PFWYU4MK-6PWQUJEB-MDWWU4MK-PFXUSS53-7F8WU4QK-PFWYU4MK-PFXZ24K6-2FXYUMGK"};
+            ret = vca_tool.UpdateLicence(licence, reply_update_licence);
+            if (ret == VcaTool::RET_OK && reply_update_licence.vca_errno == 0)
+            {
+                std::cerr << "Success to update licence" << std::endl;
+            }
+        }
+    }
 }

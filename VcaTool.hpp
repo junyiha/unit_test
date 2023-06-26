@@ -127,6 +127,7 @@ public:
     {
         std::string detector_id;
         std::vector<std::pair<std::string, std::string>> detector_status;  // Ok/Failed/Unknown(未加载或无输入)
+        std::string status_string;  // 因为status对象中的键不确定，所以存储为字符串输出
     };
 
     struct ReplyStatusTask_t 
@@ -163,14 +164,19 @@ public:
         std::string machine_code;
     };
 
-    struct ReplyListSlave_t 
+    struct SlaveNode_t 
     {
-        ReplyCommon_t vca_common;  // 出错码(整型)。0：成功，1：不支持的操作，3：空的
         std::string id;  // 节点ID(字符串)
         int granted;  // 是否授权(整型)。1：未授权，2：已授权
         int ctime;  // 上线时间(秒，整型)。自然时间
         int atime;  // 活动时间(秒，整型)。自然时间
         std::string remote_addr;  // 远程地址(字符串)。
+    };
+
+    struct ReplyListSlave_t 
+    {
+        ReplyCommon_t vca_common;  // 出错码(整型)。0：成功，1：不支持的操作，3：空的
+        std::vector<SlaveNode_t> node_arr;  // 节点列表
     };
 
 public:
@@ -184,6 +190,14 @@ public:
     int UpdateLicence(std::string licence, ReplyUpdateLicence_t &out);
     int ListTask(ReplyListTask_t &out);
     int StartTask(StartTaskParam_t in, ReplyStartTask_t &out);
+    int StopTask(std::string id, ReplyStopTask_t &out);
+    int DeleteTask(std::string id, ReplyStopTask_t &out);
+    int UpdateTask(StartTaskParam_t in, ReplyUpdateTask_t &out);
+    int StatusTask(std::string id, ReplyStatusTask_t &out);
+    int DeviceInfo(ReplyDeviceInfo_t &out);
+    int GetMachineCode(ReplyGetMachineCode &out);
+    int ListSlave(ReplyListSlave_t &out);
+
 
 private:
     pid_t findProcessIdByName(const char* processName);
@@ -369,18 +383,9 @@ inline int VcaTool::LicenceInfo(ReplyLicenceInfo_t &out)
         out.vca_common.realtime = parsed_data["realtime"];
         out.vca_common.version = parsed_data["version"];
         out.vca_common.vca_errno = parsed_data["errno"];
-        if (parsed_data["duration"].is_null())
-        {
-            out.duration = 0;
-            out.nodes = 0;
-            out.type = 0;
-        }
-        else 
-        {
-            out.duration = parsed_data["duration"];
-            out.nodes = parsed_data["nodes"];
-            out.type = parsed_data["type"];
-        }
+        out.duration = parsed_data["info"]["duration"];
+        out.nodes = parsed_data["info"]["nodes"];
+        out.type = parsed_data["info"]["type"];
     }
     catch(nlohmann::json::parse_error &e)
     {
@@ -456,17 +461,12 @@ inline int VcaTool::ListTask(ReplyListTask_t &out)
         out.vca_common.realtime = parsed_data["realtime"];
         out.vca_common.version = parsed_data["version"];
         out.vca_common.vca_errno = parsed_data["errno"];
-        if (out.vca_common.vca_errno == 0 && parsed_data["ids"].is_array())
+        if (out.vca_common.vca_errno == 0)
         {
             for (auto &it : parsed_data["ids"])
             {
                 out.id_arr.push_back(it);
             }
-        }
-        else 
-        {
-            std::cerr << "VcaTool: Empty task list or Error json string : " << ret->body << std::endl;
-            return RET_ERR;
         }
     }
     catch(nlohmann::json::parse_error &e)
@@ -522,4 +522,296 @@ inline int VcaTool::StartTask(StartTaskParam_t in, ReplyStartTask_t &out)
     }
 
     return RET_OK;
+}
+
+inline int VcaTool::StopTask(std::string id, ReplyStopTask_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params start_task_params = 
+    {
+        {"cmd", std::to_string(VCA_STOP_TASK)},
+        {"id", id}
+    };
+
+    auto ret = client.Post(m_vca_api, start_task_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.monotonic = parsed_data["monotonic"];
+        out.realtime = parsed_data["realtime"];
+        out.version = parsed_data["version"];
+        out.vca_errno = parsed_data["errno"];
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
+}
+
+inline int VcaTool::DeleteTask(std::string id, ReplyStopTask_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params delete_task_params = 
+    {
+        {"cmd", std::to_string(VCA_DELETE_TASK)},
+        {"id", id}
+    };
+
+    auto ret = client.Post(m_vca_api, delete_task_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.monotonic = parsed_data["monotonic"];
+        out.realtime = parsed_data["realtime"];
+        out.version = parsed_data["version"];
+        out.vca_errno = parsed_data["errno"];
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
+}
+
+inline int VcaTool::UpdateTask(StartTaskParam_t in, ReplyUpdateTask_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params update_task_params = 
+    {
+        {"cmd", std::to_string(VCA_UPDATE_TASK)},
+        {"id", in.id},
+        {"detector-conf-inline", ""},
+        {"detector-conf", in.detector_conf},
+        {"input-video-name", in.input_video_name},
+        {"output-type", std::to_string(in.output_type)}
+    };
+
+    auto ret = client.Post(m_vca_api, update_task_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.monotonic = parsed_data["monotonic"];
+        out.realtime = parsed_data["realtime"];
+        out.version = parsed_data["version"];
+        out.vca_errno = parsed_data["errno"];
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
+}
+
+inline int VcaTool::StatusTask(std::string id, ReplyStatusTask_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params status_task_params = 
+    {
+        {"cmd", std::to_string(VCA_STATUS_TASK)},
+        {"id", id}
+    };
+
+    auto ret = client.Post(m_vca_api, status_task_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.vca_common.monotonic = parsed_data["monotonic"];
+        out.vca_common.realtime = parsed_data["realtime"];
+        out.vca_common.version = parsed_data["version"];
+        out.vca_common.vca_errno = parsed_data["errno"];
+        if (parsed_data["errno"] == 0)
+        {
+            for (auto &detector : parsed_data["task"]["detector"])
+            {
+                ReplyTaskDetector_t tmp;
+                tmp.status_string = detector.dump();
+                tmp.detector_id = detector["id"];
+                out.detector_arr.push_back(tmp);
+            }
+            out.input = std::make_pair(parsed_data["task"]["input"]["status"], parsed_data["task"]["input"]["type"]);
+            out.output = std::make_pair(parsed_data["task"]["output"]["status"], parsed_data["task"]["output"]["type"]); 
+        }
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        std::cerr << "VcaTool: " << "json string : " << ret->body << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        std::cerr << "VcaTool: " << "json string : " << ret->body << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
+
+}
+
+inline int VcaTool::DeviceInfo(ReplyDeviceInfo_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params device_info_params = 
+    {
+        {"cmd", std::to_string(VCA_DEVICE_INFO)}
+    };
+
+    auto ret = client.Post(m_vca_api, device_info_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.vca_common.monotonic = parsed_data["monotonic"];
+        out.vca_common.realtime = parsed_data["realtime"];
+        out.vca_common.version = parsed_data["version"];
+        out.vca_common.vca_errno = parsed_data["errno"];
+        out.product = parsed_data["info"]["product"];
+        out.socket = parsed_data["info"]["socket"];
+        out.vendor = parsed_data["info"]["vendor"];
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
+}
+
+inline int VcaTool::GetMachineCode(ReplyGetMachineCode &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params get_machine_code_params = 
+    {
+        {"cmd", std::to_string(VCA_GET_MACHINE_CODE)}
+    };
+
+    auto ret = client.Post(m_vca_api, get_machine_code_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.vca_common.monotonic = parsed_data["monotonic"];
+        out.vca_common.realtime = parsed_data["realtime"];
+        out.vca_common.version = parsed_data["version"];
+        out.vca_common.vca_errno = parsed_data["errno"];
+        out.machine_code = parsed_data["info"]["mc"];
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
+}
+
+inline int VcaTool::ListSlave(ReplyListSlave_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params list_slave_params = 
+    {
+        {"cmd", std::to_string(VCA_LIST_SLAVE)}
+    };
+
+    auto ret = client.Post(m_vca_api, list_slave_params);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.vca_common.monotonic = parsed_data["monotonic"];
+        out.vca_common.realtime = parsed_data["realtime"];
+        out.vca_common.version = parsed_data["version"];
+        out.vca_common.vca_errno = parsed_data["errno"];
+        if (parsed_data["errno"] == 0)
+        {
+            for (auto &node : parsed_data["nodes"])
+            {
+                SlaveNode_t tmp;
+                tmp.id = node["ID"];
+                tmp.granted = node["granted"];
+                tmp.ctime = node["ctime"];
+                tmp.atime = node["atime"];
+                tmp.remote_addr = node["raddr"];
+                out.node_arr.push_back(tmp);
+            }
+        }
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;   
 }

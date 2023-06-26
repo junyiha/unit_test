@@ -153,5 +153,76 @@ int main(int argc, char *argv[])
                 std::cerr << "Success to update licence" << std::endl;
             }
         }
+        else if (arg == "--stop-task")
+        {
+            VcaTool::ReplyStopTask_t reply_stop_task;
+            ret = vca_tool.StopTask("aaa", reply_stop_task);
+            if (ret == VcaTool::RET_OK && reply_stop_task.vca_errno == 0)
+            {
+                std::cerr << "Success to stop task: " << "aaa" << std::endl;
+            }
+        }
+        else if (arg == "--delete-task")
+        {
+            VcaTool::ReplyDeleteTask_t reply_delete_task;
+            ret = vca_tool.DeleteTask("aaa", reply_delete_task);
+            if (ret == VcaTool::RET_OK && reply_delete_task.vca_errno == 0)
+            {
+                std::cerr << "Success to delete task: aaa" << std::endl;
+            }
+        }
+        else if (arg == "--status-task")
+        {
+            VcaTool::ReplyStatusTask_t reply_status_task;
+            ret = vca_tool.StatusTask("aaa", reply_status_task);
+            if (ret == VcaTool::RET_OK && reply_status_task.vca_common.vca_errno == 0)
+            {
+                std::cerr << "Success to status task: aaa" << std::endl;
+                for (auto &detector : reply_status_task.detector_arr)
+                {
+                    std::cerr << detector.detector_id << std::endl;
+                    std::cerr << detector.status_string << std::endl;
+                }
+            }
+        }
+        else if (arg == "--device-info")
+        {
+            VcaTool::ReplyDeviceInfo_t reply_device_info;
+            ret = vca_tool.DeviceInfo(reply_device_info);
+            if (ret == VcaTool::RET_OK && reply_device_info.vca_common.vca_errno == 0)
+            {
+                std::cerr << "Success to query device information" << std::endl;
+                std::cerr << "product: " << reply_device_info.product << std::endl;
+                std::cerr << "socket: " << reply_device_info.socket << std::endl;
+                std::cerr << "vendor: " << reply_device_info.vendor << std::endl;
+            }
+        }
+        else if (arg == "--get-machince-code")
+        {
+            VcaTool::ReplyGetMachineCode reply_get_machine_code;
+            ret = vca_tool.GetMachineCode(reply_get_machine_code);
+            if (ret == VcaTool::RET_OK && reply_get_machine_code.vca_common.vca_errno == 0)
+            {
+                std::cerr << "Success to get machine code" << std::endl;
+                std::cerr << "Machine code: " << reply_get_machine_code.machine_code << std::endl;
+            }
+        }
+        else if (arg == "--list-slave")
+        {
+            VcaTool::ReplyListSlave_t reply_list_slave;
+            ret = vca_tool.ListSlave(reply_list_slave);
+            if (ret == VcaTool::RET_OK && reply_list_slave.vca_common.vca_errno == 0)
+            {
+                std::cerr << "Success to list slaves" << std::endl;
+                for (auto &node : reply_list_slave.node_arr)
+                {
+                    std::cerr << "id: " << node.id << std::endl;
+                    std::cerr << "granted: " << node.granted << std::endl;
+                    std::cerr << "ctime: " << node.ctime << std::endl;
+                    std::cerr << "atime: " << node.atime << std::endl;
+                    std::cerr << "remote_addr: " << node.remote_addr << std::endl;
+                }
+            }
+        }
     }
 }

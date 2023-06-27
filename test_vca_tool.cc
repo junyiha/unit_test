@@ -224,5 +224,19 @@ int main(int argc, char *argv[])
                 }
             }
         }
+        else if (arg == "--yolov5-fire")
+        {
+            VcaTool::ReplyStartTask_t reply_start_task;
+            VcaTool::StartTaskParam_t in;
+            in.detector_conf = "@--detector-models@/workspace/fastApiProject/static/models/FIRE/DETECT.conf@xxx@yyy@";
+            in.input_video_name = "/workspace/video2/fire.mp4";
+            in.output_type = 0;
+            in.id = "aaa";
+            ret = vca_tool.StartTask(in, reply_start_task);
+            if (ret == VcaTool::RET_OK && reply_start_task.vca_errno == 0)
+            {
+                std::cerr << "Success to list task" << std::endl;
+            }
+        }
     }
 }

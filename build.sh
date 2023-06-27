@@ -43,7 +43,9 @@ file_arr=(get_file_size
           test_stl
           test_mongoose_client
           test_mongoose_server
-          test_http_lib )
+          test_http_lib
+          test_time
+          test_alert_time )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"

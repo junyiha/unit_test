@@ -29,10 +29,12 @@ public:
 
     struct Mjpeg_t 
     {
+        std::vector<char> shm_file_data;
         std::vector<char> origin_pic_data;
         std::vector<char> thumb_pic_data;
         std::string struct_string;
         std::string mjpeg_file;
+        std::size_t struct_size;
     };
 
 public:
@@ -42,17 +44,17 @@ public:
     int SaveOriginPicFile(std::string origin_file);
     int SaveThumbPicFile(std::string thumb_file);
     int SaveStructDataFile(std::string struct_data_file);
-    
+
     int GetOriginPicData(std::vector<char> &out);
     int GetThumbPicData(std::vector<char> &out);
     int GetStructData(std::vector<char> &out);
     int GetStructData(std::string &out);
-    
-    int GetMjpegData(Mjpeg_t &out);
 
-private:
+    int GetMjpegData(Mjpeg_t &out);
     std::vector<char> ReadFileToMemory(const std::string& filename);
     bool SaveMemoryToFile(const std::vector<char>& data, const std::string& filename);
+
+private:
     void CharToInt(std::vector<char> &in, std::size_t &out);
     int GetLenDataFromShmFile();
     int GetDataFromShmFile();
@@ -69,6 +71,7 @@ private:
     int m_shm_fd;
     std::string m_file_name {};
     std::vector<char> m_file_data {};
+    std::vector<char> m_shm_file_data {};
 
     std::vector<char> m_origin_pic_data {};
     std::vector<char> m_thumb_pic_data {};
@@ -83,14 +86,14 @@ private:
     std::size_t m_struct_len {};
 };
 
-ParseMjpeg::ParseMjpeg()
+inline ParseMjpeg::ParseMjpeg()
 {
     m_origin_pic_len_data.resize(20);
     m_thumb_pic_len_data.resize(20);
     m_struct_len_data.resize(20);
 }
 
-ParseMjpeg::~ParseMjpeg()
+inline ParseMjpeg::~ParseMjpeg()
 {
     m_origin_pic_len_data.clear();
     m_thumb_pic_len_data.clear();
@@ -172,7 +175,6 @@ inline int ParseMjpeg::ParseShmMjpegFile(std::string file)
         close(m_shm_fd);
         return RET_ERR;
     }
-
     close(m_shm_fd);
     return RET_OK;
 }
@@ -213,10 +215,8 @@ inline int ParseMjpeg::SaveStructDataFile(std::string struct_data_file)
 inline int ParseMjpeg::GetOriginPicData(std::vector<char> &out)
 {
     if (m_origin_pic_data.empty())
-    {
-        std::cerr << "Empty origin picture data" << std::endl;
         return RET_ERR;
-    }
+        
     out = m_origin_pic_data;
 
     return RET_OK;
@@ -266,6 +266,7 @@ inline int ParseMjpeg::GetMjpegData(Mjpeg_t &out)
 {
     int ret {RET_ERR};
 
+    out.shm_file_data = m_shm_file_data;
     out.origin_pic_data = m_origin_pic_data;
     out.thumb_pic_data = m_thumb_pic_data;
     out.mjpeg_file = m_file_name;
@@ -396,6 +397,15 @@ inline int ParseMjpeg::GetDataFromShmFile()
     m_struct_data.clear();
     m_struct_data.resize(m_struct_len);
     ret = read(m_shm_fd, m_struct_data.data(), m_struct_len);
+    if (ret == RET_ERR)
+        return RET_ERR;
+    
+    ret = lseek(m_shm_fd, 0, SEEK_SET);
+    if (ret == RET_ERR)
+        return RET_ERR;
+    m_shm_file_data.clear();
+    m_shm_file_data.resize(m_origin_pic_len + m_thumb_pic_len + m_struct_len + (m_proto_size * m_data_num));
+    ret = read(m_shm_fd, m_shm_file_data.data(), m_origin_pic_len + m_thumb_pic_len + m_struct_len + (m_proto_size * m_data_num));
     if (ret == RET_ERR)
         return RET_ERR;
     

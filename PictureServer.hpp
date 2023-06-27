@@ -13,6 +13,7 @@
 #include <cassert>
 #include <queue>
 #include <atomic>
+#include <mutex>
 #include "ParseMjpeg.hpp"
 #include "ConsumerIndex.hpp"
 #include "ProducerIndex.hpp"
@@ -33,17 +34,17 @@ public:
     int Process();
     void GetServerFlag(int &out);
     void SetServerFlag(EnumServerFlag_t in);
-    
+
     bool GetStructData(std::string &out);
     bool GetOriginPicData(std::vector<char> &out);
     bool GetMjpegData(ParseMjpeg::Mjpeg_t &out);
-
+    
     void DeleteQueueFrontData();
-    bool SaveOriginPictureToDir(std::string &in);
+    bool SaveOriginPictureToDir(std::string in_dir_path, std::string &out_file_path);
 
 public:
-    PictureServer() ;
-    virtual ~PictureServer() ;
+    PictureServer() = default;
+    virtual ~PictureServer() = default;
 
 private:
     void InitConsumer();
@@ -56,6 +57,10 @@ private:
     bool RemoveShmFile(std::string &in);
     void SaveDataToQueue(std::string &in);
     void SaveDataToQueue(ParseMjpeg::Mjpeg_t &in);
+
+private:
+    void GetMjpegFromQueue(ParseMjpeg::Mjpeg_t &out);
+    void UpdateMjpegQueue(ParseMjpeg::Mjpeg_t &in);
 
 private:
     ParseMjpeg m_pm;
@@ -71,6 +76,7 @@ private:
     std::size_t m_total_queue_size {5};
 
 private:
+    std::mutex m_mutex;
     std::atomic<int> m_server_flag {EXIT_FLAG};
     std::queue<std::string> m_struct_queue;
     std::queue<ParseMjpeg::Mjpeg_t> m_mjpeg_queue;
@@ -106,7 +112,7 @@ inline int PictureServer::Process()
             break;
         }
         
-        if (m_consumer_idx > m_producer_idx)
+        if (m_consumer_idx >= m_producer_idx)
         {
             sleep(1);
             continue;
@@ -117,14 +123,13 @@ inline int PictureServer::Process()
         if (ret == ParseMjpeg::RET_OK)
         {
             ParseMjpeg::Mjpeg_t m;
-
             ret = m_pm.GetStructData(json_string);
             ret = m_pm.GetMjpegData(m);
             if (ret == ParseMjpeg::RET_OK)
             {
                 SaveDataToQueue(m);
                 SaveDataToQueue(json_string);
-                
+                    
                 if (!RemoveShmFile(pic_name))
                     std::cerr << "Failed to remove file: " << pic_name << std::endl;
             }
@@ -175,11 +180,12 @@ inline bool PictureServer::GetOriginPicData(std::vector<char> &out)
 
 inline bool PictureServer::GetMjpegData(ParseMjpeg::Mjpeg_t &out)
 {
-    if (m_struct_queue.empty())
+    if (m_mjpeg_queue.empty())
         return false;
 
-    out = m_mjpeg_queue.front();
-    DeleteQueueFrontData();
+    m_mutex.lock();
+    GetMjpegFromQueue(out);
+    m_mutex.unlock();
 
     return true;
 }
@@ -187,31 +193,21 @@ inline bool PictureServer::GetMjpegData(ParseMjpeg::Mjpeg_t &out)
 inline void PictureServer::DeleteQueueFrontData()
 {
     m_struct_queue.pop();
-    m_mjpeg_queue.pop();
 }
 
-inline bool PictureServer::SaveOriginPictureToDir(std::string &in)
+inline bool PictureServer::SaveOriginPictureToDir(std::string in_dir_path, std::string &out_file_path)
 {
-    int ret {ParseMjpeg::RET_ERR};
     std::string pic_name;
 
     GetPictureName(pic_name);
-    in += pic_name;
-    ret = m_pm.SaveOriginPicFile(in);
-    if (ret == ParseMjpeg::RET_OK)
+    in_dir_path += pic_name;
+    if (m_pm.SaveMemoryToFile(m_mjpeg_queue.front().origin_pic_data, in_dir_path))
+    {
+        out_file_path = in_dir_path;
         return true;
+    }
 
     return false;
-}
-
-inline PictureServer::PictureServer()
-{
-    m_server_flag.store(RUN_FLAG);
-}
-
-inline PictureServer::~PictureServer()
-{
-    m_server_flag.store(EXIT_FLAG);
 }
 
 inline void PictureServer::InitConsumer()
@@ -283,6 +279,22 @@ inline void PictureServer::SaveDataToQueue(std::string &in)
 }
 
 inline void PictureServer::SaveDataToQueue(ParseMjpeg::Mjpeg_t &in)
+{
+    m_mutex.lock();
+    UpdateMjpegQueue(in);
+    m_mutex.unlock();
+}
+
+
+inline void PictureServer::GetMjpegFromQueue(ParseMjpeg::Mjpeg_t &out)
+{
+    if (m_mjpeg_queue.empty())
+        return;
+    
+    out = m_mjpeg_queue.front();
+}
+
+inline void PictureServer::UpdateMjpegQueue(ParseMjpeg::Mjpeg_t &in)
 {
     if (m_mjpeg_queue.size() >= m_total_queue_size)
     {

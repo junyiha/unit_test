@@ -108,3 +108,13 @@ do
 
     g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
 done 
+
+function CopyVideoPlayFiles()
+{
+    cp /mnt/remote/190-mnt/zhangjunyi/workspace/manager_node_cpp/include/BaseIndex.hpp .
+    cp /mnt/remote/190-mnt/zhangjunyi/workspace/manager_node_cpp/include/ConsumerIndex.hpp .
+    cp /mnt/remote/190-mnt/zhangjunyi/workspace/manager_node_cpp/include/ProducerIndex.hpp .
+    cp /mnt/remote/190-mnt/zhangjunyi/workspace/manager_node_cpp/include/ParseMjpeg.hpp .
+    cp /mnt/remote/190-mnt/zhangjunyi/workspace/manager_node_cpp/include/PictureServer.hpp .
+    cp /mnt/remote/190-mnt/zhangjunyi/workspace/manager_node_cpp/include/VcaTool.hpp .
+}

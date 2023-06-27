@@ -99,6 +99,12 @@ public:
     };
 
 public:
+    using EnumVcaRET_t = enum 
+    {
+        VCA_RET_OK = 0,
+        
+    };
+
     struct ReplyCommon_t 
     {
         std::size_t monotonic;

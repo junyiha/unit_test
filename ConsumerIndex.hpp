@@ -12,7 +12,7 @@
 
 #include "BaseIndex.hpp"
 
-class ConsumerIndex : public BaseIndex
+class ConsumerIndex final : public BaseIndex
 {
 public:
     void GetFileName(std::string &out) override;

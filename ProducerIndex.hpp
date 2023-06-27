@@ -12,7 +12,7 @@
 
 #include "BaseIndex.hpp"
 
-class ProducerIndex : public BaseIndex
+class ProducerIndex final : public BaseIndex
 {
 public:
     void GetFileName(std::string &out) override;

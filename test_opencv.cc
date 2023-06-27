@@ -54,7 +54,7 @@ int ProcessPic(cv::Mat &image)
     int height = 150;
 
     // 在图像上绘制边框
-    cv::rectangle(image, cv::Point(x, y), cv::Point(x + width, y + height), cv::Scalar(0, 255, 0), 2);
+    // cv::rectangle(image, cv::Point(x, y), cv::Point(x + width, y + height), cv::Scalar(0, 255, 0), 2);
 
     // 创建窗口
     cv::namedWindow("Image", cv::WINDOW_NORMAL);
@@ -75,11 +75,11 @@ int show()
 {
     // 读取图片
     // cv::Mat image = cv::imread("input_pic.jpg");
-    cv::Mat image = cv::imread("/dev/shm/aaa-frame-55816.jpg");
+    cv::Mat image = cv::imread("./wQMc1-frame-4792.jpg");
     ProcessPic(image);
 }
 
-int main ()
+int old_version ()
 {
     std::string file {"frame.jpg"};
     int height {1920};
@@ -95,6 +95,54 @@ int main ()
     cv::Mat image = cv::Mat( width, height, CV_8UC3, pic_data.data());
     ProcessPic(image);
     // show();
+
+    return 0;
+}
+
+std::string tmp_img {"./wQMc1-frame-4792.jpg"};
+
+/**
+    ++++++++++++++++++
+    cnt: 1
+    x: 265
+    y: 351
+    ++++++++++++++++++
+
+    ++++++++++++++++++
+    cnt: 2
+    x: 538
+    y: 326
+    ++++++++++++++++++
+
+    ++++++++++++++++++
+    cnt: 3
+    x: 721
+    y: 780
+    ++++++++++++++++++
+
+    ++++++++++++++++++
+    cnt: 4
+    x: 160
+    y: 912
+    ++++++++++++++++++
+*/
+
+
+int main()
+{
+    int x1 = 265;
+    int y1 = 351;
+    int x2 = 160;
+    int y2 = 912;
+    std::string window_name {"tmp"};
+    cv::Mat img;
+    img = cv::imread(tmp_img);
+
+    cv::rectangle(img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 255, 0), 2);
+
+    cv::namedWindow(window_name, cv::WINDOW_NORMAL);
+    cv::imshow(window_name, img);
+    cv::waitKey(0);
 
     return 0;
 }

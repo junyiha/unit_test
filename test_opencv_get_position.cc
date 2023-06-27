@@ -1,21 +1,31 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
+int cnt {0};
+
 // 鼠标点击事件的回调函数
-void onMouse(int event, int x, int y, int flags, void* userdata) {
-    if (event == cv::EVENT_LBUTTONDOWN) {
+void onMouse(int event, int x, int y, int flags, void* userdata) 
+{
+    if (event == cv::EVENT_LBUTTONDOWN) 
+    {
+        cnt++;
         cv::Point* p = static_cast<cv::Point*>(userdata);
         p->x = x;
         p->y = y;
         std::cerr << "\n++++++++++++++++++" << std::endl;
+        std::cerr << "cnt: " << cnt << std::endl;
         std::cerr << "x: " << x << std::endl;
         std::cerr << "y: " << y << std::endl;
         std::cerr << "++++++++++++++++++\n" << std::endl;
     }
 }
 
-int main() {
-    cv::Mat image = cv::imread("path/to/aaa-frame-6249.jpg");
+std::string tmp_img {"./wQMc1-frame-4792.jpg"};
+
+int main() 
+{
+    // cv::Mat image = cv::imread("path/to/aaa-frame-6249.jpg");
+    cv::Mat image = cv::imread(tmp_img);
 
     // 创建窗口并显示图像
     cv::namedWindow("Image");

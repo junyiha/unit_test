@@ -17,7 +17,12 @@ ServiceLogic::Logic_t l;
 
 ServiceLogic service_logic;
 
-int main()
+/**
+ * @brief 测试告警时间间隔
+ * 
+ * @return int 
+ */
+int test_alert_time()
 {
     l.score = 80;
     l.label = 10001;
@@ -58,4 +63,42 @@ int main()
     }
 
     return 0;
+}
+
+std::string tmp_img {"/tmp/mnc/wQMc1-frame-4792.jpg"};
+
+/**
+    ++++++++++++++++++
+    cnt: 1
+    x: 265
+    y: 351
+    ++++++++++++++++++
+
+    ++++++++++++++++++
+    cnt: 2
+    x: 538
+    y: 326
+    ++++++++++++++++++
+
+    ++++++++++++++++++
+    cnt: 3
+    x: 721
+    y: 780
+    ++++++++++++++++++
+
+    ++++++++++++++++++
+    cnt: 4
+    x: 160
+    y: 912
+    ++++++++++++++++++
+*/
+
+int x1 = 265;
+int y1 = 351;
+int x2 = 160;
+int y2 = 912;
+
+int main()
+{
+
 }

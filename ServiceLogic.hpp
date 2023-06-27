@@ -24,6 +24,8 @@ public:
     int SetLimitBeginTime(LogicTime_t &in) override;
     int SetLimitEndTime(LogicTime_t &in) override;
     int GetEventNameFromID(int in_event, std::string &out_event_name) override;
+    int GetAlertTime(int &out) override;
+    int SetAlertTime(int in) override;
 
 private:
     void DetectPerson(Logic_t &l, int &event) override;
@@ -38,6 +40,7 @@ private:
     bool isInsidePolygon(const Point& point, const std::vector<Point>& region) override;
     bool isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region) override;
     int CheckAlarmArea() override;
+    int CheckAlertTime(int event) override;
 
 public:
     ServiceLogic();
@@ -45,6 +48,7 @@ public:
 
 private:
     int m_threshold {60};
+    int m_alert_time {3};
 
 private:
     std::vector<Point> m_region;
@@ -158,13 +162,17 @@ inline void ServiceLogic::DetectPerson(Logic_t &l, int &event)
     if (l.score >= m_threshold)
     {
         ret = CheckAlarmTime();
-        if ( ret == RET_OK)
+        if (ret == RET_OK)
         {
             m_l = l;
             ret = CheckAlarmArea();
             if (ret == RET_OK)
             {
-                event = EVENT_AREA_INVASION;
+                ret = CheckAlertTime(EVENT_AREA_INVASION);
+                if (ret == RET_OK)
+                {
+                    event = EVENT_AREA_INVASION;
+                }
             }
         }
     }
@@ -184,7 +192,11 @@ inline void ServiceLogic::DetectFire(Logic_t &l, int &event)
             ret = CheckAlarmArea();
             if (ret == RET_OK)
             {
-                event = EVENT_FIRE;
+                ret = CheckAlertTime(EVENT_FIRE);
+                if (ret == RET_OK)
+                {
+                    event = EVENT_FIRE;
+                }
             }
         }
     }
@@ -204,7 +216,11 @@ inline void ServiceLogic::DetectSmoke(Logic_t &l, int &event)
             ret = CheckAlarmArea();
             if (ret == RET_OK)
             {
-                event = EVENT_SMOKE;
+                ret = CheckAlertTime(EVENT_SMOKE);
+                if (ret == RET_OK)
+                {
+                    event = EVENT_SMOKE;
+                }
             }
         }
     }
@@ -224,7 +240,11 @@ inline void ServiceLogic::DetectHelmet(Logic_t &l, int &event)
             ret = CheckAlarmArea();
             if (ret == RET_OK)
             {
-                event = EVENT_WEAR_HELMET;
+                ret = CheckAlertTime(EVENT_WEAR_HELMET);
+                if (ret == RET_OK)
+                {
+                    event = EVENT_WEAR_HELMET;
+                }
             }
         }
     }
@@ -244,7 +264,11 @@ inline void ServiceLogic::DetectReflectClothing(Logic_t &l, int &event)
             ret = CheckAlarmArea();
             if (ret == RET_OK)
             {
-                event = EVENT_WEAR_REFLECTIVE_CLOTHING;
+                ret = CheckAlertTime(EVENT_WEAR_REFLECTIVE_CLOTHING);
+                if (ret == RET_OK)
+                {
+                    event = EVENT_WEAR_REFLECTIVE_CLOTHING;
+                }
             }
         }
     }
@@ -330,8 +354,19 @@ inline int ServiceLogic::GetEventNameFromID(int in_event, std::string &out_event
         return RET_OK;
     }
 
-    out_event_name.clear();
+    out_event_name = m_event_map[EVENT_ERROR];
+    // out_event_name.clear();
     return RET_ERR;
+}
+
+inline int ServiceLogic::GetAlertTime(int &out)
+{
+    out = m_alert_time;
+}
+
+inline int ServiceLogic::SetAlertTime(int in)
+{
+    m_alert_time = in;    
 }
 
 inline int ServiceLogic::CheckAlarmTime()
@@ -406,4 +441,26 @@ inline int ServiceLogic::CheckAlarmArea()
     {
         return RET_ERR;
     }
+}
+
+inline int ServiceLogic::CheckAlertTime(int event)
+{
+    EnumEvent_t e = static_cast<EnumEvent_t>(event);
+    auto it = m_alert_time_map.find(e);
+    std::time_t current_time = std::time(nullptr);
+    if (it != m_alert_time_map.end())
+    {
+        int diff_time = current_time - m_alert_time_map[e].last_alert_time;
+        if (diff_time > m_alert_time)
+        {
+            m_alert_time_map[e].last_alert_time = current_time;
+            return RET_OK;
+        }
+    }
+    else 
+    {
+        m_alert_time_map[e].last_alert_time = current_time;
+    }
+
+    return RET_ERR;
 }

@@ -104,6 +104,7 @@ public:
 protected:
     std::map<EnumEvent_t, std::string> m_event_map = 
     {
+        {EVENT_ERROR, "未知事件"},
         {EVENT_AREA_INVASION, "区域入侵"},
         {EVENT_WEAR_HELMET, "戴安全帽"},
         {EVENT_UNWEAR_HELMET, "未戴安全帽"},
@@ -130,6 +131,8 @@ public:
     virtual int SetLimitBeginTime(LogicTime_t &in) {}
     virtual int SetLimitEndTime(LogicTime_t &in) {}
     virtual int GetEventNameFromID(int in_event, std::string &out_event_name) {}
+    virtual int GetAlertTime(int &out) {}
+    virtual int SetAlertTime(int in) {}
 
 protected:
     virtual void DetectPerson(Logic_t &l, int &event) {}
@@ -143,6 +146,7 @@ protected:
     virtual bool isInsidePolygon(const Point& point, const std::vector<Point>& region) {}
     virtual bool isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region) {}
     virtual int CheckAlarmArea() {}
+    virtual int CheckAlertTime(int event) {};
 
 public:
     BaseServiceLogic() = default;

@@ -12,7 +12,9 @@
 
 #include <iostream>
 #include <ctime>
+#include <vector>
 #include <cassert>
+#include <map>  
 
 
 class BaseServiceLogic
@@ -40,7 +42,8 @@ public:
         int second;
     };
 
-    struct Point {
+    struct Point 
+    {
         int x;
         int y;
 
@@ -78,26 +81,55 @@ public:
     {
         EVENT_ERROR = -1,
 
-        EVENT_AREA_INVASION = 10018,
+        EVENT_AREA_INVASION = 10018,               // 区域入侵
 
-        EVENT_WEAR_HELMET = 20005,
-        EVENT_UNWEAR_HELMET = 20006,
+        EVENT_WEAR_HELMET = 20005,                 // 戴安全帽
+        EVENT_UNWEAR_HELMET = 20006,               // 未戴安全帽
 
-        EVENT_WEAR_REFLECTIVE_CLOTHING = 20009,
-        EVENT_UNWEAR_REFLECTIVE_CLOTHING = 20010,
+        EVENT_WEAR_REFLECTIVE_CLOTHING = 20009,    // 穿反光衣
+        EVENT_UNWEAR_REFLECTIVE_CLOTHING = 20010,  // 未穿反光衣
 
-        EVENT_SMOKE = 30001,
-        EVENT_FIRE = 30002
+        EVENT_SMOKE = 30001,                       // 烟
+        EVENT_FIRE = 30002                         // 火
+    };
+
+    struct TimeInfo_t 
+    {
+        std::size_t last_alert_time;
+
+    };
+
+    using AlertTimeMap_t = std::map<EnumEvent_t, TimeInfo_t>;
+
+protected:
+    std::map<EnumEvent_t, std::string> m_event_map = 
+    {
+        {EVENT_AREA_INVASION, "区域入侵"},
+        {EVENT_WEAR_HELMET, "戴安全帽"},
+        {EVENT_UNWEAR_HELMET, "未戴安全帽"},
+        {EVENT_WEAR_REFLECTIVE_CLOTHING, "穿反光衣"},
+        {EVENT_UNWEAR_REFLECTIVE_CLOTHING, "未穿反光衣"},
+        {EVENT_SMOKE, "烟"},
+        {EVENT_FIRE, "火"}
     };
 
 public:
     virtual int SetDetectionRegion(std::vector<Point> &in) {}
     virtual int ConfigThreshold(int threshold) {}
+    virtual void GetThreshold(int &out) {}
+    /**
+     * @brief 
+     * 
+     * @param [in] l 
+     * @param [out] event 
+     * @return int 
+     */
     virtual int Process(Logic_t &l, int &event) {}
     virtual void InitLimitTime() {}
     virtual void InitLimitArea() {}
     virtual int SetLimitBeginTime(LogicTime_t &in) {}
     virtual int SetLimitEndTime(LogicTime_t &in) {}
+    virtual int GetEventNameFromID(int in_event, std::string &out_event_name) {}
 
 protected:
     virtual void DetectPerson(Logic_t &l, int &event) {}

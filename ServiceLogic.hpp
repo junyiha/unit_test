@@ -15,31 +15,33 @@
 class ServiceLogic final : public BaseServiceLogic
 {
 public:
-    virtual int SetDetectionRegion(std::vector<Point> &in) override;
-    virtual int ConfigThreshold(int threshold) override;
-    virtual int Process(Logic_t &l, int &event) override;
-    virtual void InitLimitTime() override;
-    virtual void InitLimitArea() override;
-    virtual int SetLimitBeginTime(LogicTime_t &in) override;
-    virtual int SetLimitEndTime(LogicTime_t &in) override;
+    int SetDetectionRegion(std::vector<Point> &in) override;
+    int ConfigThreshold(int threshold) override;
+    void GetThreshold(int &out) override;
+    int Process(Logic_t &l, int &event) override;
+    void InitLimitTime() override;
+    void InitLimitArea() override;
+    int SetLimitBeginTime(LogicTime_t &in) override;
+    int SetLimitEndTime(LogicTime_t &in) override;
+    int GetEventNameFromID(int in_event, std::string &out_event_name) override;
 
 private:
-    virtual void DetectPerson(Logic_t &l, int &event) override;
-    virtual void DetectFire(Logic_t &l, int &event) override;
-    virtual void DetectSmoke(Logic_t &l, int &event) override;
-    virtual void DetectHelmet(Logic_t &l, int &event) override;
-    virtual void DetectReflectClothing(Logic_t &l, int &event) override;
+    void DetectPerson(Logic_t &l, int &event) override;
+    void DetectFire(Logic_t &l, int &event) override;
+    void DetectSmoke(Logic_t &l, int &event) override;
+    void DetectHelmet(Logic_t &l, int &event) override;
+    void DetectReflectClothing(Logic_t &l, int &event) override;
 
 private:
-    virtual void GetCurrentTime(LogicTime_t &lt) override;
-    virtual int CheckAlarmTime() override;
-    virtual bool isInsidePolygon(const Point& point, const std::vector<Point>& region) override;
-    virtual bool isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region) override;
-    virtual int CheckAlarmArea() override;
+    void GetCurrentTime(LogicTime_t &lt) override;
+    int CheckAlarmTime() override;
+    bool isInsidePolygon(const Point& point, const std::vector<Point>& region) override;
+    bool isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region) override;
+    int CheckAlarmArea() override;
 
 public:
     ServiceLogic();
-    virtual ~ServiceLogic() = default;
+    ~ServiceLogic() = default;
 
 private:
     int m_threshold {60};
@@ -48,6 +50,7 @@ private:
     std::vector<Point> m_region;
     struct Logic_t m_l {};
     std::pair<LogicTime_t, LogicTime_t> m_time_limit;
+    AlertTimeMap_t m_alert_time_map {};
 };
 
 inline ServiceLogic::ServiceLogic()
@@ -74,6 +77,11 @@ inline int ServiceLogic::ConfigThreshold(int threshold)
     m_threshold = threshold;
 
     return RET_OK;
+}
+
+inline void ServiceLogic::GetThreshold(int &out)
+{
+    out = m_threshold;
 }
 
 inline int ServiceLogic::Process(Logic_t &l, int &event)
@@ -313,6 +321,19 @@ inline int ServiceLogic::SetLimitEndTime(LogicTime_t &in)
     return RET_OK;
 }
 
+inline int ServiceLogic::GetEventNameFromID(int in_event, std::string &out_event_name)
+{
+    auto it = m_event_map.find(static_cast<EnumEvent_t>(in_event));
+    if (it != m_event_map.end())
+    {
+        out_event_name = it->second;
+        return RET_OK;
+    }
+
+    out_event_name.clear();
+    return RET_ERR;
+}
+
 inline int ServiceLogic::CheckAlarmTime()
 {
     int ret {RET_ERR};
@@ -339,12 +360,14 @@ inline bool ServiceLogic::isInsidePolygon(const Point& point, const std::vector<
     int count = 0;
     int n = region.size();
 
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) 
+    {
         const Point& p1 = region[i];
         const Point& p2 = region[(i + 1) % n];
 
         if ((p1.y > point.y) != (p2.y > point.y) &&
-            point.x < (p2.x - p1.x) * (point.y - p1.y) / (p2.y - p1.y) + p1.x) {
+            point.x < (p2.x - p1.x) * (point.y - p1.y) / (p2.y - p1.y) + p1.x) 
+        {
             ++count;
         }
     }
@@ -354,8 +377,10 @@ inline bool ServiceLogic::isInsidePolygon(const Point& point, const std::vector<
 
 inline bool ServiceLogic::isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region)
 {
-    for (const Point& point : rectangle) {
-        if (!isInsidePolygon(point, region)) {
+    for (const Point& point : rectangle) 
+    {
+        if (!isInsidePolygon(point, region)) 
+        {
             return false;
         }
     }

@@ -111,7 +111,7 @@ int main()
 {
     struct Frame_t f;
     std::string json_string;
-    std::string prefix {"aaa"};
+    std::string prefix {"J0E78"};
     std::string save_origin_path {"path/to/"};
     PictureServer ps;
 
@@ -138,7 +138,8 @@ int main()
                                 if (box.label == FULL_BODY && box.score > threshold)
                                 {
                                     save_origin_path = "path/to/";
-                                    if (ps.SaveOriginPictureToDir(save_origin_path))
+                                    std::string file_name {};
+                                    if (ps.SaveOriginPictureToDir(save_origin_path, file_name))
                                     {
                                         std::cerr << "Success to save record picture, and the information : " << std::endl;
                                         std::cerr << "\n++++++++++++++++++++++++++" << std::endl;

@@ -105,44 +105,94 @@ std::string tmp_img {"./wQMc1-frame-4792.jpg"};
     ++++++++++++++++++
     cnt: 1
     x: 265
-    y: 351
+    y: 300
     ++++++++++++++++++
 
     ++++++++++++++++++
     cnt: 2
-    x: 538
-    y: 326
+    x: 700
+    y: 300
     ++++++++++++++++++
 
     ++++++++++++++++++
     cnt: 3
-    x: 721
-    y: 780
+    x: 700
+    y: 900
     ++++++++++++++++++
 
     ++++++++++++++++++
     cnt: 4
-    x: 160
-    y: 912
+    x: 265
+    y: 900
     ++++++++++++++++++
 */
 
 
-int main()
+int draw_static_image()
 {
+    /* 检测区域 */
     int x1 = 265;
-    int y1 = 351;
-    int x2 = 160;
-    int y2 = 912;
+    int y1 = 300;
+    int x2 = 700;
+    int y2 = 900;
+
+    /* 告警框信息 */
+    // int x1 = 720;
+    // int y1 = 231;
+    // int x2 = 773;
+    // int y2 = 308;
     std::string window_name {"tmp"};
     cv::Mat img;
     img = cv::imread(tmp_img);
 
     cv::rectangle(img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 255, 0), 2);
 
+    /* 告警框信息1 */
+    x1 = 720;
+    y1 = 231;
+    x2 = 773;
+    y2 = 308;
+    cv::rectangle(img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 255, 0), 2);
+
+    /* 告警框信息2 */
+    x1 = 341;
+    y1 = 329;
+    x2 = 483;
+    y2 = 732;
+    cv::rectangle(img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 255, 0), 2);
+
     cv::namedWindow(window_name, cv::WINDOW_NORMAL);
     cv::imshow(window_name, img);
     cv::waitKey(0);
+
+    return 0;
+}
+
+int failed_read_image()
+{
+    std::string file_name {"origin-frame-1.jpg"};
+
+    int height {1920};
+    int width {1080};
+    std::vector<char> pic_data;
+
+    pic_data = ReadFileToMemory(file_name);
+    if (pic_data.empty())
+    {
+        std::cerr << "Failed to read data of :" << file_name << std::endl;
+        return -1;
+    }
+    cv::Mat image = cv::Mat( width, height, CV_8UC3, pic_data.data());
+    cv::namedWindow(file_name, cv::WINDOW_NORMAL);
+    cv::imshow(file_name, image);
+    cv::waitKey(0);
+
+    return 0;
+}
+
+int main()
+{
+    draw_static_image();
 
     return 0;
 }

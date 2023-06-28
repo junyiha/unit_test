@@ -46,7 +46,8 @@ file_arr=(get_file_size
           test_http_lib
           test_time
           test_alert_time
-          test_service_logic )
+          test_service_logic
+          test_perf )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -103,6 +104,11 @@ do
 
     if [[ ${file} == "test_stl" ]]; then 
         g++ -g -std=c++11 "${file}.cc"  -o ${f} -I./ -lpthread
+        continue
+    fi
+
+    if [[ ${file} == "test_perf" ]]; then 
+        # g++ -g -std=c++11 "${file}.cc" "hash_table.c"  -o ${f} -I./ -lpthread
         continue
     fi
 

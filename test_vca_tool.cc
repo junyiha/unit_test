@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
             VcaTool::ReplyStartTask_t reply_start_task;
             VcaTool::StartTaskParam_t in;
             in.detector_conf = "@--detector-models@/data/models/PERSON/DETECT.conf@xxxx@yyyy@";
-            in.input_video_name = "rtsp://192.169.4.16/test_fire_smoke.mp4";
+            in.input_video_name = "rtsp://admin:a1234567@192.169.7.123:554";
             in.output_type = 5;
             in.id = "aaa";
             ret = vca_tool.StartTask(in, reply_start_task);

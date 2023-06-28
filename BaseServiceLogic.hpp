@@ -115,6 +115,7 @@ protected:
     };
 
 public:
+    virtual void GetDetectionRegion(std::vector<Point> &out) {}
     virtual int SetDetectionRegion(std::vector<Point> &in) {}
     virtual int ConfigThreshold(int threshold) {}
     virtual void GetThreshold(int &out) {}

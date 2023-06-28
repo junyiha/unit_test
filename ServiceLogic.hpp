@@ -15,6 +15,7 @@
 class ServiceLogic final : public BaseServiceLogic
 {
 public:
+    void GetDetectionRegion(std::vector<Point> &out) override;
     int SetDetectionRegion(std::vector<Point> &in) override;
     int ConfigThreshold(int threshold) override;
     void GetThreshold(int &out) override;
@@ -61,6 +62,11 @@ inline ServiceLogic::ServiceLogic()
 {
     InitLimitTime();
     InitLimitArea();
+}
+
+inline void ServiceLogic::GetDetectionRegion(std::vector<Point> &out)
+{
+    out = m_region;
 }
 
 inline int ServiceLogic::SetDetectionRegion(std::vector<Point> &in)

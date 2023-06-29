@@ -96,6 +96,7 @@ public:
         std::string detector_conf;
         std::string input_video_name;
         int output_type;
+        std::string next_protocol_param;
     };
 
 public:
@@ -500,7 +501,8 @@ inline int VcaTool::StartTask(StartTaskParam_t in, ReplyStartTask_t &out)
         {"detector-conf-inline", ""},
         {"detector-conf", in.detector_conf},
         {"input-video-name", in.input_video_name},
-        {"output-type", std::to_string(in.output_type)}
+        {"output-type", std::to_string(in.output_type)},
+        {"next-protocol-param", in.next_protocol_param}
     };
 
     auto ret = client.Post(m_vca_api, start_task_params);

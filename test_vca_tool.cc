@@ -125,6 +125,7 @@ int main(int argc, char *argv[])
             in.input_video_name = "rtsp://admin:a1234567@192.169.7.123:554";
             in.output_type = 5;
             in.id = "aaa";
+            in.next_protocol_param = "hello world";
             ret = vca_tool.StartTask(in, reply_start_task);
             if (ret == VcaTool::RET_OK && reply_start_task.vca_errno == 0)
             {

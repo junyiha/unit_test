@@ -49,7 +49,8 @@ file_arr=(get_file_size
           test_service_logic
           test_perf
           test_nlohmann_json
-          test_tmp )
+          test_tmp
+          test_sqlpp11 )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -113,6 +114,11 @@ do
         # g++ -g -std=c++11 "${file}.cc" "hash_table.c"  -o ${f} -I./ -lpthread
         continue
     fi
+
+    if [[ ${file} == "test_sqlpp11" ]]; then 
+        g++ -g -std=c++11 "${file}.cc" -o ${f} -I ./ -I./sqlite3/include/ -L./sqlite3/lib/ -lsqlite3
+        continue
+    fi 
 
     g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
 done 

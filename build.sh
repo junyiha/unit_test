@@ -53,7 +53,11 @@ file_arr=(get_file_size
           test_sqlpp11
           test_map
           test_file
-          test_function_time )
+          test_function_time
+          test_asan
+          test_get_meminfo
+          test_get_diskinfo
+           )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -122,6 +126,11 @@ do
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I ./ -I./sqlite3/include/ -L./sqlite3/lib/ -lsqlite3
         continue
     fi 
+
+    if [[ ${file} == "test_asan" ]]; then 
+        g++ -fsanitize=address -g "${file}.cc" -o ${f} -I.
+        continue
+    fi
 
     g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
 done 

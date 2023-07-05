@@ -82,6 +82,22 @@ public:
         long index;
         long number;
         std::vector<struct FrameDetector_t> detector_arr;
+        public:
+            void Clear()
+            {
+                monotonic = 0;
+                real_time = 0;
+                task.clear();
+                version.clear();
+                next_protocol.param.clear();
+                next_protocol.seqnum = 0;
+                height = 0;
+                width = 0;
+                index = 0;
+                number = 0;
+                std::vector<struct FrameDetector_t> tmp {};
+                detector_arr.swap(tmp);
+            }
     };
 
 public:
@@ -145,7 +161,7 @@ public:
         std::pair<std::string, int> output;  // Ok/Unknown(无输入或未启用)
     };
 
-    using ReplySetDownProtocol_t = ReplyCommon_t;  // 出错码(整型)。0：成功，3：ID不存在
+    using ReplySetNextProtocol_t = ReplyCommon_t;  // 出错码(整型)。0：成功，3：ID不存在
 
     struct ReplyDeviceInfo_t 
     {
@@ -201,6 +217,7 @@ public:
     int DeleteTask(std::string id, ReplyStopTask_t &out);
     int UpdateTask(StartTaskParam_t in, ReplyUpdateTask_t &out);
     int StatusTask(std::string id, ReplyStatusTask_t &out);
+    int SetNextProtocolParam(std::string id, std::string in, ReplySetNextProtocol_t &out);
     int DeviceInfo(ReplyDeviceInfo_t &out);
     int GetMachineCode(ReplyGetMachineCode &out);
     int ListSlave(ReplyListSlave_t &out);
@@ -697,6 +714,43 @@ inline int VcaTool::StatusTask(std::string id, ReplyStatusTask_t &out)
 
     return RET_OK;
 
+}
+
+inline int VcaTool::SetNextProtocolParam(std::string id, std::string in, ReplySetNextProtocol_t &out)
+{
+    nlohmann::json parsed_data;
+    httplib::Client client(m_vca_listen);
+    httplib::Params set_next_protocol_param = 
+    {
+        {"cmd", std::to_string(VCA_SET_DOWN_PROTOCOL)},
+        {"id", id},
+        {"next-protocol-param", in}
+    };
+    auto ret = client.Post(m_vca_api, set_next_protocol_param);
+    if (ret.error() != httplib::Error::Success)
+    {
+        return RET_ERR;
+    }
+    try 
+    {
+        parsed_data = nlohmann::json::parse(ret->body);
+        out.monotonic = parsed_data["monotonic"];
+        out.realtime = parsed_data["realtime"];
+        out.version = parsed_data["version"];
+        out.vca_errno = parsed_data["errno"];
+    }
+    catch(nlohmann::json::parse_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        std::cerr << "VcaTool: " << "Error information: " << e.what() << std::endl;
+        return RET_ERR;
+    }
+
+    return RET_OK;
 }
 
 inline int VcaTool::DeviceInfo(ReplyDeviceInfo_t &out)

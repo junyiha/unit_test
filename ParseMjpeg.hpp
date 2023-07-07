@@ -45,16 +45,12 @@ public:
     int SaveThumbPicFile(std::string thumb_file);
     int SaveStructDataFile(std::string struct_data_file);
 
-    int GetOriginPicData(std::vector<char> &out);
-    int GetThumbPicData(std::vector<char> &out);
-    int GetStructData(std::vector<char> &out);
-    int GetStructData(std::string &out);
-
     int GetMjpegData(Mjpeg_t &out);
     std::vector<char> ReadFileToMemory(const std::string& filename);
     bool SaveMemoryToFile(const std::vector<char>& data, const std::string& filename);
 
 private:
+    int GetStructData(std::string &out);
     void CharToInt(std::vector<char> &in, std::size_t &out);
     int GetLenDataFromShmFile();
     int GetDataFromShmFile();
@@ -73,14 +69,26 @@ private:
     std::vector<char> m_file_data {};
     std::vector<char> m_shm_file_data {};
 
+    /**
+     * @brief 原图，缩略图，结构化数据长度数据
+     * 
+     */
     std::vector<char> m_origin_pic_data {};
     std::vector<char> m_thumb_pic_data {};
     std::vector<char> m_struct_data {};
 
+    /**
+     * @brief 原图，缩略图，结构化数据长度数据的大小
+     * 
+     */
     std::vector<char> m_origin_pic_len_data;
     std::vector<char> m_thumb_pic_len_data;
     std::vector<char> m_struct_len_data;
-
+    
+    /**
+     * @brief 原图，缩略图，结构化数据长度数据
+     * 
+     */
     std::size_t m_origin_pic_len {};
     std::size_t m_thumb_pic_len {};
     std::size_t m_struct_len {};
@@ -208,40 +216,6 @@ inline int ParseMjpeg::SaveStructDataFile(std::string struct_data_file)
         std::cerr << "Failed to save struct data file from memory data" << std::endl;
         return RET_ERR;
     }
-
-    return RET_OK;
-}
-
-inline int ParseMjpeg::GetOriginPicData(std::vector<char> &out)
-{
-    if (m_origin_pic_data.empty())
-        return RET_ERR;
-        
-    out = m_origin_pic_data;
-
-    return RET_OK;
-}
-
-inline int ParseMjpeg::GetThumbPicData(std::vector<char> &out)
-{
-    if (m_thumb_pic_data.empty())
-    {
-        std::cerr << "Empty thumb picture data" << std::endl;
-        return RET_ERR;
-    }
-    out = m_thumb_pic_data;
-
-    return RET_OK;
-}
-
-inline int ParseMjpeg::GetStructData(std::vector<char> &out)
-{
-    if (m_struct_data.empty())
-    {
-        std::cerr << "Empty struct data" << std::endl;
-        return RET_ERR;
-    }
-    out = m_struct_data;
 
     return RET_OK;
 }

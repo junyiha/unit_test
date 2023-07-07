@@ -57,7 +57,9 @@ file_arr=(get_file_size
           test_asan
           test_get_meminfo
           test_get_diskinfo
-           )
+          test_cnt_mjpeg
+          test_remove_dir
+          test_vector )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"

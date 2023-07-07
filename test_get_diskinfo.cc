@@ -39,12 +39,12 @@ int old_version() {
     return 0;
 }
 
-int GetDiskInfo()
+int GetDiskInfo(std::string path)
 {
     int ret {};
     struct statvfs fs_info;
 
-    ret = statvfs("/", &fs_info);
+    ret = statvfs(path.c_str(), &fs_info);
     if (ret == -1)
     {
         std::cerr << "Failed to execute statvfs() function" << std::endl;
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
         }
         else if (arg == "--get-diskinfo")
         {
-            GetDiskInfo();
+            GetDiskInfo(argv[col + 1]);
         }
         else if (arg == "--df-diskinfo")
         {

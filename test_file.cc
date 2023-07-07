@@ -20,7 +20,7 @@ bool fileExists(const std::string& filename) {
 }
 
 int main() {
-    std::string filename = "/dev/shm/9afU4-producer.idx";
+    std::string filename = "/userdata/static/origin_pictures/Q4H0v/";
     if (fileExists(filename)) {
         std::cout << "File exists." << std::endl;
     } else {

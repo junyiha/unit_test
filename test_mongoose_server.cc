@@ -48,6 +48,34 @@ std::vector<char> ReadFileToMemory(const std::string& filename)
     return buffer;
 }
 
+void PrintConnectionInfo(struct mg_connection *c)
+{
+    std::cerr << "mg_connection information: " << std::endl;
+
+    std::cerr << "c->send.buf:" << c->send.buf << std::endl;
+    std::cerr << "c->send.len:" << c->send.len << std::endl;
+    std::cerr << "c->send.align:" << c->send.align << std::endl;
+    std::cerr << "c->send.size: " << c->send.size << std::endl;
+    std::cerr << "c->is_listening: " << c->is_listening << std::endl;
+    std::cerr << "c->is_client: " << c->is_client << std::endl;
+    std::cerr << "c->is_accepted: " << c->is_accepted << std::endl;
+    std::cerr << "c->is_resolving: " << c->is_resolving << std::endl;
+    std::cerr << "c->is_arplooking: " << c->is_arplooking << std::endl;
+    std::cerr << "c->is_connecting: " << c->is_connecting << std::endl;
+    std::cerr << "c->is_tls: " << c->is_tls << std::endl;
+    std::cerr << "c->is_tls_hs: " << c->is_tls_hs << std::endl;
+    std::cerr << "c->is_udp: " << c->is_udp << std::endl;
+    std::cerr << "c->is_websocket: " << c->is_websocket << std::endl;
+    std::cerr << "c->is_mqtt5: " << c->is_mqtt5 << std::endl;
+    std::cerr << "c->is_hexdumping: " << c->is_hexdumping << std::endl;
+    std::cerr << "c->is_draining: " << c->is_draining << std::endl;
+    std::cerr << "c->is_closing: " << c->is_closing << std::endl;
+    std::cerr << "c->is_full: " << c->is_full << std::endl;
+    std::cerr << "c->is_resp: " << c->is_resp << std::endl;
+    std::cerr << "c->is_readable: " << c->is_readable << std::endl;
+    std::cerr << "c->is_writable: " << c->is_writable << std::endl;
+}
+
 static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) 
 {
     if (ev == MG_EV_HTTP_MSG)   
@@ -67,6 +95,7 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
         // mg_send(c, buffer.data(), buffer.size());
         // mg_send(c, "\r\n", 2);
         // mg_http_reply(c, 200, m_http_header.c_str(), "success");
+        PrintConnectionInfo(c);
     }
 }
 
@@ -117,23 +146,33 @@ static void test_mg_send_cb(struct mg_connection *c, int ev, void *ev_data, void
         body = body.substr(0, http_msg->body.len);
         std::cerr << "body: " << body << std::endl;
 
-        std::string reply {R"(
-HTTP/1.1 200 OK
-Content-Type: application/json
-Connection: keep-alive
-Server: mnc.exe
-Cache-control: no-cache, max-age=0, must-revalidate
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Methods: *
-Content-Length: 278        
+//         std::string reply {R"(HTTP/1.1 200 OK
+// Content-Type: application/json
+// Connection: keep-alive
+// Cache-control: no-cache, max-age=0, must-revalidate
+// Access-Control-Allow-Origin: *
+// Access-Control-Allow-Methods: *
 
-{"code":0,"curr_page":1,"list":[{"id":1,"name":"company","updatedtime":"2023-6-30 15:45:44","url":"rtsp://admin:a1234567@192.169.7.123:554"},{"id":2,"name":"coffee","updatedtime":"2023-7-4 10:9:0","url":"rtsp://admin:a1234567@192.169.7.111:554"}],"total_count":2,"total_page":1}
-        )"};
-        mg_printf(c, reply.c_str());
+
+// {"code":0,"curr_page":1,"list":[{"id":1,"name":"company","updatedtime":"2023-6-30 15:45:44","url":"rtsp://admin:a1234567@192.169.7.123:554"},{"id":2,"name":"coffee","updatedtime":"2023-7-4 10:9:0","url":"rtsp://admin:a1234567@192.169.7.111:554"}],"total_count":2,"total_page":1} 
+// )"};
+//         int send_size = mg_printf(c, reply.c_str());
+//         std::cerr << "mg_printf send size: " << send_size << std::endl;
+//         c->is_resp = 0;
+//         PrintConnectionInfo(c);
+
+        mg_printf(c, "%s%s%s\r\n",
+                     "HTTP/1.1 200 OK\r\n",
+                     "Content-Type: application/json\r\n",
+                     "Access-Control-Allow-Origin: *\r\n");
+        mg_http_printf_chunk(c, "%s\r\n","hello world!");
+        // mg_printf(c, "%s\r\n",
+        //              "hello world!");
+        mg_printf(c, "", 0);
         c->is_resp = 0;
+        PrintConnectionInfo(c);
     }
 }
-
 
 int test_mg_send()
 {
@@ -141,6 +180,48 @@ int test_mg_send()
     struct mg_connection *c {nullptr};
     mg_mgr_init(&mgr);
     c = mg_http_listen(&mgr, url.c_str(), test_mg_send_cb, nullptr);
+    if (!c)
+    {
+        std::cerr << "Failed to listen url: " << url << std::endl;
+        return -1;
+    }
+    while (true)
+    {
+        mg_mgr_poll(&mgr, 1000);
+    }
+    
+    return 0;
+}
+
+static void test_mg_http_reply(struct mg_connection *c, int ev, void *ev_data, void *fn_data) 
+{
+    if (ev == MG_EV_HTTP_MSG)   
+    {
+        struct mg_http_message *http_msg = static_cast<struct mg_http_message *>(ev_data);
+        std::cerr << "Receive http message, and it's data is :" << std::endl;
+        std::string body = http_msg->body.ptr;
+        body = body.substr(0, http_msg->body.len);
+        std::cerr << "body: " << body << std::endl;
+        std::string reply_string {R"(
+{"code":0,"curr_page":1,"list":[{"id":1,"name":"company","updatedtime":"2023-6-30 15:45:44","url":"rtsp://admin:a1234567@192.169.7.123:554"},{"id":2,"name":"coffee","updatedtime":"2023-7-4 10:9:0","url":"rtsp://admin:a1234567@192.169.7.111:554"}],"total_count":2,"total_page":1}
+        )"};
+        mg_http_reply(c, 200, m_http_header.c_str(), reply_string.c_str());
+        PrintConnectionInfo(c);
+    }
+}
+
+int test_mg_http_reply()
+{
+    struct mg_mgr mgr;
+    struct mg_connection *c {nullptr};
+    m_http_header =  "Content-Type: application/json\r\n";
+    m_http_header += "Connection: keep-alive\r\n";
+    m_http_header += "Server: mnc.exe\r\n";
+    m_http_header += "Cache-control: no-cache, max-age=0, must-revalidate\r\n";
+    m_http_header += "Access-Control-Allow-Origin: *\r\n";
+    m_http_header += "Access-Control-Allow-Methods: *\r\n";
+    mg_mgr_init(&mgr);
+    c = mg_http_listen(&mgr, url.c_str(), test_mg_http_reply, nullptr);
     if (!c)
     {
         std::cerr << "Failed to listen url: " << url << std::endl;
@@ -171,6 +252,10 @@ int main (int argc, char *argv[])
         else if (arg == "--test-mg-send")
         {
             test_mg_send();
+        }
+        else if (arg == "--test-mg-http-reply")
+        {
+            test_mg_http_reply();
         }
         else 
         {

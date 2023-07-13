@@ -59,7 +59,8 @@ file_arr=(get_file_size
           test_get_diskinfo
           test_cnt_mjpeg
           test_remove_dir
-          test_vector )
+          test_vector
+          test_sqlite_orm )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -131,6 +132,11 @@ do
 
     if [[ ${file} == "test_asan" ]]; then 
         g++ -fsanitize=address -g "${file}.cc" -o ${f} -I.
+        continue
+    fi
+
+    if [[ ${file} == "test_sqlite_orm" ]]; then 
+        g++ -g "${file}.cc"  -o ${f} -I. -I./sqlite3/include/ -L./sqlite3/lib/ -lsqlite3
         continue
     fi
 

@@ -4,9 +4,9 @@
  * @brief 测试Mongoose服务器
  * @version 0.1
  * @date 2023-06-24
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #include <iostream>
 #include <string>
@@ -20,31 +20,31 @@ static std::string m_http_header;
 static std::string file {"path/to/aaa-frame-6147.jpg"};
 
 // 读取文件内容到内存
-std::vector<char> ReadFileToMemory(const std::string& filename) 
+std::vector<char> ReadFileToMemory(const std::string& filename)
 {
     std::ifstream file(filename, std::ios::binary);
-    
-    if (!file) 
+
+    if (!file)
     {
         std::cerr << "Failed to open file: " << filename << std::endl;
         return {};
     }
-    
+
     // 获取文件大小
     file.seekg(0, std::ios::end);
     std::streampos fileSize = file.tellg();
     file.seekg(0, std::ios::beg);
-    
+
     // 分配内存缓冲区
     std::vector<char> buffer(fileSize);
-    
+
     // 读取文件内容到缓冲区
-    if (!file.read(buffer.data(), fileSize)) 
+    if (!file.read(buffer.data(), fileSize))
     {
         std::cerr << "Failed to read file: " << filename << std::endl;
         return {};
     }
-    
+
     return buffer;
 }
 
@@ -76,9 +76,9 @@ void PrintConnectionInfo(struct mg_connection *c)
     std::cerr << "c->is_writable: " << c->is_writable << std::endl;
 }
 
-static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) 
+static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
-    if (ev == MG_EV_HTTP_MSG)   
+    if (ev == MG_EV_HTTP_MSG)
     {
         struct mg_http_message *http_msg = static_cast<struct mg_http_message *>(ev_data);
         std::cerr << "Receive http message, and it's data is :" << std::endl;
@@ -121,7 +121,7 @@ int old_version()
     {
         mg_mgr_poll(&mgr, 1000);
     }
-    
+
     return 0;
 }
 
@@ -136,9 +136,9 @@ void Help()
     std::cerr << help_info << std::endl;
 }
 
-static void test_mg_send_cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) 
+static void test_mg_send_cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
-    if (ev == MG_EV_HTTP_MSG)   
+    if (ev == MG_EV_HTTP_MSG)
     {
         struct mg_http_message *http_msg = static_cast<struct mg_http_message *>(ev_data);
         std::cerr << "Receive http message, and it's data is :" << std::endl;
@@ -154,7 +154,7 @@ static void test_mg_send_cb(struct mg_connection *c, int ev, void *ev_data, void
 // Access-Control-Allow-Methods: *
 
 
-// {"code":0,"curr_page":1,"list":[{"id":1,"name":"company","updatedtime":"2023-6-30 15:45:44","url":"rtsp://admin:a1234567@192.169.7.123:554"},{"id":2,"name":"coffee","updatedtime":"2023-7-4 10:9:0","url":"rtsp://admin:a1234567@192.169.7.111:554"}],"total_count":2,"total_page":1} 
+// {"code":0,"curr_page":1,"list":[{"id":1,"name":"company","updatedtime":"2023-6-30 15:45:44","url":"rtsp://admin:a1234567@192.169.7.123:554"},{"id":2,"name":"coffee","updatedtime":"2023-7-4 10:9:0","url":"rtsp://admin:a1234567@192.169.7.111:554"}],"total_count":2,"total_page":1}
 // )"};
 //         int send_size = mg_printf(c, reply.c_str());
 //         std::cerr << "mg_printf send size: " << send_size << std::endl;
@@ -189,13 +189,13 @@ int test_mg_send()
     {
         mg_mgr_poll(&mgr, 1000);
     }
-    
+
     return 0;
 }
 
-static void test_mg_http_reply(struct mg_connection *c, int ev, void *ev_data, void *fn_data) 
+static void test_mg_http_reply_cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
-    if (ev == MG_EV_HTTP_MSG)   
+    if (ev == MG_EV_HTTP_MSG)
     {
         struct mg_http_message *http_msg = static_cast<struct mg_http_message *>(ev_data);
         std::cerr << "Receive http message, and it's data is :" << std::endl;
@@ -221,7 +221,7 @@ int test_mg_http_reply()
     m_http_header += "Access-Control-Allow-Origin: *\r\n";
     m_http_header += "Access-Control-Allow-Methods: *\r\n";
     mg_mgr_init(&mgr);
-    c = mg_http_listen(&mgr, url.c_str(), test_mg_http_reply, nullptr);
+    c = mg_http_listen(&mgr, url.c_str(), test_mg_http_reply_cb, nullptr);
     if (!c)
     {
         std::cerr << "Failed to listen url: " << url << std::endl;
@@ -231,7 +231,45 @@ int test_mg_http_reply()
     {
         mg_mgr_poll(&mgr, 1000);
     }
-    
+
+    return 0;
+}
+
+static void test_mg_error_cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
+{
+    if (ev == MG_EV_HTTP_MSG)
+    {
+        struct mg_http_message *http_msg = static_cast<struct mg_http_message *>(ev_data);
+        std::cerr << "Receive http message, and it's data is :" << std::endl;
+        std::string body = http_msg->body.ptr;
+        body = body.substr(0, http_msg->body.len);
+        std::cerr << "body: " << body << std::endl;
+        mg_http_reply(c, 200, m_http_header.c_str(), "yes, it's my world");
+    }
+}
+
+int test_mg_error()
+{
+    struct mg_mgr mgr;
+    struct mg_connection *c {nullptr};
+    m_http_header =  "Content-Type: application/json\r\n";
+    m_http_header += "Connection: keep-alive\r\n";
+    m_http_header += "Server: mnc.exe\r\n";
+    m_http_header += "Cache-control: no-cache, max-age=0, must-revalidate\r\n";
+    m_http_header += "Access-Control-Allow-Origin: *\r\n";
+    m_http_header += "Access-Control-Allow-Methods: *\r\n";
+    mg_mgr_init(&mgr);
+    c = mg_http_listen(&mgr, url.c_str(), test_mg_error_cb, nullptr);
+    if (!c)
+    {
+        std::cerr << "Failed to listen url: " << url << std::endl;
+        return -1;
+    }
+    while (true)
+    {
+        mg_mgr_poll(&mgr, 1000);
+    }
+
     return 0;
 }
 
@@ -257,7 +295,11 @@ int main (int argc, char *argv[])
         {
             test_mg_http_reply();
         }
-        else 
+        else if (arg == "--test-mg-error")
+        {
+            test_mg_error();
+        }
+        else
         {
             Help();
         }

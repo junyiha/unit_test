@@ -1,13 +1,13 @@
-#! /bin/bash 
+#! /bin/bash
 
-file_arr=(get_file_size 
-          clear_file 
-          test_logger 
-          create_directory 
-          share_memory 
-          test_ftok 
-          read_share_mem 
-          read_write_file 
+file_arr=(get_file_size
+          clear_file
+          test_logger
+          create_directory
+          share_memory
+          test_ftok
+          read_share_mem
+          read_write_file
           shm_open_unlink
           test_mmap
           read_shm_open
@@ -60,88 +60,94 @@ file_arr=(get_file_size
           test_cnt_mjpeg
           test_remove_dir
           test_vector
-          test_sqlite_orm )
+          test_sqlite_orm
+          test_eigen )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
 
 for file in "${file_arr[@]}"
-do 
+do
     f="${file}.exe"
-    # if [[ -e ${f} ]]; then 
+    # if [[ -e ${f} ]]; then
     #     echo "Exist file: " ${f} ", and delete it"
     #     rm ${f}
-    # fi 
+    # fi
 
-    if [[ -e ${f} ]]; then 
+    if [[ -e ${f} ]]; then
         echo "Exist file: " ${f} ", and continue"
         continue
-    fi 
+    fi
 
-    if [[ ${file} == "shm_open_unlink" ]]; then 
+    if [[ ${file} == "shm_open_unlink" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
         continue
     fi
 
-    if [[ ${file} == "test_thread" ]]; then 
+    if [[ ${file} == "test_thread" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lpthread
         continue
     fi
 
-    if [[ ${file} == "test_video_stream" ]]; then 
+    if [[ ${file} == "test_video_stream" ]]; then
         g++ -g -std=c++11 "${file}.cc" "mongoose.c" "ParseFrame.cc" -o ${f} -I./ -lpthread -lrt -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
     fi
 
-    if [[ ${file} == "test_pic_server" ]]; then 
+    if [[ ${file} == "test_pic_server" ]]; then
         g++ -g -std=c++11 "${file}.cc" "ParseFrame.cc" -o ${f} -I./ -lrt -lpthread -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
     fi
 
-    if [[ ${file} == "test_opencv" ]]; then 
+    if [[ ${file} == "test_opencv" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
-        continue
-    fi 
-
-    if [[ ${file} == "test_opencv_get_position" ]]; then 
-        g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
-        continue
-    fi 
-
-    if [[ ${file} == "test_static_file"  || 
-          ${file} == "test_mongoose_client" || 
-          ${file} == "test_mongoose_server" ]]; then 
-        g++ -g -std=c++11 "${file}.cc" "mongoose.c" -o ${f} -I./ 
         continue
     fi
 
-    if [[ ${file} == "test_stl" ]]; then 
+    if [[ ${file} == "test_opencv_get_position" ]]; then
+        g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
+        continue
+    fi
+
+    if [[ ${file} == "test_static_file"  ||
+          ${file} == "test_mongoose_client" ||
+          ${file} == "test_mongoose_server" ]]; then
+        g++ -g -std=c++11 "${file}.cc" "mongoose.c" -o ${f} -I./
+        continue
+    fi
+
+    if [[ ${file} == "test_stl" ]]; then
         g++ -g -std=c++11 "${file}.cc"  -o ${f} -I./ -lpthread
         continue
     fi
 
-    if [[ ${file} == "test_perf" ]]; then 
+    if [[ ${file} == "test_perf" ]]; then
         # g++ -g -std=c++11 "${file}.cc" "hash_table.c"  -o ${f} -I./ -lpthread
         continue
     fi
 
-    if [[ ${file} == "test_sqlpp11" ]]; then 
+    if [[ ${file} == "test_sqlpp11" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I ./ -I./sqlite3/include/ -L./sqlite3/lib/ -lsqlite3
         continue
-    fi 
+    fi
 
-    if [[ ${file} == "test_asan" ]]; then 
+    if [[ ${file} == "test_asan" ]]; then
         g++ -fsanitize=address -g "${file}.cc" -o ${f} -I.
         continue
     fi
 
-    if [[ ${file} == "test_sqlite_orm" ]]; then 
+    if [[ ${file} == "test_sqlite_orm" ]]; then
         g++ -g "${file}.cc"  -o ${f} -I. -I./sqlite3/include/ -L./sqlite3/lib/ -lsqlite3
         continue
     fi
 
+    if [[ ${file} == "test_eigen" ]]; then
+        g++ -g "${file}.cc"  -o ${f} -I. -I./eigen3/
+        continue
+    fi
+
     g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
-done 
+done
 
 function CopyVideoPlayFiles()
 {

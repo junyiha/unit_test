@@ -61,7 +61,8 @@ file_arr=(get_file_size
           test_remove_dir
           test_vector
           test_sqlite_orm
-          test_eigen )
+          test_eigen
+          test_magic )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -143,6 +144,11 @@ do
 
     if [[ ${file} == "test_eigen" ]]; then
         g++ -g "${file}.cc"  -o ${f} -I. -I./eigen3/
+        continue
+    fi
+
+    if [[ ${file} == "test_magic" ]]; then
+        g++ -g "${file}.cc"  -o ${f} -I. -lmagic
         continue
     fi
 

@@ -4,9 +4,9 @@
  * @brief 测试httplib第三方库
  * @version 0.1
  * @date 2023-06-25
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #include <iostream>
 #include <map>
@@ -35,25 +35,25 @@ R"(
 
 int main(int argc, char *argv[])
 {
-    httplib::Client cli("http://192.169.4.16:17008");
+    httplib::Client cli("http://192.169.4.16:8989");
 
-    httplib::Params params = 
+    httplib::Params params =
     {
         {"cmd", "201"} // 查看许可证信息
     };
 
-    httplib::Params licence_params = 
+    httplib::Params licence_params =
     {
         {"cmd", "202"},
         {"licence", "HFWYU4MP-NEW6GQLD-HFWYU4MK-PFWYU4MK-6PWQUJEB-MDWWU4MK-PFXUSS53-7F8WU4QK-PFWYU4MK-PFXZ24K6-2FXYUMGK"}
     };
 
-    httplib::Params list_task_params = 
+    httplib::Params list_task_params =
     {
         {"cmd", "1"}
     };
 
-    httplib::Params start_task_params = 
+    httplib::Params start_task_params =
     {
         {"cmd", "2"},
         {"id", "aaa"},
@@ -63,25 +63,25 @@ int main(int argc, char *argv[])
         {"output-type", "5"}
     };
 
-    httplib::Params delete_task_params = 
+    httplib::Params delete_task_params =
     {
         {"cmd", "4"},
         {"id", "aaa"}
     };
 
-    httplib::Params stop_task_params = 
+    httplib::Params stop_task_params =
     {
         {"cmd", "3"},
         {"id", "aaa"}
     };
 
-    httplib::Params status_task_params = 
+    httplib::Params status_task_params =
     {
         {"cmd", "6"},
         {"id", "aaa"}
     };
 
-    httplib::Params update_task_params = 
+    httplib::Params update_task_params =
     {
         {"cmd", "5"},
         {"id", "aaa"},
@@ -170,7 +170,18 @@ int main(int argc, char *argv[])
                 std::cerr << res->body << std::endl;
             }
         }
-        else 
+        else if (arg == "--post-json")
+        {
+            std::string msg {R"({"hello":"world"})"};
+
+            auto res = cli.Post("/api", msg, "application/json");
+            if (res.error() == httplib::Error::Success)
+            {
+                std::cerr << "Success to get response information" << std::endl;
+                std::cerr << res->body << std::endl;
+            }
+        }
+        else
         {
             std::cerr << "Unknown option: " << arg << std::endl;
             return -1;

@@ -15,7 +15,7 @@
 #include "mongoose.h"
 #include <unistd.h>
 
-static std::string url {"0.0.0.0:8989"};
+static std::string url {"0.0.0.0:10010"};
 static std::string m_http_header;
 static std::string file {"path/to/aaa-frame-6147.jpg"};
 
@@ -277,11 +277,16 @@ static void test_upload_alarm_cb(struct mg_connection *c, int ev, void *ev_data,
 {
     if (ev == MG_EV_HTTP_MSG)
     {
+        std::ofstream file;
+        file.open("/tmp/test.txt", std::ios::out | std::ios::binary);
         struct mg_http_message *http_msg = static_cast<struct mg_http_message *>(ev_data);
         std::cerr << "Receive http message, and it's data is :" << std::endl;
         std::string body = http_msg->body.ptr;
         body = body.substr(0, http_msg->body.len);
-        std::cerr << "body: " << body << std::endl;
+        file << body ;
+        file << "\n";
+        // std::cerr << "body: " << body << std::endl;
+        file.close();
         mg_http_reply(c, 200, m_http_header.c_str(), "yes, it's my world");
     }
 }

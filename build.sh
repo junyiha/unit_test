@@ -62,7 +62,8 @@ file_arr=(get_file_size
           test_vector
           test_sqlite_orm
           test_eigen
-          test_magic )
+          test_magic
+          test_save_status )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"

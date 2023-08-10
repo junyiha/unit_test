@@ -4,9 +4,9 @@
  * @brief nlohmann::json 测试
  * @version 0.1
  * @date 2023-06-29
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include <iostream>
@@ -32,7 +32,7 @@ int old_version()
     data["code"] = 0;
     data["area"];
     std::cerr << "str: " << data.dump() << std::endl;
-    
+
     return 0;
 }
 
@@ -51,7 +51,7 @@ int parse_file()
 
     file >> parsed_data;
     std::string licence {};
-    try 
+    try
     {
         licence = parsed_data["licence"];
     }
@@ -87,6 +87,21 @@ int test_array()
     return 0;
 }
 
+int test_array_2()
+{
+    nlohmann::json reply_data;
+
+    double joint_value[6] = {0, 1, 2, 3, 4, 5};
+
+    nlohmann::json arr_data(joint_value);
+
+    reply_data["array"] = arr_data;
+
+    reply_data["arr"] = nlohmann::json(joint_value);
+
+    std::cerr << reply_data.dump() << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     std::string arg {};
@@ -109,7 +124,11 @@ int main(int argc, char *argv[])
         {
             test_array();
         }
-        else 
+        else if (arg == "--test-array-2")
+        {
+            test_array_2();
+        }
+        else
         {
             Help();
         }

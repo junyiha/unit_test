@@ -316,6 +316,42 @@ int test_upload_alarm()
     return 0;
 }
 
+static void test_static_file_cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
+{
+    struct mg_http_message *http_msg = static_cast<struct mg_http_message *>(ev_data);
+    struct mg_http_serve_opts opts;
+    opts.root_dir = ".";
+    if (ev == MG_EV_HTTP_MSG)
+    {
+        mg_http_serve_dir(c, http_msg, &opts);
+    }
+}
+
+int test_static_file()
+{
+    struct mg_mgr mgr;
+    struct mg_connection *c {nullptr};
+    m_http_header =  "Content-Type: application/json\r\n";
+    m_http_header += "Connection: keep-alive\r\n";
+    m_http_header += "Server: mnc.exe\r\n";
+    m_http_header += "Cache-control: no-cache, max-age=0, must-revalidate\r\n";
+    m_http_header += "Access-Control-Allow-Origin: *\r\n";
+    m_http_header += "Access-Control-Allow-Methods: *\r\n";
+    mg_mgr_init(&mgr);
+    c = mg_http_listen(&mgr, url.c_str(), test_static_file_cb, nullptr);
+    if (!c)
+    {
+        std::cerr << "Failed to listen url: " << url << std::endl;
+        return -1;
+    }
+    while (true)
+    {
+        mg_mgr_poll(&mgr, 1000);
+    }
+
+    return 0;
+}
+
 int main (int argc, char *argv[])
 {
     std::string arg {};
@@ -345,6 +381,10 @@ int main (int argc, char *argv[])
         else if (arg == "--test-upload-alarm")
         {
             test_upload_alarm();
+        }
+        else if (arg == "--test-static-file")
+        {
+            test_static_file();
         }
         else
         {

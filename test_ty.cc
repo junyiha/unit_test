@@ -55,27 +55,7 @@ void eventCallback(TY_EVENT_INFO *event_info, void *userdata)
     }
 }
 
-// static int get_fps() {
-//     static int fps_counter = 0;
-//     static clock_t fps_tm = 0;
-//     const int kMaxCounter = 200;
-//     struct timeval start;
-//     fps_counter++;
-//     if (fps_counter < kMaxCounter) {
-//         return -1;
-//     }
-
-//     gettimeofday(&start, NULL);
-//     int elapse = start.tv_sec * 1000 + start.tv_usec / 1000 - fps_tm;
-//     int v = (int)(((float)fps_counter) / elapse * 1000);
-//     gettimeofday(&start, NULL);
-//     fps_tm = start.tv_sec * 1000 + start.tv_usec / 1000;
-
-//     fps_counter = 0;
-//     return v;
-// }
-
-int main()
+int test_fetch_frame()
 {
     int ret;
     TY_VERSION_INFO ver;
@@ -493,5 +473,10 @@ int main()
     delete frame_buffer[1];
 
     std::cerr << "---main done---" << std::endl;
+    return 0;
+}
+
+int main()
+{
     return 0;
 }

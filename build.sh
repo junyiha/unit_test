@@ -65,10 +65,13 @@ file_arr=(get_file_size
           test_magic
           test_save_status
           test_bit
-          test_json )
+          test_json
+          test_ty )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
+
+CXX_FLAGS="g++ -g -std=c++11"
 
 for file in "${file_arr[@]}"
 do
@@ -152,6 +155,11 @@ do
 
     if [[ ${file} == "test_magic" ]]; then
         g++ -g "${file}.cc"  -o ${f} -I. -lmagic
+        continue
+    fi
+
+    if [[ ${file} == "test_ty" ]]; then
+        ${CXX_FLAGS} "${file}.cc" "./ty_lib/MatViewer.cpp" "./ty_lib/DepthInpainter.cpp" "./ty_lib/ImageSpeckleFilter.cpp" -o ${f} -I./ty_lib/ -I/usr/local/TY_sdk/include/ -L/usr/local/TY_sdk/lib/linux/lib_x64/  -I/usr/local/include/opencv4/ -L/usr/local/lib/ -ltycam -lopencv_core -lopencv_imgproc -lopencv_imgcodecs -lopencv_highgui -lopencv_photo -lpthread
         continue
     fi
 

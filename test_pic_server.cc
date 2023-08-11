@@ -6,9 +6,9 @@
 // #include "VCAFrame.hpp"
 #include "ParseFrame.hpp"
 
-using EnumRET_t = enum 
+using EnumRET_t = enum
 {
-    RET_ERR = -1, 
+    RET_ERR = -1,
     RET_OK = 0
 };
 
@@ -37,7 +37,7 @@ int GetProducerIdx(std::size_t &out)
     }
     for (auto &it : producer_data)
         cnt_string += it;
-    
+
     out = std::stoi(cnt_string);
 
     return RET_OK;
@@ -68,7 +68,7 @@ int test_v1()
         ret = pm.ParseShmMjpegFile(pic_name);
         if (ret == ParseMjpeg::RET_OK)
         {
-            ret = pm.GetStructData(json_string);
+            // ret = pm.GetStructData(json_string);
             if (ret == ParseMjpeg::RET_OK)
             {
                 std::cerr << "Success to get struct data from file: " << pic_name << std::endl;
@@ -100,7 +100,7 @@ int test_v1()
     return 0;
 }
 
-using EnumLabel_t = enum 
+using EnumLabel_t = enum
 {
     FULL_BODY = 10001,
 };
@@ -115,7 +115,7 @@ int main()
     std::string save_origin_path {"path/to/"};
     PictureServer ps;
 
-    ps.SetPrefix(prefix);   
+    ps.SetPrefix(prefix);
     ps.Init();
     // ps.Process();
 

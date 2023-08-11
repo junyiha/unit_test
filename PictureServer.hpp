@@ -4,11 +4,11 @@
  * @brief 图片服务器 接收mjpeg图片，解析，维护计数器
  * @version 0.1
  * @date 2023-06-06
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
-#pragma once 
+#pragma once
 
 #include <cassert>
 #include <queue>
@@ -21,7 +21,7 @@
 class PictureServer
 {
 public:
-    using EnumServerFlag_t = enum 
+    using EnumServerFlag_t = enum
     {
         EXIT_FLAG = -1,
         RUN_FLAG = 0,
@@ -38,7 +38,7 @@ public:
     bool GetStructData(std::string &out);
     bool GetOriginPicData(std::vector<char> &out);
     bool GetMjpegData(ParseMjpeg::Mjpeg_t &out);
-    
+
     void DeleteQueueFrontData();
     bool SaveOriginPictureToDir(std::string in_dir_path, std::string &out_file_path);
 
@@ -111,7 +111,7 @@ inline int PictureServer::Process()
             std::cerr << "Failed to read producer index, break"<< std::endl;
             break;
         }
-        
+
         if (m_consumer_idx >= m_producer_idx)
         {
             sleep(1);
@@ -123,13 +123,13 @@ inline int PictureServer::Process()
         if (ret == ParseMjpeg::RET_OK)
         {
             ParseMjpeg::Mjpeg_t m;
-            ret = m_pm.GetStructData(json_string);
+            // ret = m_pm.GetStructData(json_string);
             ret = m_pm.GetMjpegData(m);
             if (ret == ParseMjpeg::RET_OK)
             {
                 SaveDataToQueue(m);
                 SaveDataToQueue(json_string);
-                    
+
                 if (!RemoveShmFile(pic_name))
                     std::cerr << "Failed to remove file: " << pic_name << std::endl;
             }
@@ -171,9 +171,9 @@ inline bool PictureServer::GetOriginPicData(std::vector<char> &out)
 {
     int ret {ParseMjpeg::RET_ERR};
 
-    ret = m_pm.GetOriginPicData(out);
-    if (ret == ParseMjpeg::RET_OK)
-        return true;
+    // ret = m_pm.GetOriginPicData(out);
+    // if (ret == ParseMjpeg::RET_OK)
+    //     return true;
 
     return false;
 }
@@ -228,7 +228,7 @@ inline void PictureServer::InitConsumer()
 inline void PictureServer::InitProducer()
 {
     int ret {ProducerIndex::RET_ERR};
-    
+
     GetProducerName(m_producer_name);
     ret = m_pi.SetFileName(m_producer_name);
     assert(ret == ProducerIndex::RET_OK);
@@ -290,7 +290,7 @@ inline void PictureServer::GetMjpegFromQueue(ParseMjpeg::Mjpeg_t &out)
 {
     if (m_mjpeg_queue.empty())
         return;
-    
+
     out = m_mjpeg_queue.front();
 }
 

@@ -72,7 +72,7 @@ opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/insta
 
 for file in "${file_arr[@]}"
 do
-    f="${file}.exe"
+    f="./bin/${file}.exe"
     # if [[ -e ${f} ]]; then
     #     echo "Exist file: " ${f} ", and delete it"
     #     rm ${f}

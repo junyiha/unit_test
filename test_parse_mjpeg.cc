@@ -42,11 +42,11 @@ int main()
             {
                 std::cerr << "Success to save struct data file" << std::endl;
             }
-            ret = pm.GetStructData(json_string);
-            if (ret == ParseMjpeg::RET_OK)
-            {
-                std::cerr << "Success to get struct data, data: " << json_string << std::endl;
-            }
+            // ret = pm.GetStructData(json_string);
+            // if (ret == ParseMjpeg::RET_OK)
+            // {
+            //     std::cerr << "Success to get struct data, data: " << json_string << std::endl;
+            // }
         }
     }
 

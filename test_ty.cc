@@ -55,6 +55,8 @@ void eventCallback(TY_EVENT_INFO *event_info, void *userdata)
     }
 }
 
+// #define SUCCESS_TY_SDK
+
 int test_fetch_frame()
 {
     int ret;
@@ -373,6 +375,7 @@ int test_fetch_frame()
         }
     }
 
+#ifdef SUCCESS_TY_SDK
     std::cerr << "Start capture" << std::endl;
     ret = TYStartCapture(device_handle);
     if (ret != TY_STATUS_OK)
@@ -438,7 +441,84 @@ int test_fetch_frame()
             break;
         }
     }
+#else
+    std::cerr << "Start capture" << std::endl;
+    ret = TYStartCapture(device_handle);
+    if (ret != TY_STATUS_OK)
+    {
+        std::cerr << "failed to start capture from device" << std::endl;
+        return -1;
+    }
 
+    std::cerr << "while loop to fetch frame" << std::endl;
+    bool exit_main = false;
+    TY_FRAME_DATA frame;
+    int index = 0;
+    std::string file{"./data/"};
+    while (!exit_main)
+    {
+        int err = TYFetchFrame(device_handle, &frame, 3000);
+        if (err != TY_STATUS_OK)
+            continue;
+
+        std::cerr << "Get frame " << ++index << std::endl;
+        int fps = get_fps();
+        if (fps > 0)
+        {
+            std::cerr << "fps: " << fps << std::endl;
+        }
+
+        cv::Mat depth, irl, irr, color;
+        parseFrame(frame, &depth, &irl, &irr, &color, color_isp_handle);
+        if (!depth.empty())
+        {
+            // depth_viewer.show(depth);
+            file = std::string("./data/") + "depth-img-" + std::to_string(index) + ".jpg";
+            cv::imwrite(file, depth);
+        }
+        if (!irl.empty())
+        {
+            // cv::imshow("LeftIR", irl);
+            file = std::string("./data/") + "LeftIR-img-" + std::to_string(index) + ".jpg";
+            cv::imwrite(file, irl);
+        }
+        if (!irr.empty())
+        {
+            // cv::imshow("RightIR", irr);
+            file = std::string("./data/") + "RightIR-img-" + std::to_string(index) + ".jpg";
+            cv::imwrite(file, irr);
+        }
+        if (!color.empty())
+        {
+            // cv::imshow("Color", color);
+            file = std::string("./data/") + "Color-img-" + std::to_string(index) + ".jpg";
+            cv::imwrite(file, color);
+        }
+
+        if (index > 100)
+            break;
+        // int key = cv::waitKey(1);
+        // switch (key & 0xff)
+        // {
+        // case 0xff:
+        //     break;
+        // case 'q':
+        //     exit_main = true;
+        //     break;
+        // default:
+        //     std::cerr << "Unmapped key: " << key << std::endl;
+        // }
+
+        TYISPUpdateDevice(color_isp_handle);
+        std::cerr << "Re-enqueue buffer (" << frame.userBuffer << ", " << frame.bufferSize << std::endl;
+        ret = TYEnqueueBuffer(device_handle, frame.userBuffer, frame.bufferSize);
+        if (ret != TY_STATUS_OK)
+        {
+            std::cerr << "failed to enqueue frame to buffer" << std::endl;
+            break;
+        }
+    }
+#endif
     ret = TYStopCapture(device_handle);
     if (ret != TY_STATUS_OK)
     {
@@ -478,5 +558,7 @@ int test_fetch_frame()
 
 int main()
 {
+    test_fetch_frame();
+
     return 0;
 }

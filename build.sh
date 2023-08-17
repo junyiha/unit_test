@@ -66,7 +66,10 @@ file_arr=(get_file_size
           test_save_status
           test_bit
           test_json
-          test_ty )
+          test_ty
+          test_lambda
+          test_math
+          test_base )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -160,6 +163,11 @@ do
 
     if [[ ${file} == "test_ty" ]]; then
         ${CXX_FLAGS} "${file}.cc" "./ty_lib/MatViewer.cpp" "./ty_lib/DepthInpainter.cpp" "./ty_lib/ImageSpeckleFilter.cpp" -o ${f} -I./ty_lib/ -I/usr/local/TY_sdk/include/ -L/usr/local/TY_sdk/lib/linux/lib_x64/  -I/usr/local/include/opencv4/ -L/usr/local/lib/ -ltycam -lopencv_core -lopencv_imgproc -lopencv_imgcodecs -lopencv_highgui -lopencv_photo -lpthread
+        continue
+    fi
+
+    if [[ ${file} == "test_lambda" ]]; then
+        ${CXX_FLAGS} "${file}.cc" -o ${f} -I. -lpthread
         continue
     fi
 

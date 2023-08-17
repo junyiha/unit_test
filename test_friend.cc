@@ -1,3 +1,13 @@
+/**
+ * @file test_friend.cc
+ * @author your name (you@domain.com)
+ * @brief 友元单元测试
+ * @version 0.1
+ * @date 2023-08-15
+ *
+ * @copyright Copyright (c) 2023
+ *
+ */
 #include <iostream>
 
 class MyClass {

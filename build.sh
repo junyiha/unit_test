@@ -69,7 +69,8 @@ file_arr=(get_file_size
           test_ty
           test_lambda
           test_math
-          test_base )
+          test_base
+          test_opengl )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"

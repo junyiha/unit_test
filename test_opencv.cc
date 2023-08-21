@@ -16,7 +16,7 @@
 
 void Help()
 {
-    std::string help_info {R"(
+    std::string help_info{R"(
         help information
 
         --draw-static-image
@@ -27,10 +27,12 @@ void Help()
 }
 
 // 读取文件内容到内存
-std::vector<char> ReadFileToMemory(const std::string& filename) {
+std::vector<char> ReadFileToMemory(const std::string &filename)
+{
     std::ifstream file(filename, std::ios::binary);
 
-    if (!file) {
+    if (!file)
+    {
         std::cerr << "Failed to open file: " << filename << std::endl;
         return {};
     }
@@ -44,7 +46,8 @@ std::vector<char> ReadFileToMemory(const std::string& filename) {
     std::vector<char> buffer(fileSize);
 
     // 读取文件内容到缓冲区
-    if (!file.read(buffer.data(), fileSize)) {
+    if (!file.read(buffer.data(), fileSize))
+    {
         std::cerr << "Failed to read file: " << filename << std::endl;
         return {};
     }
@@ -54,7 +57,8 @@ std::vector<char> ReadFileToMemory(const std::string& filename) {
 
 int ProcessPic(cv::Mat &image)
 {
-    if (image.empty()) {
+    if (image.empty())
+    {
         std::cout << "无法加载图像文件" << std::endl;
         return -1;
     }
@@ -91,11 +95,11 @@ int show()
     ProcessPic(image);
 }
 
-int old_version ()
+int old_version()
 {
-    std::string file {"frame.jpg"};
-    int height {1920};
-    int width {1080};
+    std::string file{"frame.jpg"};
+    int height{1920};
+    int width{1080};
     std::vector<char> pic_data;
 
     pic_data = ReadFileToMemory(file);
@@ -104,14 +108,14 @@ int old_version ()
         std::cerr << "Failed to read data of :" << file << std::endl;
         return -1;
     }
-    cv::Mat image = cv::Mat( width, height, CV_8UC3, pic_data.data());
+    cv::Mat image = cv::Mat(width, height, CV_8UC3, pic_data.data());
     ProcessPic(image);
     // show();
 
     return 0;
 }
 
-std::string tmp_img {"path/to/aaa-frame-6137.jpg"};
+std::string tmp_img{"path/to/aaa-frame-6137.jpg"};
 
 /**
     ++++++++++++++++++
@@ -139,7 +143,6 @@ std::string tmp_img {"path/to/aaa-frame-6137.jpg"};
     ++++++++++++++++++
 */
 
-
 int draw_static_image()
 {
     /* 检测区域 */
@@ -153,7 +156,7 @@ int draw_static_image()
     // int y1 = 231;
     // int x2 = 773;
     // int y2 = 308;
-    std::string window_name {"tmp"};
+    std::string window_name{"tmp"};
     cv::Mat img;
     img = cv::imread(tmp_img);
 
@@ -182,10 +185,10 @@ int draw_static_image()
 
 int failed_read_image()
 {
-    std::string file_name {"origin-frame-1.jpg"};
+    std::string file_name{"origin-frame-1.jpg"};
 
-    int height {1920};
-    int width {1080};
+    int height{1920};
+    int width{1080};
     std::vector<char> pic_data;
 
     pic_data = ReadFileToMemory(file_name);
@@ -194,7 +197,7 @@ int failed_read_image()
         std::cerr << "Failed to read data of :" << file_name << std::endl;
         return -1;
     }
-    cv::Mat image = cv::Mat( width, height, CV_8UC3, pic_data.data());
+    cv::Mat image = cv::Mat(width, height, CV_8UC3, pic_data.data());
     cv::namedWindow(file_name, cv::WINDOW_NORMAL);
     cv::imshow(file_name, image);
     cv::waitKey(0);
@@ -364,7 +367,7 @@ int test_rectangle()
 
     // 绘制矩形
     cv::Rect rect(50, 50, 200, 150);
-    cv::Scalar color(0, 0, 255);  // 红色
+    cv::Scalar color(0, 0, 255); // 红色
     int thickness = 2;
     int lineType = cv::LINE_8;
     int shift = 0;
@@ -396,6 +399,89 @@ int test_circle()
     return 0;
 }
 
+int test_opencv_at()
+{
+    std::string img_path = "path/to/aaa-frame-6253.jpg";
+
+    cv::Mat image = cv::imread(img_path);
+
+    if (!image.empty())
+    {
+        int row = 100;
+        int col = 150;
+
+        cv::Vec3b pixel = image.at<cv::Vec3b>(row, col);
+
+        uchar blue = pixel[0];
+        uchar green = pixel[1];
+        uchar red = pixel[2];
+
+        std::cout << "Pixel at (" << col << ", " << row << "): "
+                  << "B: " << int(blue) << " G: " << int(green) << " R: " << int(red) << std::endl;
+    }
+}
+
+int test_opencv_polygon()
+{
+    std::vector<cv::Point> contour = {cv::Point(50, 50), cv::Point(200, 50), cv::Point(200, 200), cv::Point(50, 200)};
+    cv::Point2f point(100, 100);
+
+    double distance = cv::pointPolygonTest(contour, point, true);
+
+    if (distance > 0)
+    {
+        std::cout << "Point is inside the polygon." << std::endl;
+    }
+    else if (distance == 0)
+    {
+        std::cout << "Point is on the polygon boundary." << std::endl;
+    }
+    else
+    {
+        std::cout << "Point is outside the polygon." << std::endl;
+    }
+}
+
+int test_opencv_ptr()
+{
+    std::string depth_img_path = "data/depth-img-73.jpg";
+
+    cv::Mat depth_image = cv::imread(depth_img_path, cv::IMREAD_ANYDEPTH);
+
+    // if (!depth_image.empty() && depth_image.depth() == CV_16U)
+    if (!depth_image.empty())
+    {
+        int row = 100;
+
+        uint16_t *ptr = depth_image.ptr<uint16_t>(row);
+
+        for (int col = 0; col < depth_image.cols; ++col)
+        {
+            uint16_t depth_value = ptr[col];
+            std::cerr << "depth value: " << depth_value << std::endl;
+        }
+    }
+}
+
+int test_opencv_fillpoly()
+{
+    cv::Mat image(300, 300, CV_8UC3, cv::Scalar(0, 0, 0));
+
+    std::vector<cv::Point> polygon;
+    polygon.push_back(cv::Point(50, 50));
+    polygon.push_back(cv::Point(150, 50));
+    polygon.push_back(cv::Point(150, 150));
+    polygon.push_back(cv::Point(50, 150));
+
+    std::vector<std::vector<cv::Point>> polygons;
+    polygons.push_back(polygon);
+
+    cv::fillPoly(image, polygons, cv::Scalar(0, 255, 0));
+
+    cv::imshow("Filled Image", image);
+    cv::waitKey(0);
+}
+
 int main(int argc, char *argv[])
 {
     std::string arg;
@@ -405,6 +491,22 @@ int main(int argc, char *argv[])
         if (arg == "--draw-static-image")
         {
             draw_static_image();
+        }
+        else if (arg == "--test-opencv-fillpoly")
+        {
+            test_opencv_fillpoly();
+        }
+        else if (arg == "--test-opencv-ptr")
+        {
+            test_opencv_ptr();
+        }
+        else if (arg == "--test_opencv_polygon")
+        {
+            test_opencv_polygon();
+        }
+        else if (arg == "--test-opencv-at")
+        {
+            test_opencv_at();
         }
         else if (arg == "--test-scalar")
         {

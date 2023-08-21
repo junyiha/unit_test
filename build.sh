@@ -70,12 +70,14 @@ file_arr=(get_file_size
           test_lambda
           test_math
           test_base
-          test_opengl )
+          test_opengl
+          test_pcl )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
 
-CXX_FLAGS="g++ -g -std=c++11"
+# CXX_FLAGS="g++ -g -std=c++11"
+CXX_FLAGS="g++ -g -std=c++14"
 
 for file in "${file_arr[@]}"
 do
@@ -88,87 +90,58 @@ do
     if [[ -e ${f} ]]; then
         echo "Exist file: " ${f} ", and continue"
         continue
-    fi
-
-    if [[ ${file} == "shm_open_unlink" ]]; then
+    elif [[ ${file} == "shm_open_unlink" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
         continue
-    fi
-
-    if [[ ${file} == "test_thread" ]]; then
+    elif [[ ${file} == "test_thread" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lpthread
         continue
-    fi
-
-    if [[ ${file} == "test_video_stream" ]]; then
+    elif [[ ${file} == "test_video_stream" ]]; then
         g++ -g -std=c++11 "${file}.cc" "mongoose.c" "ParseFrame.cc" -o ${f} -I./ -lpthread -lrt -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
-    fi
-
-    if [[ ${file} == "test_pic_server" ]]; then
+    elif [[ ${file} == "test_pic_server" ]]; then
         g++ -g -std=c++11 "${file}.cc" "ParseFrame.cc" -o ${f} -I./ -lrt -lpthread -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
-    fi
-
-    if [[ ${file} == "test_opencv" ]]; then
+    elif [[ ${file} == "test_opencv" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
-    fi
-
-    if [[ ${file} == "test_opencv_get_position" ]]; then
+    elif [[ ${file} == "test_opencv_get_position" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
-    fi
-
-    if [[ ${file} == "test_static_file"  ||
+    elif [[ ${file} == "test_static_file"  ||
           ${file} == "test_mongoose_client" ||
           ${file} == "test_mongoose_server" ]]; then
         g++ -g -std=c++11 "${file}.cc" "mongoose.c" -o ${f} -I./
         continue
-    fi
-
-    if [[ ${file} == "test_stl" ]]; then
+    elif [[ ${file} == "test_stl" ]]; then
         g++ -g -std=c++11 "${file}.cc"  -o ${f} -I./ -lpthread
         continue
-    fi
-
-    if [[ ${file} == "test_perf" ]]; then
+    elif [[ ${file} == "test_perf" ]]; then
         # g++ -g -std=c++11 "${file}.cc" "hash_table.c"  -o ${f} -I./ -lpthread
         continue
-    fi
-
-    if [[ ${file} == "test_sqlpp11" ]]; then
+    elif [[ ${file} == "test_sqlpp11" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I ./ -I./sqlite3/include/ -L./sqlite3/lib/ -lsqlite3
         continue
-    fi
-
-    if [[ ${file} == "test_asan" ]]; then
+    elif [[ ${file} == "test_asan" ]]; then
         g++ -fsanitize=address -g "${file}.cc" -o ${f} -I.
         continue
-    fi
-
-    if [[ ${file} == "test_sqlite_orm" ]]; then
+    elif [[ ${file} == "test_sqlite_orm" ]]; then
         g++ -g "${file}.cc"  -o ${f} -I. -I./sqlite3/include/ -L./sqlite3/lib/ -lsqlite3
         continue
-    fi
-
-    if [[ ${file} == "test_eigen" ]]; then
+    elif [[ ${file} == "test_eigen" ]]; then
         g++ -g "${file}.cc"  -o ${f} -I. -I./eigen3/
         continue
-    fi
-
-    if [[ ${file} == "test_magic" ]]; then
+    elif [[ ${file} == "test_magic" ]]; then
         g++ -g "${file}.cc"  -o ${f} -I. -lmagic
         continue
-    fi
-
-    if [[ ${file} == "test_ty" ]]; then
+    elif [[ ${file} == "test_ty" ]]; then
         ${CXX_FLAGS} "${file}.cc" "./ty_lib/MatViewer.cpp" "./ty_lib/DepthInpainter.cpp" "./ty_lib/ImageSpeckleFilter.cpp" -o ${f} -I./ty_lib/ -I/usr/local/TY_sdk/include/ -L/usr/local/TY_sdk/lib/linux/lib_x64/  -I/usr/local/include/opencv4/ -L/usr/local/lib/ -ltycam -lopencv_core -lopencv_imgproc -lopencv_imgcodecs -lopencv_highgui -lopencv_photo -lpthread
         continue
-    fi
-
-    if [[ ${file} == "test_lambda" ]]; then
+    elif [[ ${file} == "test_lambda" ]]; then
         ${CXX_FLAGS} "${file}.cc" -o ${f} -I. -lpthread
+        continue
+    elif [[ ${file} == "test_pcl" ]]; then
+        ${CXX_FLAGS} "${file}.cc" -o ${f} -I./eigen3/ -I/usr/local/include/vtk-7.1/ -I/usr/local/include/pcl-1.12/ -L/usr/local/lib/ -lvtkCommonCore-7.1 -lvtksys-7.1 -lvtkCommonColor-7.1 -lpcl_common -lpcl_io -lpcl_visualization -lpcl_filters -lpthread
         continue
     fi
 

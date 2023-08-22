@@ -24,6 +24,12 @@
 #include "MatViewer.hpp"
 #include "common.hpp"
 
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/point_cloud.h>
+
 #define SUCCESS_TY_SDK  // SDK 示例代码 图形化显示
 
 static void Help()
@@ -773,6 +779,7 @@ int test_fetch_frame()
     bool exit_main = false;
     TY_FRAME_DATA frame;
     int index = 0;
+	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer1(new pcl::visualization::PCLVisualizer("3D Viewer"));
     while (!exit_main)
     {
         int err = TYFetchFrame(device_handle, &frame, -1);
@@ -789,8 +796,49 @@ int test_fetch_frame()
         cv::Mat depth, irl, irr, color;
         parseFrame(frame, &depth, &irl, &irr, &color, color_isp_handle);
 
+		std::vector<TY_VECT_3F> p3d;
 		TY_CAMERA_CALIB_INFO color_calib;
+		TY_CAMERA_CALIB_INFO depth_calib;
+		pcl::PointCloud<pcl::PointXYZ> cloud;
+		pcl::PointXYZ point;
+
         cv::Mat  undistort_color = cv::Mat(color.size(), CV_8UC3);
+		p3d.resize(depth.size().area());
+		ret = TYGetStruct(device_handle, TY_COMPONENT_DEPTH_CAM, TY_STRUCT_CAM_CALIB_DATA, &depth_calib, sizeof(depth_calib));  //  提取深度相机的标定数据
+        if (ret != TY_STATUS_OK)
+        {
+            std::cerr << "Failed to get depth image calib data" << std::endl;
+        }
+        else
+        {
+            ret = TYMapDepthImageToPoint3d(&depth_calib, depth.cols, depth.rows, (uint16_t*)depth.data, &p3d[0]); // 深度图像->xyz点云
+            if (ret != TY_STATUS_OK)
+            {
+                std::cerr << "Failed to get point 3d from depth image" << std::endl;
+            }
+            else
+            {
+                std::cerr << "--------Point Cloud------------ size: " << p3d.size() << std::endl;
+                for (auto &it : p3d)
+                {
+                    point.x = it.x;
+                    point.y = it.y;
+                    point.z = it.z;
+                    cloud.points.push_back(point);
+                }
+                pcl::PointCloud<pcl::PointXYZ>::Ptr basic_cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
+                basic_cloud_ptr = cloud.makeShared(); // 转换为指针格式 basic_cloud_ptr
+                basic_cloud_ptr->is_dense = false;  //  自己创建的点云，默认为dense，需要修改属性，否则removenanfrompointcloud函数无效
+                pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
+                std::vector<int> mapping;
+                pcl::removeNaNFromPointCloud(*basic_cloud_ptr, *cloud_ptr, mapping); // 移除无效点
+
+                viewer1->removeAllPointClouds();  // 移除当前所有点云
+                viewer1->addPointCloud<pcl::PointXYZ> (cloud_ptr, "initial");
+                viewer1->updatePointCloud(cloud_ptr, "initial");
+                viewer1->spinOnce(100);
+            }
+        }
 	    ret = TYGetStruct(device_handle, TY_COMPONENT_RGB_CAM, TY_STRUCT_CAM_CALIB_DATA, &color_calib, sizeof(color_calib)); // 提取RGB相机的标定数据
         if (ret != TY_STATUS_OK)
         {
@@ -826,14 +874,14 @@ int test_fetch_frame()
         {
             depth_viewer.show(depth);
         }
-        if (!irl.empty())
-        {
-            cv::imshow("LeftIR", irl);
-        }
-        if (!irr.empty())
-        {
-            cv::imshow("RightIR", irr);
-        }
+        // if (!irl.empty())
+        // {
+        //     cv::imshow("LeftIR", irl);
+        // }
+        // if (!irr.empty())
+        // {
+        //     cv::imshow("RightIR", irr);
+        // }
         if (!color.empty())
         {
             cv::imshow("Color", color);

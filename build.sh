@@ -135,7 +135,7 @@ do
         g++ -g "${file}.cc"  -o ${f} -I. -lmagic
         continue
     elif [[ ${file} == "test_ty" ]]; then
-        ${CXX_FLAGS} "${file}.cc" "./ty_lib/MatViewer.cpp" "./ty_lib/DepthInpainter.cpp" "./ty_lib/ImageSpeckleFilter.cpp" -o ${f} -I./ty_lib/ -I/usr/local/TY_sdk/include/ -L/usr/local/TY_sdk/lib/linux/lib_x64/  -I/usr/local/include/opencv4/ -L/usr/local/lib/ -ltycam -lopencv_core -lopencv_imgproc -lopencv_imgcodecs -lopencv_highgui -lopencv_photo -lpthread
+        ${CXX_FLAGS} "${file}.cc" "./ty_lib/MatViewer.cpp" "./ty_lib/DepthInpainter.cpp" "./ty_lib/ImageSpeckleFilter.cpp" -o ${f} -I./ty_lib/ -I/usr/local/TY_sdk/include/ -L/usr/local/TY_sdk/lib/linux/lib_x64/  -I/usr/local/include/opencv4/ -L/usr/local/lib/ -ltycam -lopencv_core -lopencv_imgproc -lopencv_imgcodecs -lopencv_highgui -lopencv_photo -lpthread -I./eigen3/ -I/usr/local/include/vtk-7.1/ -I/usr/local/include/pcl-1.12/ -L/usr/local/lib/ -lvtkCommonCore-7.1 -lvtksys-7.1 -lvtkCommonColor-7.1 -lvtkRenderingCore-7.1 -lvtkCommonDataModel-7.1 -lvtkCommonMath-7.1 -lpcl_common -lpcl_io -lpcl_visualization -lpcl_filters -lpthread
         continue
     elif [[ ${file} == "test_lambda" ]]; then
         ${CXX_FLAGS} "${file}.cc" -o ${f} -I. -lpthread

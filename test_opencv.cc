@@ -482,6 +482,20 @@ int test_opencv_fillpoly()
     cv::waitKey(0);
 }
 
+int test_opencv_rotatedRect_points()
+{
+    cv::Point2f points[4]; // 存储顶点坐标的数组
+    cv::RotatedRect rotatedRect(cv::Point2f(100, 100), cv::Size2f(200, 100), 30); // 创建一个旋转矩形
+
+    rotatedRect.points(points); // 获取旋转矩形的顶点坐标
+
+    for (int i = 0; i < 4; ++i) {
+        std::cout << "Point " << i + 1 << ": (" << points[i].x << ", " << points[i].y << ")" << std::endl;
+    }
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     std::string arg;
@@ -491,6 +505,10 @@ int main(int argc, char *argv[])
         if (arg == "--draw-static-image")
         {
             draw_static_image();
+        }
+        else if (arg == "--test-opencv-rotated-rect-points")
+        {
+            test_opencv_rotatedRect_points();
         }
         else if (arg == "--test-opencv-fillpoly")
         {

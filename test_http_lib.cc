@@ -35,7 +35,8 @@ R"(
 
 int main(int argc, char *argv[])
 {
-    httplib::Client cli("http://192.169.4.16:8989");
+    // httplib::Client cli("http://192.169.4.16:8989");
+    httplib::Client cli("http://127.0.0.1:1234");
 
     httplib::Params params =
     {
@@ -175,6 +176,25 @@ int main(int argc, char *argv[])
             std::string msg {R"({"hello":"world"})"};
 
             auto res = cli.Post("/api", msg, "application/json");
+            if (res.error() == httplib::Error::Success)
+            {
+                std::cerr << "Success to get response information" << std::endl;
+                std::cerr << res->body << std::endl;
+            }
+        }
+        else if (arg == "--post-file")
+        {
+            std::string file_path = "/mnt/remote/190-mnt/zhangjunyi/Documents/VCR/pcd_files/cloud-computer-test-0.pcd";
+            std::ifstream file_in(file_path, std::ios::binary);
+            std::ostringstream os;
+            os << file_in.rdbuf();
+            std::string content = os.str();
+            file_in.close();
+            httplib::MultipartFormDataItems items =
+            {
+                {"image_file", content, "cloud-computer-test-0.pcd", "application/octet-stream"}  ,
+            };
+            auto res = cli.Post("/post", items);
             if (res.error() == httplib::Error::Success)
             {
                 std::cerr << "Success to get response information" << std::endl;

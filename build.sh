@@ -71,7 +71,8 @@ file_arr=(get_file_size
           test_math
           test_base
           test_opengl
-          test_pcl )
+          test_pcl
+          test_httplib_server )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -141,11 +142,19 @@ do
         ${CXX_FLAGS} "${file}.cc" -o ${f} -I. -lpthread
         continue
     elif [[ ${file} == "test_pcl" ]]; then
-        ${CXX_FLAGS} "${file}.cc" -o ${f} -I./eigen3/ -I/usr/local/include/vtk-7.1/ -I/usr/local/include/pcl-1.12/ -L/usr/local/lib/ -lvtkCommonCore-7.1 -lvtksys-7.1 -lvtkCommonColor-7.1 -lpcl_common -lpcl_io -lpcl_visualization -lpcl_filters -lpthread
+        # ${CXX_FLAGS} "${file}.cc" -o ${f} -I./eigen3/ -I/usr/local/include/vtk-7.1/ -I/usr/local/include/pcl-1.12/ -L/usr/local/lib/ -lvtkCommonCore-7.1 -lvtksys-7.1 -lvtkCommonColor-7.1 -lpcl_common -lpcl_io -lpcl_visualization -lpcl_filters -lpthread
+
+        # ${CXX_FLAGS} "${file}.cc" -o ${f} -I./eigen3/ -I/usr/include/vtk-6.3/ -I/usr/include/pcl-1.8/ -L/usr/lib/x86_64-linux-gnu/ -lvtkCommonCore-6.3 -lvtksys-6.3 -lvtkCommonColor-6.3 -lpcl_common -lpcl_io -lpcl_visualization -lpcl_filters -lpcl_features -lpcl_filters -lpcl_sample_consensus -lpthread -lboost_system
+
+        # vca pcl 1.12
+        ${CXX_FLAGS} "${file}.cc" -o ${f}  -DEIGEN_DONT_ALIGN_STATICALLY -DBOOST_BIND_GLOBAL_PLACEHOLDERS -I/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL-x86_64/include/eigen3/ -I/usr/include/vtk-7.1/ -I/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL-x86_64/include/pcl-1.12/ -lvtkCommonCore-7.1 -lvtksys-7.1 -lvtkCommonColor-7.1 -lpcl_common -lpcl_io -lpcl_visualization -lpcl_filters -lpcl_features -lpcl_filters -lpcl_sample_consensus -lpcl_search -lpthread -lboost_system -lboost_filesystem -lboost_iostreams -lboost_serialization -L/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL-x86_64/lib/
+
+        # 本地pcl 1.12
+        # ${CXX_FLAGS} "${file}.cc" -o ${f} -I/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL-x86_64/include/eigen3/ -I/usr/include/vtk-7.1/ -I/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL-x86_64/include/pcl-1.12/ -L/usr/local/lib/ -lvtkCommonCore-7.1 -lvtksys-7.1 -lvtkCommonColor-7.1 -lpcl_common -lpcl_io -lpcl_visualization -lpcl_filters -lpcl_features -lpcl_filters -lpcl_sample_consensus -lpthread -lboost_system
         continue
     fi
 
-    g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt
+    g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -lrt -lpthread
 done
 
 function CopyVideoPlayFiles()

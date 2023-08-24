@@ -12,12 +12,24 @@
 #include <iostream>
 #include <string>
 
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
-#include <pcl/filters/voxel_grid.h>
+#ifdef OPEN_VIEWER
 #include <pcl/visualization/cloud_viewer.h>
+#endif
 
 #include <pcl/point_cloud.h>
+#include <pcl/filters/radius_outlier_removal.h>
+#include <pcl/surface/surfel_smoothing.h>
+#include <pcl/surface/mls.h>
+#include <pcl/surface/gp3.h>
+#include <pcl/surface/impl/mls.hpp>
+#include <pcl/filters/passthrough.h>
+#include <pcl/point_types.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/filters/voxel_grid.h>                     //体素滤波器头文件
+#include <pcl/filters/statistical_outlier_removal.h>    //统计滤波头文件
+#include <pcl/common/transforms.h>
+#include <pcl/common/projection_matrix.h>
+#include <pcl/features/moment_of_inertia_estimation.h>  //提取点云特征
 
 static void Help()
 {
@@ -33,10 +45,11 @@ static void Help()
     std::cerr << help_info << std::endl;
 }
 
+#ifdef OPEN_VIEWER
 int test_load_pcd_file()
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::io::loadPCDFile("data/pcl/VSLAMRGBD.pcd", *cloud);
+    pcl::io::loadPCDFile("/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/build/data/cloud-computer-test-aaa.pcd", *cloud);
 
     pcl::VoxelGrid<pcl::PointXYZ> voxel_filter;
     voxel_filter.setInputCloud(cloud);
@@ -45,10 +58,105 @@ int test_load_pcd_file()
     voxel_filter.filter(*filtered_cloud);
 
     pcl::visualization::CloudViewer viewer("Point Cloud Viewer");
+    // viewer.showCloud(cloud);
     viewer.showCloud(filtered_cloud);
     while (!viewer.wasStopped()) {}
 
     return 0;
+}
+#endif
+void PointCloudComputer(pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloud)
+{
+    // 统计滤波器 (移除离群点)
+    pcl::VoxelGrid<pcl::PointXYZ> VoxlFilter;                          // 下采样 VoxelGrid 滤波对象
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> statisFilter;        // 统计滤波器 (移除离群点)
+    pcl::MomentOfInertiaEstimation<pcl::PointXYZ> feature_extractor;   // 创建特征提取类
+
+    // pcl::io::savePCDFile("/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/build/data/cloud-computer-test-aaa.pcd", *pointCloud);
+    //体素滤波
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    // pcl::io::loadPCDFile("data/pcl/cloud-computer-test-aaa.pcd", *input_cloud);
+    VoxlFilter.setInputCloud(input_cloud);
+    VoxlFilter.setLeafSize(0.005f, 0.005f, 0.005f);
+    // VoxlFilter.setLeafSize(0.002f, 0.002f, 0.002f);
+    // VoxlFilter.filter(*pointCloud);  // 段错误
+    VoxlFilter.filter(*output_cloud);  // 段错误
+    // pcl::io::savePCDFile("/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/build/data/cloud-computer-test-bbb.pcd", *output_cloud);
+    // return;
+
+    //统计滤波去离群点
+    statisFilter.setInputCloud(output_cloud);
+    statisFilter.setMeanK(50);              // 对每个点分析的临近点个数设为50
+    statisFilter.setStddevMulThresh(2.0);   // 将标准差倍数设为1，意味着一个点的距离超出平均距离1个标准差以上，就会被标记为离群点，并被移除。
+    statisFilter.filter(*output_cloud);
+
+    //设置要计算的点云
+    feature_extractor.setInputCloud(output_cloud);  //设置要计算的点云
+    feature_extractor.compute(); //开始计算
+
+    std::vector <float> moment_of_inertia;  //惯性矩 ;  创建一个惯性矩 浮点数 数组
+    std::vector <float> eccentricity;   // 主轴
+    pcl::PointXYZ min_point_AABB;
+    pcl::PointXYZ max_point_AABB;
+    pcl::PointXYZ min_point_OBB;
+    pcl::PointXYZ max_point_OBB;
+    pcl::PointXYZ position_OBB;
+    Eigen::Matrix3f rotational_matrix_OBB;  //矩阵，旋转变换
+    float major_value, middle_value, minor_value; //浮点数
+    Eigen::Vector3f major_vector, middle_vector, minor_vector; // 分别表示 x轴的三个向量，y轴的三个向量，z轴的三个向量
+    Eigen::Vector3f mass_center;   //质心
+
+    //计算输入点云的所有几何属性值
+    feature_extractor.getMomentOfInertia(moment_of_inertia);  //计算点云的惯性矩阵
+    feature_extractor.getEccentricity(eccentricity);    //计算点云的离心率
+    feature_extractor.getAABB(min_point_AABB, max_point_AABB);
+    feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
+    feature_extractor.getEigenValues(major_value, middle_value, minor_value);
+    feature_extractor.getEigenVectors(major_vector, middle_vector, minor_vector);
+    feature_extractor.getMassCenter(mass_center);
+
+    Eigen::Vector3f position(position_OBB.x, position_OBB.y, position_OBB.z);// 赋值给向量对象 position
+    Eigen::Quaternionf quat(rotational_matrix_OBB);  //构造一个四元数对象; 输入的是旋转矩阵
+
+    //position obb-box的中心点坐标,x y z ;
+    std::cerr << "obbxyz: " << position << "\n"
+                << "width: " << max_point_OBB.x -min_point_OBB.x << "\n"
+                << "height: " << max_point_OBB.y - min_point_OBB.y << "\n"
+                << "depth: " << max_point_OBB.z - min_point_OBB.z << "\n"
+                << std::endl;
+
+    std::cerr << "obb包围盒法向量"
+                << minor_vector[0] << " , "
+                << minor_vector[1] << " , "
+                << minor_vector[2]
+                << std::endl;     // 包围盒的法向量
+}
+
+
+int test_pcl_load_pcd_file()
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    // std::string path = "/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/build/data/cloud-computer-test-aaa.pcd";
+    std::string path = "data/pcl/cloud-computer-test-aaa.pcd";
+    pcl::io::loadPCDFile(path, *cloud);
+
+    pcl::VoxelGrid<pcl::PointXYZ> voxel_filter;
+    voxel_filter.setInputCloud(cloud);
+    voxel_filter.setLeafSize(0.01f, 0.01f, 0.01f);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    voxel_filter.filter(*filtered_cloud);
+
+    // pcl::io::savePCDFile("/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/build/data/cloud-computer-test-bbb.pcd", *filtered_cloud);
+    pcl::io::savePCDFile("data/pcl/cloud-computer-test-bbb.pcd", *filtered_cloud);
+
+    return 0;
+}
+
+int test_pcl_PointCloudCompute()
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
+    PointCloudComputer(cloud_ptr);
 }
 
 int test_pcl_cloud()
@@ -77,7 +185,17 @@ int main(int argc, char *argv[])
         arg = argv[col];
         if (arg == "--test-load-pcd-file")
         {
+#ifdef OPEN_VIEWER
             test_load_pcd_file();
+#endif
+        }
+        else if (arg == "--test-pcl-PointCloudCompute")
+        {
+            test_pcl_PointCloudCompute();
+        }
+        else if (arg == "--test-pcl-load-pcd-file")
+        {
+            test_pcl_load_pcd_file();
         }
         else if (arg == "--test-pcl-cloud")
         {

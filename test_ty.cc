@@ -866,6 +866,29 @@ int test_fetch_frame()
                 std::cerr << "畸变矫正失败" << std::endl;
             }
         }
+		cv::Mat mapped_color;
+		if (!color.empty())
+		{
+			bool hasColorCalib;
+			TYHasFeature(device_handle, TY_COMPONENT_RGB_CAM, TY_STRUCT_CAM_CALIB_DATA, &hasColorCalib);
+			if (hasColorCalib)
+			{
+                mapped_color.create(depth.size(), CV_8UC3);
+                ret = TYMapRGBImageToDepthCoordinate(&depth_calib,
+                                                     depth.cols, depth.rows, depth.ptr<uint16_t>(),
+                                                     &color_calib,
+                                                     undistort_color.cols, undistort_color.rows, undistort_color.ptr<uint8_t>(), mapped_color.ptr<uint8_t>(), 1.0f);
+                if (ret != TY_STATUS_OK)
+                {
+                    std::cerr << "将彩色度映射到深度失败" << std::endl;
+                }
+                else
+                {
+                    cv::cvtColor(mapped_color, mapped_color, cv::COLOR_BGR2RGB);
+                    cv::imshow("Mapped color", mapped_color);
+                }
+			}
+		}
         if (!undistort_color.empty())
         {
             cv::imshow("Undistort", undistort_color);

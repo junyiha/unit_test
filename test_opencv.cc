@@ -465,7 +465,8 @@ int test_opencv_ptr()
 
 int test_opencv_fillpoly()
 {
-    cv::Mat image(300, 300, CV_8UC3, cv::Scalar(0, 0, 0));
+    // cv::Mat image(300, 300, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Mat image = cv::Mat::zeros(cv::Size(1280, 760), CV_8UC3);
 
     std::vector<cv::Point> polygon;
     polygon.push_back(cv::Point(50, 50));
@@ -476,7 +477,7 @@ int test_opencv_fillpoly()
     std::vector<std::vector<cv::Point>> polygons;
     polygons.push_back(polygon);
 
-    cv::fillPoly(image, polygons, cv::Scalar(0, 255, 0));
+    cv::fillPoly(image, polygons, cv::Scalar(125, 125, 125));
 
     cv::imshow("Filled Image", image);
     cv::waitKey(0);

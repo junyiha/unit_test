@@ -55,6 +55,32 @@ int test_bit_size()
               << std::endl;
 }
 
+int test_modbus_write_1()
+{
+    typedef struct
+    {
+        uint8_t address;
+        uint8_t function;
+        uint16_t start;
+        uint16_t count;
+        uint16_t crc;
+    } ModbusCommand;
+
+    ModbusCommand cmd;
+    cmd.address = 1;
+    cmd.function = 1;
+    cmd.start = 100;
+    cmd.count = 8;
+    uint8_t *cmd_bytes = (uint8_t *)&cmd;
+    for (size_t row = 0; row < sizeof(ModbusCommand); row++)
+    {
+        printf("it: %u \n", cmd_bytes[row]);
+        printf("it: 0x%X \n", cmd_bytes[row]);
+    }
+
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     std::string arg;
@@ -64,6 +90,10 @@ int main(int argc, char **argv)
         if (arg == "-h")
         {
             Help();
+        }
+        else if (arg == "--test-modbus-write-1")
+        {
+            test_modbus_write_1();
         }
         else if (arg == "--test-bit-write")
         {

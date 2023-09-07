@@ -497,6 +497,157 @@ int test_opencv_rotatedRect_points()
     return 0;
 }
 
+int test_opencv_video2picture()
+{
+    std::string video_file;
+    cv::VideoCapture cap;
+    cv::Mat frame;
+    int frame_index = 1;
+
+    video_file = "data/opencv/aod_video_01.mp4";
+    cap.open(video_file);
+    if (!cap.isOpened())
+    {
+        std::cerr << "failed to open video file: " << video_file << std::endl;
+        return -1;
+    }
+    while (cap.read(frame))
+    {
+        std::string output_file_name = "data/opencv/image/frame_" + std::to_string(frame_index) + ".jpg";
+        cv::imwrite(output_file_name, frame);
+        frame_index++;
+    }
+    cap.release();
+
+    return 0;
+}
+
+void OnMouse(int event, int x, int y, int flags, void *userdata)
+{
+    if (event == cv::EVENT_MOUSEMOVE)
+    {
+        cv::Mat *image = static_cast<cv::Mat *>(userdata);
+        cv::Mat imageCopy = image->clone();
+        cv::circle(imageCopy, cv::Point(x, y), 5, cv::Scalar(0, 0, 255), -1);
+        cv::putText(imageCopy, "Mouse Position: (" + std::to_string(x) + ", " + std::to_string(y) + ")",
+                    cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
+        cv::imshow("Image with Mouse Position", imageCopy);
+    }
+}
+
+int test_opencv_get_mouse_position()
+{
+    cv::Mat image;
+    cv::Mat box_img;
+    std::string img_path;
+
+    img_path = "/mnt/remote/190-mnt/zhangjunyi/src-color.jpg";
+    image = cv::imread(img_path);
+    if (image.empty())
+    {
+        std::cerr << "Error loading image" << std::endl;
+        return -1;
+    }
+    box_img = image.clone();
+    cv::namedWindow("Image with Mouse Position");
+    cv::namedWindow("Image with box");
+    cv::rectangle(box_img, cv::Point(429, 818), cv::Point(979, 513), cv::Scalar(0, 255, 0), 2);
+    cv::Rect rect;
+    rect.x = 429;
+    rect.y = 486;
+    rect.width = 550;
+    rect.height = 400;
+
+    cv::rectangle(box_img, rect, cv::Scalar(0, 0, 255), 2);
+    cv::setMouseCallback("Image with Mouse Position", OnMouse, &image);
+    cv::imshow("Image with Mouse Position", image);
+    cv::imshow("Image with box", box_img);
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+
+    return 0;
+}
+
+int test_opencv_create_rect()
+{
+    cv::Point pt1(429, 818);
+    cv::Point pt2(429, 486);
+    cv::Point pt3(979, 847);
+    cv::Point pt4(979, 513);
+
+    cv::RotatedRect rotatedRect = cv::minAreaRect(std::vector<cv::Point2f>{pt1, pt2, pt3, pt4});
+    cv::Rect boundingRect = rotatedRect.boundingRect();
+    std::cout << "Bounding Rect: (x=" << boundingRect.x << ", y=" << boundingRect.y
+              << ", width=" << boundingRect.width << ", height=" << boundingRect.height << ")" << std::endl;
+
+    cv::Mat image;
+    cv::Mat box_img;
+    std::string img_path;
+
+    img_path = "/mnt/remote/190-mnt/zhangjunyi/src-color.jpg";
+    image = cv::imread(img_path);
+    if (image.empty())
+    {
+        std::cerr << "Error loading image" << std::endl;
+        return -1;
+    }
+    box_img = image.clone();
+    cv::namedWindow("Image with box");
+    cv::rectangle(image, cv::Point(429, 818), cv::Point(979, 513), cv::Scalar(0, 0, 255), 2);
+    cv::rectangle(image, boundingRect, cv::Scalar(0, 255, 0), 2);
+    cv::imshow("Image with Mouse Position", image);
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+
+    return 0;
+}
+
+bool IsRectangleInsideQuadrilateral(const cv::Point2f& p1,
+                                    const cv::Point2f& p2,
+                                    const cv::Point2f& p3,
+                                    const cv::Point2f& p4,
+                                    const cv::Rect& rect)
+{
+    std::vector<cv::Point2f> quadPoints = {p1, p2, p3, p4};
+    cv::Mat quadMat = cv::Mat(quadPoints).reshape(1);
+    cv::convexHull(quadMat, quadPoints);
+    std::vector<cv::Point2f> rectPoints(4);
+    rectPoints[0] = cv::Point2f(rect.x, rect.y);
+    rectPoints[1] = cv::Point2f(rect.x + rect.width, rect.y);
+    rectPoints[2] = cv::Point2f(rect.x + rect.width, rect.y + rect.height);
+    rectPoints[3] = cv::Point2f(rect.x, rect.y + rect.height);
+
+    for (const cv::Point2f& point: rectPoints)
+    {
+        if (cv::pointPolygonTest(quadMat, point, false) < 0)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int test_is_rectangle_inside_quadrilateral()
+{
+    cv::Point2f p1(100, 100);
+    cv::Point2f p2(300, 100);
+    cv::Point2f p3(300, 200);
+    cv::Point2f p4(100, 200);
+
+    cv::Rect rect(150, 150, 50, 50);
+    if (IsRectangleInsideQuadrilateral(p1, p2, p3, p4, rect))
+    {
+        std::cerr << "Rectangle is inside in the quadrilateral" << std::endl;
+    }
+    else
+    {
+        std::cerr << "Rectangle is not inside in the quadrilateral" << std::endl;
+    }
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     std::string arg;
@@ -506,6 +657,22 @@ int main(int argc, char *argv[])
         if (arg == "--draw-static-image")
         {
             draw_static_image();
+        }
+        else if (arg == "--test-is-rectangle-inside-quadrilateral")
+        {
+            test_is_rectangle_inside_quadrilateral();
+        }
+        else if (arg == "--test-opencv-create-rect")
+        {
+            test_opencv_create_rect();
+        }
+        else if (arg == "--test-opencv-get-mouse-position")
+        {
+            test_opencv_get_mouse_position();
+        }
+        else if (arg == "--test-opencv-video-2-capture")
+        {
+            test_opencv_video2picture();
         }
         else if (arg == "--test-opencv-rotated-rect-points")
         {

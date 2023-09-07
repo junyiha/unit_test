@@ -72,7 +72,9 @@ file_arr=(get_file_size
           test_base
           test_opengl
           test_pcl
-          test_httplib_server )
+          test_httplib_server
+          test_hashmap
+          test_api_process )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
@@ -104,7 +106,7 @@ do
         g++ -g -std=c++11 "${file}.cc" "ParseFrame.cc" -o ${f} -I./ -lrt -lpthread -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
         continue
     elif [[ ${file} == "test_opencv" ]]; then
-        g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread
+        g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_videoio -lpthread
         continue
     elif [[ ${file} == "test_opencv_get_position" ]]; then
         g++ -g -std=c++11 "${file}.cc" -o ${f} -I./ -I${opencv_header_path} -L${opencv_library_path} -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lpthread

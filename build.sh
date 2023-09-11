@@ -74,7 +74,8 @@ file_arr=(get_file_size
           test_pcl
           test_httplib_server
           test_hashmap
-          test_api_process )
+          test_api_process
+          test_string )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"

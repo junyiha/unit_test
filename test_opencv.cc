@@ -541,7 +541,7 @@ int test_opencv_get_mouse_position()
     cv::Mat box_img;
     std::string img_path;
 
-    img_path = "/mnt/remote/190-mnt/zhangjunyi/src-color.jpg";
+    img_path = "/mnt/remote/190-mnt/zhangjunyi/Documents/VCR/src-color.jpg";
     image = cv::imread(img_path);
     if (image.empty())
     {
@@ -551,12 +551,17 @@ int test_opencv_get_mouse_position()
     box_img = image.clone();
     cv::namedWindow("Image with Mouse Position");
     cv::namedWindow("Image with box");
-    cv::rectangle(box_img, cv::Point(429, 818), cv::Point(979, 513), cv::Scalar(0, 255, 0), 2);
+    // cv::rectangle(box_img, cv::Point(429, 818), cv::Point(979, 513), cv::Scalar(0, 255, 0), 2);
     cv::Rect rect;
-    rect.x = 429;
-    rect.y = 486;
-    rect.width = 550;
-    rect.height = 400;
+    // rect.x = 429;
+    // rect.y = 486;
+    // rect.width = 550;
+    // rect.height = 400;
+
+    rect.x = 312;
+    rect.y = 329;
+    rect.width = 713;
+    rect.height = 450;
 
     cv::rectangle(box_img, rect, cv::Scalar(0, 0, 255), 2);
     cv::setMouseCallback("Image with Mouse Position", OnMouse, &image);

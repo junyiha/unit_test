@@ -102,6 +102,9 @@ public:
 
     using DeviceMap_t = std::map<std::string, void *>;
     std::unordered_map<std::string, DeviceMap_t> m_abstract_device_map;
+public:
+    Devices();
+    virtual ~Devices();
 
 public:
     void Process(std::string in, std::string &out);
@@ -151,8 +154,8 @@ Devices::~Devices()
         {
             if (i.second != NULL)
             {
-                delete i.second;
-                i.second = NULL;
+                // delete i.second;
+                // i.second = NULL;
             }
         }
     }

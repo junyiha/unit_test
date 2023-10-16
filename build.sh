@@ -76,10 +76,11 @@ file_arr=(get_file_size
           test_hashmap
           test_api_process
           test_string
-          test_api_v2 )
+          test_api_v2
+          test_nvr )
 
-opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/include/opencv4/"
-opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/Documents/OpenCV/4.5.2/install/lib/"
+opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/opencv4/"
+opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/lib/"
 
 # CXX_FLAGS="g++ -g -std=c++11"
 CXX_FLAGS="g++ -g -std=c++14"

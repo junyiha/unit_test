@@ -93,6 +93,8 @@ int show()
     // cv::Mat image = cv::imread("input_pic.jpg");
     cv::Mat image = cv::imread("./wQMc1-frame-4792.jpg");
     ProcessPic(image);
+
+    return 0;
 }
 
 int old_version()
@@ -419,6 +421,7 @@ int test_opencv_at()
         std::cout << "Pixel at (" << col << ", " << row << "): "
                   << "B: " << int(blue) << " G: " << int(green) << " R: " << int(red) << std::endl;
     }
+    return 0;
 }
 
 int test_opencv_polygon()
@@ -440,6 +443,7 @@ int test_opencv_polygon()
     {
         std::cout << "Point is outside the polygon." << std::endl;
     }
+    return 0;
 }
 
 int test_opencv_ptr()
@@ -461,6 +465,7 @@ int test_opencv_ptr()
             std::cerr << "depth value: " << depth_value << std::endl;
         }
     }
+    return 0;
 }
 
 int test_opencv_fillpoly()
@@ -481,6 +486,7 @@ int test_opencv_fillpoly()
 
     cv::imshow("Filled Image", image);
     cv::waitKey(0);
+    return 0;
 }
 
 int test_opencv_rotatedRect_points()
@@ -653,6 +659,25 @@ int test_is_rectangle_inside_quadrilateral()
     return 0;
 }
 
+int test_draw_rotation_rect()
+{
+    cv::Mat image(400, 400, CV_8UC3, cv::Scalar(255, 255, 255)); // 创建白色背景图像
+
+    cv::Point center(200, 200);
+    float width = 200;
+    float height = 100;
+    double angle = 30;
+    cv::RotatedRect rb(center, cv::Size2f(width, height), angle);
+    cv::Scalar color(0, 0, 255); // 蓝色
+
+    // 使用椭圆函数绘制旋转矩形框
+    cv::drawContours(image, rb, color, 2);
+
+    cv::imwrite("/home/user/zjy-190/workspace/unit_test/rb.jpeg", image);
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     std::string arg;
@@ -662,6 +687,10 @@ int main(int argc, char *argv[])
         if (arg == "--draw-static-image")
         {
             draw_static_image();
+        }
+        else if (arg == "--test-draw-rotation-rect")
+        {
+            test_draw_rotation_rect();
         }
         else if (arg == "--test-is-rectangle-inside-quadrilateral")
         {

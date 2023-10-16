@@ -24,6 +24,13 @@ struct Command_t
     std::string cmd;
 };
 
+struct ServerMessage_t
+{
+    std::string request_type;
+    std::string device_type;
+    std::string command_type;
+};
+
 class Robot
 {
 private:
@@ -104,14 +111,35 @@ private:
         ROBOT,
         CAMERA
     };
+
+    enum class RequestType : unsigned int
+    {
+        API = 1
+    };
+
+    enum class DeviceType : unsigned int
+    {
+        ROBOT = 1,
+        CAMERA = 2
+    };
+
+    enum class RobotCommand : unsigned int
+    {
+        MOVE_JOINT = 1,
+        MOVE_LINE = 2
+    };
+
 public:
     Device();
     virtual ~Device();
 
 public:
     void Process(std::string in, std::string &out);
+    void Process(struct ServerMessage_t in, std::string &out);
 
 private:
+    void ProcessRequestType(struct ServerMessage_t in, std::string &out);
+    void ProcessDeviceType(struct ServerMessage_t in, std::string &out);
     void RobotProcess(std::string in, std::string &out);
     void CameraProcess(std::string in, std::string &out);
     void Unknown();
@@ -119,12 +147,16 @@ private:
 private:
     Robot m_robot;
     std::map<std::string, enum cmd> m_map;
+    std::map<std::string, DeviceType> m_device_map;
 };
 
 Device::Device()
 {
     m_map["robot"] = ROBOT;
     m_map["camera"] = CAMERA;
+
+    m_device_map["robot"] = DeviceType::ROBOT;
+    m_device_map["camera"] = DeviceType::CAMERA;
 }
 
 Device::~Device()
@@ -153,6 +185,37 @@ void Device::Process(std::string in, std::string &out)
             Unknown();
     }
 }
+
+void Device::Process(struct ServerMessage_t in, std::string &out)
+{
+    ProcessDeviceType(in, out);
+}
+
+void Device::ProcessRequestType(struct ServerMessage_t in, std::string &out)
+{
+    
+}
+
+void Device::ProcessDeviceType(struct ServerMessage_t in, std::string &out)
+{
+    auto it = m_device_map.find(in.device_type);
+    if (it == m_device_map.end())
+    {
+        return ;
+    }
+    switch(it->second)
+    {
+        case DeviceType::ROBOT:
+            std::cerr << "device is robot" << std::endl;
+            break;
+        case DeviceType::CAMERA:
+            std::cerr << "device is camera" << std::endl;
+            break;
+        default:
+            std::cerr << "unknown device" << std::endl;
+    }
+}
+
 
 void Device::RobotProcess(std::string in, std::string &out)
 {
@@ -183,8 +246,12 @@ int test_device(std::string cmd)
 {
     Device m_device;
     std::string out;
+    ServerMessage_t sm;
+    sm.request_type = "api";
+    sm.device_type = "robot";
+    sm.command_type = "moveJoint";
 
-    m_device.Process(cmd, out);
+    m_device.Process(sm, out);
 
     return 0;
 }

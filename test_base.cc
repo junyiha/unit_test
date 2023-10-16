@@ -13,6 +13,17 @@
 #include <iostream>
 #include <vector>
 
+static void Help()
+{
+    std::string info;
+
+    info = R"sss(
+        --help 
+        --test-queue
+        --test-static-member
+    )sss";
+}
+
 class Base
 {
 public:
@@ -41,6 +52,12 @@ public:
         out = m_str_arr.front();
     }
 
+    static void UpdateConfig(std::string in)
+    {
+        m_config = in;
+    }
+
+    static std::string m_config;
 private:
     std::vector<std::string> m_str_arr;
 };
@@ -55,7 +72,9 @@ class Detector : public Base
 
 };
 
-int main()
+std::string Base::m_config = "one";
+
+int test_queue()
 {
     Camera camera;
     Detector detector;
@@ -64,6 +83,41 @@ int main()
     camera.Enqueue("hahahah");
     detector.Get(str);
     std::cerr << "str: " << str << std::endl;
+
+    return 0;
+}
+
+int test_static_member()
+{
+    Camera camera;
+    Detector detector;
+
+    camera.UpdateConfig("two");
+    Base::m_config = "three";
+    
+
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    std::string arg;
+    for (int i = 1; i < argc; i++)
+    {
+        arg = argv[i];
+        if (arg == "--test-queue")
+        {
+            test_queue();
+        }
+        else if (arg == "--test-static-member")
+        {
+            test_static_member();
+        }
+        else 
+        {
+            Help();
+        }
+    }
 
     return 0;
 }

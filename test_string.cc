@@ -54,6 +54,20 @@ int test_split_api(std::string in)
     return 0;
 }
 
+int test_split_nvr_id()
+{
+    std::string rtmp_url = ":19935/live/safas";
+
+        // int pose = ct.camera_rtmp_url.find_last_of('/');
+        // nvr_id = ct.camera_rtmp_url.substr(pose);
+    int pose = rtmp_url.find_last_of('/');
+    std::string id = rtmp_url.substr(pose + 1);
+    std::cerr << "rtmp url: " << rtmp_url << "\n"
+              << "nvr id: " << id << std::endl;
+
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     std::string arg;
@@ -63,6 +77,10 @@ int main(int argc, char* argv[])
         if (arg == "-h")
         {
             Help();
+        }
+        else if (arg == "--test-split-nvr-id")
+        {
+            test_split_nvr_id();
         }
         else if (arg == "--test-split-api")
         {

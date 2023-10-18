@@ -77,7 +77,8 @@ file_arr=(get_file_size
           test_api_process
           test_string
           test_api_v2
-          test_nvr )
+          test_nvr
+          test_sqlite3 )
 
 opencv_header_path="/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/opencv4/"
 opencv_library_path="/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/lib/"
@@ -132,6 +133,9 @@ do
         g++ -fsanitize=address -g "${file}.cc" -o ${f} -I.
         continue
     elif [[ ${file} == "test_sqlite_orm" ]]; then
+        g++ -g "${file}.cc"  -o ${f} -I. -I./sqlite3/include/ -L./sqlite3/lib/ -lsqlite3
+        continue
+    elif [[ ${file} == "test_sqlite3" ]]; then 
         g++ -g "${file}.cc"  -o ${f} -I. -I./sqlite3/include/ -L./sqlite3/lib/ -lsqlite3
         continue
     elif [[ ${file} == "test_eigen" ]]; then

@@ -11,3 +11,5 @@ web_root
 *.sqlite
 data
 *.pcd
+*.db
+build

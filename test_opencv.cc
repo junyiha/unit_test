@@ -671,7 +671,7 @@ int test_draw_rotation_rect()
     cv::Scalar color(0, 0, 255); // 蓝色
 
     // 使用椭圆函数绘制旋转矩形框
-    cv::drawContours(image, rb, color, 2);
+    // cv::drawContours(image, rb, color, 2);
 
     cv::imwrite("/home/user/zjy-190/workspace/unit_test/rb.jpeg", image);
 

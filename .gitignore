@@ -1,6 +1,6 @@
 *.exe
 *.jpg
-*.txt
+# *.txt
 *.log
 path
 .vscode

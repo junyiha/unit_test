@@ -95,15 +95,19 @@ set(opencv_header_path "/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/
 set(opencv_library_path "/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/lib/")
 
 include_directories(${CMAKE_SOURCE_DIR}
+                    ${CMAKE_SOURCE_DIR}/source/
+                    ${CMAKE_SOURCE_DIR}/third_party/
                     ${opencv_header_path}
-                    ${CMAKE_SOURCE_DIR}/eigen3/
-                    ${CMAKE_SOURCE_DIR}/ty_lib/
+                    ${CMAKE_SOURCE_DIR}/third_party/eigen3/
+                    ${CMAKE_SOURCE_DIR}/third_party/Mongoose/
+                    ${CMAKE_SOURCE_DIR}/third_party/Httplib/
+                    ${CMAKE_SOURCE_DIR}third_party//ty_lib/
                     /usr/local/TY_sdk/include/
                     # /mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/pcl-1.12/
-                    ${CMAKE_SOURCE_DIR}/sqlite3/include/)   
+                    ${CMAKE_SOURCE_DIR}/third_party/sqlite3/include/)   
 
 link_directories(${opencv_library_path}
-                 ${CMAKE_SOURCE_DIR}/sqlite3/lib/
+                 ${CMAKE_SOURCE_DIR}/third_party/sqlite3/lib/
                  /usr/local/TY_sdk/lib/linux/lib_x64/
                  /usr/local/lib/)
 
@@ -111,7 +115,7 @@ foreach(executable ${executables})
 
     # message("the value of executable is :${executable}.cc")
 
-    add_executable(${executable} ${executable}.cc ParseFrame.cc mongoose.c)
+    add_executable(${executable} ${CMAKE_SOURCE_DIR}/source/${executable}.cc ${CMAKE_SOURCE_DIR}/source/ParseFrame.cc ${CMAKE_SOURCE_DIR}/third_party/Mongoose/mongoose.c)
     target_link_libraries(${executable} 
                           rt
                           pthread

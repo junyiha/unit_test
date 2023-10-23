@@ -13,19 +13,20 @@
 #include <iostream>
 #include <string>
 
+static const char *sql_file = "/home/user/zjy-190/workspace/unit_test/data/sql/sqlite3.db";
+
 int main()
 {
     int res;
     sqlite3 *db;
     
-    res = sqlite3_open("./sqlite3.db", &db);
+    res = sqlite3_open(sql_file, &db);
     if (res != SQLITE_OK)
     {
         return -1;
     }
 
     const char *select_tables_sql = "create table test (key INT, value TEXT)";
-    // const char *select_tables_sql = "select nae from sqlite_master where type='table';";
     res = sqlite3_exec(db, select_tables_sql, nullptr, nullptr, nullptr);
     if (res != SQLITE_OK)
     {

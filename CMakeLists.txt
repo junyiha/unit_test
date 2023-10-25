@@ -102,15 +102,18 @@ include_directories(${CMAKE_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/third_party/eigen3/
                     ${CMAKE_SOURCE_DIR}/third_party/Mongoose/
                     ${CMAKE_SOURCE_DIR}/third_party/Httplib/
-                    ${CMAKE_SOURCE_DIR}third_party//ty_lib/
-                    /usr/local/TY_sdk/include/
+                    # ${CMAKE_SOURCE_DIR}third_party//ty_lib/
+                    # /usr/local/TY_sdk/include/
+                    ${CMAKE_SOURCE_DIR}/third_party/ty_lib/include
+                    ${CMAKE_SOURCE_DIR}/third_party/ty_lib/common
                     # /mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/pcl-1.12/
                     ${CMAKE_SOURCE_DIR}/third_party/sqlite3/include/)   
 
 link_directories(${CMAKE_SOURCE_DIR}/third_party/opencv4/lib/
                  ${opencv_library_path}
                  ${CMAKE_SOURCE_DIR}/third_party/sqlite3/lib/
-                 /usr/local/TY_sdk/lib/linux/lib_x64/
+                #  /usr/local/TY_sdk/lib/linux/lib_x64/
+                 ${CMAKE_SOURCE_DIR}/third_party/ty_lib/lib/linux/lib_x64
                  /usr/local/lib/)
 
 foreach(executable ${executables})

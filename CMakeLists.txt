@@ -91,13 +91,14 @@ set( executables
      test_sqlite3
     )
 
-set(opencv_header_path "/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/opencv4/")
-set(opencv_library_path "/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/lib/")
+# set(opencv_header_path "/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/opencv4/")
+# set(opencv_library_path "/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/lib/")
 
 include_directories(${CMAKE_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/source/
                     ${CMAKE_SOURCE_DIR}/third_party/
-                    ${opencv_header_path}
+                    # ${opencv_header_path}
+                    ${CMAKE_SOURCE_DIR}/third_party/opencv4/include/opencv4/
                     ${CMAKE_SOURCE_DIR}/third_party/eigen3/
                     ${CMAKE_SOURCE_DIR}/third_party/Mongoose/
                     ${CMAKE_SOURCE_DIR}/third_party/Httplib/
@@ -106,7 +107,8 @@ include_directories(${CMAKE_SOURCE_DIR}
                     # /mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/pcl-1.12/
                     ${CMAKE_SOURCE_DIR}/third_party/sqlite3/include/)   
 
-link_directories(${opencv_library_path}
+link_directories(${CMAKE_SOURCE_DIR}/third_party/opencv4/lib/
+                 ${opencv_library_path}
                  ${CMAKE_SOURCE_DIR}/third_party/sqlite3/lib/
                  /usr/local/TY_sdk/lib/linux/lib_x64/
                  /usr/local/lib/)

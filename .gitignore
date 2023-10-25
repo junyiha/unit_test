@@ -9,7 +9,7 @@ web_root
 *.zip
 .*
 *.sqlite
-data
+# data
 *.pcd
 *.db
 build

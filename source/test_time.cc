@@ -57,6 +57,17 @@ struct Time_t
         }
 };
 
+static void Help()
+{
+    std::string help_info = R"(
+        test_time 
+
+        --test-gm-time
+    )";
+
+    std::clog << help_info << std::endl;
+}
+
 int get_time ()
 {
 
@@ -115,7 +126,7 @@ bool GetYearMonthDay(std::string in, std::string &year, std::string &month, std:
     return true;
 }
 
-int main()
+int test_time()
 {
     Time_t t;
     t.year = 2023;
@@ -149,6 +160,120 @@ int main()
     convert_time();
     auto tt = getTimestamp(t.year, t.month, t.day, t.hour, t.minute, t.second);
     std::cerr << "getTimestamp: " << tt << std::endl;
+
+    return 0;
+}
+
+int test_gm_time()
+{
+    std::time_t now;
+    now = time(0);  // 格里尼治时间
+    std::tm *gmtm = gmtime(&now);
+
+    std::clog << "gm time: " << gmtm->tm_gmtoff << std::endl;
+    return 0;
+}
+
+extern "C"
+{
+    #include <sys/sysinfo.h>
+}
+
+int test_system_time()
+{
+    struct sysinfo info;
+    int ret = sysinfo(&info);
+    if (ret == -1)
+    {
+        std::clog << "Error message: failed to get system information" << std::endl;
+
+        return -1;
+    }
+
+    std::clog << "Message: system time: " << info.uptime << std::endl;
+
+    return 0;
+}
+
+#include <vector>
+
+int test_clock_gettime()
+{
+    struct timespec tp;
+    int ret = clock_gettime(CLOCK_REALTIME, &tp);
+    if (ret == -1)
+    {
+        std::clog << "Error message: failed to get real time" << std::endl;
+
+        return -1;
+    }
+
+    std::clog << "Message: real time seconds: " << tp.tv_sec << std::endl;
+    std::clog << "Message: real time nanoseconds: " << tp.tv_nsec << std::endl;
+    long nsec = tp.tv_nsec / 1000000;
+
+    std::vector<char> str(20);
+    snprintf(str.data(), 20, "%ld%s%ld", tp.tv_sec, ".", nsec);
+    std::string tmp = str.data();
+    std::clog << "Message: time string: " << tmp << std::endl;
+    return 0;
+}
+
+bool GetTime(std::string out)
+{
+    struct timespec tp;
+    int ret = clock_gettime(CLOCK_REALTIME, &tp);
+    if (ret == -1)
+    {
+        return false;
+    }
+
+    long nsec = tp.tv_nsec / 1000000;
+    std::vector<char> str(20);
+    snprintf(str.data(), 20, "%ld%s%ld", tp.tv_sec, ".", nsec);
+
+    out = str.data();
+    
+    return true;
+}
+
+int test_GetTime()
+{
+    std::string tmp;
+    GetTime(tmp);
+
+    std::clog << "time: " << tmp << std::endl;
+
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    std::string arg;
+    for (int i = 1; i < argc; i++)
+    {
+        arg = argv[i];
+        if (arg == "--test-gm-time")
+        {
+            test_gm_time();
+        }
+        else if (arg == "--test-get-time")
+        {
+            test_GetTime();
+        }
+        else if (arg == "--test-system-time")
+        {
+            test_system_time();
+        }
+        else if (arg == "--test-clock-get-time")
+        {
+            test_clock_gettime();
+        }
+        else 
+        {
+            Help();
+        }
+    }
 
     return 0;
 }

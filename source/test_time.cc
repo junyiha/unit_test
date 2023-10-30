@@ -247,6 +247,17 @@ int test_GetTime()
     return 0;
 }
 
+#include <unistd.h>
+#include <thread>
+
+int test_nanosleep()
+{
+    // std::this_thread::sleep_for(std::chrono::seconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));  // 10ms
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     std::string arg;
@@ -256,6 +267,10 @@ int main(int argc, char *argv[])
         if (arg == "--test-gm-time")
         {
             test_gm_time();
+        }
+        else if (arg == "--test-nanosleep")
+        {
+            test_nanosleep();
         }
         else if (arg == "--test-get-time")
         {

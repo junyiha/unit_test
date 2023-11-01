@@ -30,11 +30,11 @@ public:
 
 public:
     virtual void GetFileName(std::string &out) {}
-    virtual int SetFileName(std::string &in) {}
-    virtual int Open() {}
+    virtual int SetFileName(std::string &in) {return 0;}
+    virtual int Open() {return 0;}
     virtual void Close() {}
-    virtual int ReadIndex(std::size_t &out) {}
-    virtual int WriteIndex(std::size_t &in) {}
+    virtual int ReadIndex(std::size_t &out) {return 0;}
+    virtual int WriteIndex(std::size_t &in) {return 0;}
 
 public:
     BaseIndex() = default;

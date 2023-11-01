@@ -43,6 +43,8 @@ int test_bit_write()
     }
 
     std::cerr << buffer.data() << std::endl;
+
+    return 0;
 }
 
 int test_bit_size()
@@ -53,6 +55,7 @@ int test_bit_size()
     std::cerr << "device size: " << sizeof(device) << "\n"
               << "register_id size: " << sizeof(register_id) << "\n"
               << std::endl;
+    return 0;
 }
 
 int test_modbus_write_1()

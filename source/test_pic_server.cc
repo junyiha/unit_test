@@ -46,6 +46,7 @@ int GetProducerIdx(std::size_t &out)
 int GetPicFileName(std::size_t &in_idx, std::string &out)
 {
     out = id_string + "-frame-" + std::to_string(in_idx) + ".jpg";
+    return 0;
 }
 
 int test_v1()

@@ -162,6 +162,7 @@ inline bool ProcessPicture::Process(std::string &image, std::string &json_string
             }
         }
     }
+    return 0;
 }
 
 inline void ProcessPicture::DrawBox()

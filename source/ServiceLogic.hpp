@@ -368,11 +368,13 @@ inline int ServiceLogic::GetEventNameFromID(int in_event, std::string &out_event
 inline int ServiceLogic::GetAlertTime(int &out)
 {
     out = m_alert_time;
+    return 0;
 }
 
 inline int ServiceLogic::SetAlertTime(int in)
 {
     m_alert_time = in;    
+    return 0;
 }
 
 inline int ServiceLogic::CheckAlarmTime()

@@ -68,6 +68,7 @@ int GetMemInfo()
     std::cerr << "total memory: " << total_memory << " MB" << std::endl;
     std::cerr << "free memory: " << free_memory << " MB" << std::endl;
     std::cerr << "used memory: " << used_memory << " MB" << std::endl;
+    return 0;
 }
 
 int main(int argc, char *argv[])

@@ -54,6 +54,7 @@ int CharToInt(std::vector<char> &in, std::size_t &out)
         tmp_str += static_cast<char>(it);
     }
     out = std::stoi(tmp_str);
+    return 0;
 }
 
 int main()

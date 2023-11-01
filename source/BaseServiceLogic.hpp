@@ -116,8 +116,8 @@ protected:
 
 public:
     virtual void GetDetectionRegion(std::vector<Point> &out) {}
-    virtual int SetDetectionRegion(std::vector<Point> &in) {}
-    virtual int ConfigThreshold(int threshold) {}
+    virtual int SetDetectionRegion(std::vector<Point> &in) {return 0;}
+    virtual int ConfigThreshold(int threshold) {return 0;}
     virtual void GetThreshold(int &out) {}
     /**
      * @brief 
@@ -126,14 +126,14 @@ public:
      * @param [out] event 
      * @return int 
      */
-    virtual int Process(Logic_t &l, int &event) {}
+    virtual int Process(Logic_t &l, int &event) {return 0;}
     virtual void InitLimitTime() {}
     virtual void InitLimitArea() {}
-    virtual int SetLimitBeginTime(LogicTime_t &in) {}
-    virtual int SetLimitEndTime(LogicTime_t &in) {}
-    virtual int GetEventNameFromID(int in_event, std::string &out_event_name) {}
-    virtual int GetAlertTime(int &out) {}
-    virtual int SetAlertTime(int in) {}
+    virtual int SetLimitBeginTime(LogicTime_t &in) {return 0;}
+    virtual int SetLimitEndTime(LogicTime_t &in) {return 0;}
+    virtual int GetEventNameFromID(int in_event, std::string &out_event_name) {return 0;}
+    virtual int GetAlertTime(int &out) {return 0;}
+    virtual int SetAlertTime(int in) {return 0;}
 
 protected:
     virtual void DetectPerson(Logic_t &l, int &event) {}
@@ -143,11 +143,11 @@ protected:
     virtual void DetectReflectClothing(Logic_t &l, int &event) {}
 protected:
     virtual void GetCurrentTime(LogicTime_t &lt) {}
-    virtual int CheckAlarmTime() {}
-    virtual bool isInsidePolygon(const Point& point, const std::vector<Point>& region) {}
-    virtual bool isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region) {}
-    virtual int CheckAlarmArea() {}
-    virtual int CheckAlertTime(int event) {};
+    virtual int CheckAlarmTime() {return 0;}
+    virtual bool isInsidePolygon(const Point& point, const std::vector<Point>& region) {return true;}
+    virtual bool isRectangleInsidePolygon(const std::vector<Point>& rectangle, const std::vector<Point>& region) {return true;}
+    virtual int CheckAlarmArea() {return 0;}
+    virtual int CheckAlertTime(int event) {return 0;}
 
 public:
     BaseServiceLogic() = default;

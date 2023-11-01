@@ -119,6 +119,7 @@ int test_polymorphism_robot()
     robot->MoveTo();
 
     delete robot;
+    return 0;
 }
 
 int main(int argc, char *argv[])

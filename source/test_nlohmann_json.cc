@@ -100,6 +100,7 @@ int test_array_2()
     reply_data["arr"] = nlohmann::json(joint_value);
 
     std::cerr << reply_data.dump() << std::endl;
+    return 0;
 }
 
 int main(int argc, char *argv[])

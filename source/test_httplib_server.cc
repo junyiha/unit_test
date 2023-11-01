@@ -26,6 +26,7 @@ int test_httplib_server_hi()
             { res.set_content("Hello world", "text/plain"); });
 
     svr.listen("0.0.0.0", 29001);
+    return 0;
 }
 
 const char *html = R"(
@@ -75,6 +76,7 @@ int test_httplib_server_upload()
     res.set_content("done", "text/plain"); });
 
     svr.listen("localhost", 1234);
+    return 0;
 }
 
 int main()

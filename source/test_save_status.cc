@@ -126,6 +126,7 @@ int test_save_status_v1()
 
     std::cerr << "success" << std::endl;
     file.close();
+    return 0;
 }
 
 int main(int argc, char **argv)

@@ -42,15 +42,16 @@ int test_shared_ptr()
 
 int test_log()
 {
-    // boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
+    boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
 
-    // // 创建一个记录器
-    // boost::log::sources::logger lg;
+	BOOST_LOG_TRIVIAL(trace) << "A trace severity message";
+	BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
+	BOOST_LOG_TRIVIAL(info) << "An informational severity message";
+	BOOST_LOG_TRIVIAL(warning) << "A warning severity message";
+	BOOST_LOG_TRIVIAL(error) << "An error severity message";
+	BOOST_LOG_TRIVIAL(fatal) << "A fatal severity message";
 
-    // BOOST_LOG(lg) << "This is an information message.";
-    // BOOST_LOG(lg) << "This is a warning message.";
-
-    // return 0;
+    return 0;
 }
 
 int main(int argc, char *argv[])

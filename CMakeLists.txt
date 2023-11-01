@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_BUILD_TYPE "Debug")
 
+add_definitions(-DBOOST_LOG_DYN_LINK=1)
+
 set( executables 
      test_boost
      test_string 

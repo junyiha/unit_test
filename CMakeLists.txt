@@ -159,5 +159,6 @@ foreach(executable ${executables})
                           boost_locale
                           boost_log_setup
                           boost_log
+                          boost_thread
                           )
 endforeach()

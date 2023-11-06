@@ -39,9 +39,32 @@ int test_shared_ptr()
 #include "boost/log/expressions.hpp"
 #include "boost/log/sources/logger.hpp"
 #include "boost/log/sources/global_logger_storage.hpp"
+#include "boost/log/sinks.hpp"
+
+#include "boost/log/utility/setup/console.hpp"
+#include "boost/log/utility/setup/file.hpp"  // add_file_log()
+
+
+namespace logging = boost::log;
+namespace sinks = boost::log::sinks;
+namespace src = boost::log::sources;
+namespace expr = boost::log::expressions;
+namespace attrs = boost::log::attributes;
+namespace keywords = boost::log::keywords;
+
+int test_log_file()
+{
+    boost::log::sources::logger lg;
+    boost::log::add_file_log("/data/home/user/workspace/unit_test/data/auto_calibrate/sample.log");
+
+    BOOST_LOG(lg) << "hello world";
+
+    return 0;
+}
 
 int test_log()
 {
+
     boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
 
 	BOOST_LOG_TRIVIAL(trace) << "A trace severity message";
@@ -63,6 +86,10 @@ int main(int argc, char *argv[])
         if (arg == "--help")
         {
             Help();
+        }
+        else if (arg == "--test-log-file")
+        {
+            test_log_file();
         }
         else if (arg == "--test-shared-ptr")
         {

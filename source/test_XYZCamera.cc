@@ -106,6 +106,38 @@ void CycleGetData()
     xyz_camera.Close();
 }
 
+void test_debug()
+{
+    XYZCamera xyz_camera;
+
+    assert(xyz_camera.Open());
+    assert(xyz_camera.Debug());
+
+    xyz_camera.Close();
+}
+
+void test_point_cloud()
+{
+    XYZCamera xyz_camera;
+
+    assert(xyz_camera.Open());
+    assert(xyz_camera.Start());
+    assert(xyz_camera.GetPointCloudFrame());
+
+    xyz_camera.Close();
+}
+
+void test_depth_image()
+{
+    XYZCamera xyz_camera;
+
+    assert(xyz_camera.Open());
+    assert(xyz_camera.Start());
+    assert(xyz_camera.GetDepthImage());
+
+    xyz_camera.Close();
+}
+
 int main(int argc, char *argv[])
 {
     for (int i = 1; i < argc; i++)
@@ -116,6 +148,18 @@ int main(int argc, char *argv[])
             std::string output;
             GetRobotStatus(output);
             std::cerr << output << std::endl;
+        }
+        else if (arg == "--test-depth-image")
+        {
+            test_depth_image();
+        }
+        else if (arg == "--test-point-cloud")
+        {
+            test_point_cloud();
+        }
+        else if (arg == "--test-debug")
+        {
+            test_debug();
         }
         else if (arg == "--test-save-xyz-camera-frame")
         {

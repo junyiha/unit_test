@@ -30,8 +30,11 @@ public:
     bool SaveColorFrame(std::string path);
     bool Debug();
     bool GetColorImage(cv::Mat &out);
+    bool GetPointCloudFrame();
+    bool GetDepthImage();
 
 private:
     std::vector<xyz::sensor::SensorInfo> sensor_list;
     std::unique_ptr<xyz::sensor::Sensor> sensor_ptr;
+    std::string m_config_file;
 };

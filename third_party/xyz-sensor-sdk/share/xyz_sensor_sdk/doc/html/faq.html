@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1. SDK搜索不到相机 &mdash; XYZ SENSOR SDK 0.5.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Class Sensor" href="api/build/classxyz_1_1sensor_1_1Sensor.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            XYZ SENSOR SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">安装指南</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation/get_started.html">SDK安装</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">XYZ Viewer</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="viewer/ui.html">软件界面</a></li>
+<li class="toctree-l1"><a class="reference internal" href="viewer/basics.html">通用操作</a></li>
+<li class="toctree-l1"><a class="reference internal" href="viewer/parameter.html">参数配置</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">xyz-sensor-sdk API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/get_started.html">API快速入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/build/library_api.html">Library API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">常见问题速查手册</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. SDK搜索不到相机</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">问题原因</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">排查思路</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">排查方法</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">排查网络连接问题</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">排查防火墙/杀毒软件阻止使用问题</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ip-xyz-stxyz-al">排查是否ip冲突（XYZ-ST和XYZ-AL相机会有该问题）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">重启相机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">联系技术人员</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#id9">2. SDK无法连接相机</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id10">问题原因</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id12">排查思路</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id14">排查方法</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ip">排查相机与工控机 IP 地址不在同一网段问题</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ip-xyz-ls">排查是否有ip冲突（XYZ-LS相机）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16"><strong>排查相机是否已经在其他软件中启动，资源未释放</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id17">重启相机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id19">联系技术人员</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#id21">3. 相机取图慢或者取图失败</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id22">问题原因</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id24">排查思路</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id26">排查方法</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id28"><strong>排查相机网线是否完全接好</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id29"><strong>排查工控机是否识别到千兆网</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id30">重启相机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id32">联系技术人员</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">XYZ SENSOR SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">1. SDK搜索不到相机</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/faq.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sdk">
+<h1>1. SDK搜索不到相机<a class="headerlink" href="#sdk" title="Permalink to this heading"></a></h1>
+<section id="id1">
+<h2>问题原因<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>相机、工控机、路由器网线连接异常</p></li>
+<li><p>ip冲突</p></li>
+<li><p>其他</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>排查思路<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
+<figure class="align-center">
+<a class="reference internal image-reference" href="_images/no_camera.png"><img alt="no_camera.png" src="_images/no_camera.png" style="width: 244.0px; height: 527.5px;" /></a>
+</figure>
+</section>
+<section id="id3">
+<h2>排查方法<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h2>
+<section id="id4">
+<span id="id5"></span><h3>排查网络连接问题<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>首先需要确认相机已经上电并且启动成功，观察相机指示灯：</p></li>
+</ol>
+<p>（1）第一个指示灯（PWR）常亮&amp;第二个指示灯（ACT）闪烁，即表示相机启动成功；</p>
+<p>（2）第四个指示灯（SPD）常亮&amp;第三个指示灯（LNK）闪烁，即表示相机连接成功；</p>
+<ol class="arabic simple" start="2">
+<li><p>检查网线连接是否正确</p></li>
+</ol>
+<p>（1）需要确认相机端网络航插是否安装到位，外部只剩余两圈螺纹；</p>
+<figure class="align-center" id="id34">
+<a class="reference internal image-reference" href="_images/camera_cable_connection.png"><img alt="camera_cable_connection.png" src="_images/camera_cable_connection.png" style="width: 363.5px; height: 440.5px;" /></a>
+<figcaption>
+<p><span class="caption-text">相机端网线正确连接方式</span><a class="headerlink" href="#id34" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<p>（2）检查交换机接线方式是否正确或网线有无松动，交换机网口指示灯需要常亮；</p>
+<p>（3）检查电脑端接线方式是否正确或网线有无松动，工控机网口指示灯需要常亮；</p>
+<ol class="arabic simple" start="3">
+<li><p>确认电脑端网络连接成功</p></li>
+</ol>
+<p>Windows：</p>
+<p>打开网络和Internet设置-&gt;更改适配器选项-&gt;查看相机连接的网络：</p>
+<p>（1）如果显示为“未识别网络”，则为正常；</p>
+<figure class="align-center" id="id35">
+<img alt="win_normal_connection.png" src="_images/win_normal_connection.png" />
+<figcaption>
+<p><span class="caption-text">Windows工控机网络正确连接</span><a class="headerlink" href="#id35" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<p>（2）如果显示为“网络电缆被拔出”，则需要检查网线连接是否正确；如果显示已禁用，则需要手动打开该网卡设备</p>
+<figure class="align-center" id="id36">
+<img alt="win_not_connection.png" src="_images/win_not_connection.png" />
+<figcaption>
+<p><span class="caption-text">工控机网络未连接</span><a class="headerlink" href="#id36" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id37">
+<img alt="win_disable.png" src="_images/win_disable.png" />
+<figcaption>
+<p><span class="caption-text">工控机网络未启用</span><a class="headerlink" href="#id37" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<p>Ubuntu：</p>
+<p>打开左面右上角网络连接图标，如果网卡连接上了显示connected，如果是off则该网卡被关闭了，需要打开；如果没连上则不会显示该网卡设备</p>
+<figure class="align-center" id="id38">
+<img alt="linux_network.png" src="_images/linux_network.png" />
+<figcaption>
+<p><span class="caption-text">Ubuntu 工控机网络连接</span><a class="headerlink" href="#id38" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id6">
+<h3>排查防火墙/杀毒软件阻止使用问题<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<p>（1）打开网络和Internet设置-&gt;Windows防火墙-&gt;允许应用通过防火墙</p>
+<figure class="align-center">
+<img alt="open_firewall.png" src="_images/open_firewall.png" />
+</figure>
+<p>（2）选择“允许其他应用”；浏览定位到要使用的程序，例如xyz_studio_max_bin.exe/xyz-viewer.exe等；将“网络类型”中的“专用”和“公用”选项都选中；添加；</p>
+<figure class="align-center">
+<img alt="enable_xyz_soft.png" src="_images/enable_xyz_soft.png" />
+</figure>
+<p>（3）检查是否添加成功；</p>
+<figure class="align-center">
+<img alt="check_firewall.png" src="_images/check_firewall.png" />
+</figure>
+</section>
+<section id="ip-xyz-stxyz-al">
+<h3>排查是否ip冲突（XYZ-ST和XYZ-AL相机会有该问题）<a class="headerlink" href="#ip-xyz-stxyz-al" title="Permalink to this heading"></a></h3>
+<p>断开工控机与其他设备的连接，将无法枚举到的相机直连工控机，看该相机是否能枚举到，枚举到后通过sdk的修改ip工具修改该相机ip，使其唯一</p>
+</section>
+<section id="id7">
+<h3>重启相机<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<p>如以上步骤全部尝试后，仍无法连接相机，请尝试重新启动相机。</p>
+<p><strong>相机重启步骤：</strong></p>
+<ol class="arabic simple">
+<li><p>拔出电源线插头或，相机断电。</p></li>
+<li><p>等待 10秒左右，重新插入电源线插头，相机通电。</p></li>
+</ol>
+</section>
+<section id="id8">
+<h3>联系技术人员<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
+<p>如以上步骤全部尝试后，仍无法连接相机，请联系技术支持。</p>
+</section>
+</section>
+</section>
+<section id="id9">
+<h1>2. SDK无法连接相机<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h1>
+<section id="id10">
+<span id="id11"></span><h2>问题原因<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>相机与工控机 IP 地址不在同一网段</p></li>
+<li><p>IP 地址冲突</p></li>
+<li><p>相机被其他软件占用，资源没释放</p></li>
+<li><p>其他</p></li>
+</ul>
+</section>
+<section id="id12">
+<span id="id13"></span><h2>排查思路<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h2>
+<figure class="align-center">
+<a class="reference internal image-reference" href="_images/cam_start_failed.png"><img alt="cam_start_failed.png" src="_images/cam_start_failed.png" style="width: 299.5px; height: 532.0px;" /></a>
+</figure>
+</section>
+<section id="id14">
+<span id="id15"></span><h2>排查方法<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h2>
+<section id="ip">
+<h3>排查相机与工控机 IP 地址不在同一网段问题<a class="headerlink" href="#ip" title="Permalink to this heading"></a></h3>
+<p><strong>排查步骤：</strong></p>
+<ol class="arabic simple">
+<li><p>查看工控机 IP 地址，请参考 设置 IP 地址 。</p></li>
+<li><p>查看相机 IP 地址，请参考 设置 IP 地址 。</p></li>
+<li><p>确保相机与工控机 IP 地址在同一网段。如果不在同一网段，请 设置相机 IP
+地址 ，使相机 IP 地址与工控机在同一网段。</p></li>
+<li><p>运行 SDK，重新扫描并连接相机。</p></li>
+</ol>
+</section>
+<section id="ip-xyz-ls">
+<h3>排查是否有ip冲突（XYZ-LS相机）<a class="headerlink" href="#ip-xyz-ls" title="Permalink to this heading"></a></h3>
+<p>如果XYZ-LS相机返回error code
+-2147483103或者0x80000221，则是ip冲突问题，需要修改相机ip使其唯一，请参考 设置
+IP 地址 。</p>
+</section>
+<section id="id16">
+<h3><strong>排查相机是否已经在其他软件中启动，资源未释放</strong><a class="headerlink" href="#id16" title="Permalink to this heading"></a></h3>
+<p>查看是否有不同的软件同时占用的相机，包括刚刚退出的max、不同版本的max、xyz-viewer、MVS等，需要查看任务管理器，清除掉多余的后台软件；</p>
+<p>Windows：</p>
+<figure class="align-center" id="id39">
+<a class="reference internal image-reference" href="_images/win_task_manager.png"><img alt="win_task_manager.png" src="_images/win_task_manager.png" style="width: 516.0px; height: 460.5px;" /></a>
+<figcaption>
+<p><span class="caption-text">Windows任务管理器</span><a class="headerlink" href="#id39" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<p>Ubuntu：</p>
+<p>查看xyz-viewer，在终端输入命令： <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">xyz-viewer</span></code></p>
+<figure class="align-center" id="id40">
+<img alt="linux_sdk_task.png" src="_images/linux_sdk_task.png" />
+<figcaption>
+<p><span class="caption-text">Ubuntu xyz-viewer 任务</span><a class="headerlink" href="#id40" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<p>查看xyz-studio-max：<code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">xyz_studio_max</span></code></p>
+<figure class="align-center" id="id41">
+<img alt="linux_max_task.png" src="_images/linux_max_task.png" />
+<figcaption>
+<p><span class="caption-text">Ubuntu xyz-studio-max 任务</span><a class="headerlink" href="#id41" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<p>终止相关进程：<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">kill</span> <span class="pre">process_id</span></code></p>
+<figure class="align-center" id="id42">
+<img alt="linux_kill_proc.png" src="_images/linux_kill_proc.png" />
+<figcaption>
+<p><span class="caption-text">Ubuntu 终止相关进程</span><a class="headerlink" href="#id42" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id17">
+<span id="id18"></span><h3>重启相机<a class="headerlink" href="#id17" title="Permalink to this heading"></a></h3>
+<p>如以上步骤全部尝试后，仍无法启动相机，请尝试重新启动相机。</p>
+<p><strong>相机重启步骤：</strong></p>
+<ol class="arabic simple">
+<li><p>拔出电源线插头或，相机断电。</p></li>
+<li><p>等待 10秒左右，重新插入电源线插头，相机通电。</p></li>
+</ol>
+</section>
+<section id="id19">
+<span id="id20"></span><h3>联系技术人员<a class="headerlink" href="#id19" title="Permalink to this heading"></a></h3>
+<p>如以上步骤全部尝试后，仍无法启动相机，请联系技术支持。</p>
+</section>
+</section>
+</section>
+<section id="id21">
+<h1>3. 相机取图慢或者取图失败<a class="headerlink" href="#id21" title="Permalink to this heading"></a></h1>
+<section id="id22">
+<span id="id23"></span><h2>问题原因<a class="headerlink" href="#id22" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>相机网线没完全接好</p></li>
+<li><p>工控未识别到千兆网</p></li>
+<li><p>其他</p></li>
+</ul>
+</section>
+<section id="id24">
+<span id="id25"></span><h2>排查思路<a class="headerlink" href="#id24" title="Permalink to this heading"></a></h2>
+<figure class="align-center">
+<a class="reference internal image-reference" href="_images/cam_slow.png"><img alt="cam_slow.png" src="_images/cam_slow.png" style="width: 244.0px; height: 447.0px;" /></a>
+</figure>
+</section>
+<section id="id26">
+<span id="id27"></span><h2>排查方法<a class="headerlink" href="#id26" title="Permalink to this heading"></a></h2>
+<section id="id28">
+<h3><strong>排查相机网线是否完全接好</strong><a class="headerlink" href="#id28" title="Permalink to this heading"></a></h3>
+<p><strong>排查步骤：</strong></p>
+<p>参考 <a class="reference internal" href="#id4"><span class="std std-ref">排查网络连接问题</span></a> 中检查网线连接是否正确</p>
+</section>
+<section id="id29">
+<h3><strong>排查工控机是否识别到千兆网</strong><a class="headerlink" href="#id29" title="Permalink to this heading"></a></h3>
+<p><strong>排查步骤：</strong></p>
+<p>Windows：确认PC网络状态，打开网络和Internet设置-&gt;更改适配器选项-&gt;双击相机连接的网络-&gt;查看速度-&gt;正常为1.0Gbps；如果为10Mbps或者100Mbps，请确认路由或者PC连接相机的网卡是否支持千兆网；</p>
+<figure class="align-center" id="id43">
+<img alt="win_right_net.png" src="_images/win_right_net.png" />
+<figcaption>
+<p><span class="caption-text">Windows 网络正确连接状态</span><a class="headerlink" href="#id43" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<p>Ubuntu：打开设置（Setting）-&gt;找到对应的网卡-&gt;点击设置按钮-&gt;查看details中连接速度是否是1000Mb/s；如果为10Mb/s或者100Mb/s，请确认路由或者PC连接相机的网卡是否支持千兆网；</p>
+<figure class="align-center" id="id44">
+<a class="reference internal image-reference" href="_images/linux_right_net.png"><img alt="linux_right_net.png" src="_images/linux_right_net.png" style="width: 676.0px; height: 562.5px;" /></a>
+<figcaption>
+<p><span class="caption-text">Ubuntu 网络正确连接状态</span><a class="headerlink" href="#id44" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id45">
+<a class="reference internal image-reference" href="_images/linux_bad_net.png"><img alt="linux_bad_net.png" src="_images/linux_bad_net.png" style="width: 671.0px; height: 562.5px;" /></a>
+<figcaption>
+<p><span class="caption-text">Ubuntu 网络错误连接状态</span><a class="headerlink" href="#id45" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id30">
+<span id="id31"></span><h3>重启相机<a class="headerlink" href="#id30" title="Permalink to this heading"></a></h3>
+<p>如以上步骤全部尝试后，相机仍拍照失败或者取图慢，请尝试重新启动相机。</p>
+<p><strong>相机重启步骤：</strong></p>
+<ol class="arabic simple">
+<li><p>拔出电源线插头或，相机断电。</p></li>
+<li><p>等待 10秒左右，重新插入电源线插头，相机通电。</p></li>
+</ol>
+</section>
+<section id="id32">
+<span id="id33"></span><h3>联系技术人员<a class="headerlink" href="#id32" title="Permalink to this heading"></a></h3>
+<p>如以上步骤全部尝试后，相机仍拍照失败或者取图慢，请联系技术支持。</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api/build/classxyz_1_1sensor_1_1Sensor.html" class="btn btn-neutral float-left" title="Class Sensor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.08 XYZ ROBOTICS.INC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

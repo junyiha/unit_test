@@ -1,0 +1,246 @@
+.. _api_get_started:
+
+API快速入门
+=====================
+
+快速开始
+---------------------
+
+Windows 平台
+^^^^^^^^^^^^^^^^^^^^^
+
+**准备**:
+
+1. 请确保按照 :doc:`安装指南</installation/get_started>` 已经执行到位, 默认安装路径为 ``C:/Program Files/xyz-sensor-sdk``;
+2. 安装CMake;
+3. 配置编译工具, 例如Win平台的VS2019. 该部分以Win平台的VS2019开发环境为例;
+4. 请确保XYZ相机已连接好并上电启动;
+
+**编译**:
+
+1. 需要把 ``xyz-sensor-sdk/examples`` 文件夹复制到不限制读写的路径, 该部分将以 ``C:/Work`` 为例, 作为开发目录, 用户使用其他路径也可以, 示例将在该目录进行开发. 操作如图:
+
+.. figure:: ../media/copy_example.png
+  :align: center
+  :alt: capture.png
+  
+  图1 复制xyz-sensor-sdk/examples文件夹
+
+2. 打开VS Develop PowerShell并cd进入开发目录 ``C:/Work/examples``
+
+.. figure:: ../media/DevPowerShellVS.png
+  :align: center
+  :alt: DevPowerShellVS.png
+
+  图2 打开VS Develop PowerShell并进入目录
+
+3. 执行cmake和编译
+
+编译完成后将得到可执行程序
+
+.. code-block::
+
+  # cmake
+  # `CMAKE_PREFIX_PATH`用于指定额外的安装前缀路径, 来查找依赖项、库文件或头文件, 请按照sdk的安装路径对其进行修改
+  cmake -B Release -S . -DCMAKE_PREFIX_PATH='C:\Program Files\xyz-sensor-sdk\share\xyz_sensor_sdk'
+
+  # build
+  # 这里使用VS自带的编译工具msbuild, 用户也可以使用自己的工具链
+  msbuild C:\Work\examples\Release\xyz_sensor_sdk_example.sln -t:Rebuild -p:Configuration=Release
+
+**启动**:
+
+执行编译出来的demo程序
+
+.. code-block::
+
+  # 1. capture
+  C:\Work\examples\Release\Release\capture.exe
+
+  # 2. common_api
+  C:\Work\examples\Release\Release\common_api.exe
+
+启动demo程序效果:
+
+.. figure:: ../media/capture_win.png
+  :align: center
+  :alt: capture.png
+  
+  图3 执行capture的效果
+
+.. figure:: ../media/common_api_win.png
+  :align: center
+  :alt: common_api.png
+  
+  图4 执行common_api的效果
+
+we made it!
+
+Linux 平台
+^^^^^^^^^^^^^^^^^^^^^
+
+**准备**:
+
+1. 请确保按照 :doc:`安装指南</installation/get_started>` 已经执行到位, 默认安装路径为 ``/opt/xyz-sensor-sdk``, 然后logout登出系统, 再login重新登录系统用以加载环境变量;
+2. 安装CMake;
+3. 配置编译工具, 例如Linux平台的GCC9. 该文档以Ubuntu 20.04平台的GCC9开发环境为例;
+4. 请确保XYZ相机已连接好并上电启动;
+
+**编译**:
+
+1. 需要把 ``xyz-sensor-sdk/examples`` 文件夹复制到不限制读写的路径, 该部分将以 ``~/Work`` 为例, 作为开发目录, 用户使用其他路径也可以, 示例将在该目录进行开发.
+
+.. code-block:: shell
+
+  # copy xyz-sensor-sdk/examples
+  mkdir -p ~/Work && cp -r /opt/xyz-sensor-sdk/examples ~/Work
+
+2. 执行cmake和编译
+
+编译完成后将得到可执行程序
+
+.. code-block:: shell
+
+  # cd进入examples开发目录
+  cd ~/Work/examples
+
+  # cmake
+  # `CMAKE_PREFIX_PATH`用于指定额外的安装前缀路径, 来查找依赖项、库文件或头文件, 请按照sdk的安装路径对其进行修改
+  cmake -B Release -S . -DCMAKE_PREFIX_PATH=/opt/xyz-sensor-sdk/share/xyz_sensor_sdk
+
+  # cd 进入examples/Release目录
+  cd ~/Work/examples/Release
+
+  # build
+  make
+
+**启动**:
+
+执行编译出来的demo程序
+
+.. code-block:: shell
+
+  # 1. capture
+  ~/Work/examples/Release/capture
+
+  # 2. common_api
+  ~/Work/examples/Release/common_api
+
+启动demo程序效果:
+
+.. figure:: ../media/capture_linux.png
+  :align: center
+  :alt: capture.png
+  
+  图5 执行capture的效果
+
+.. figure:: ../media/common_api_linux.png
+  :align: center
+  :alt: common_api.png
+  
+  图6 执行common_api的效果
+
+we made it!
+
+编程引导
+---------------------
+
+**CMake文件说明** (examples/CMakeList.txt)
+
+.. code-block:: cmake
+
+  # 指定CMake的最低版本要求
+  cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
+  # 定义项目的名称
+  project(xyz_sensor_sdk_example)
+
+  # 根据是否有父级目录, 自动调整编译选项, 并加载xyz_sensor_sdk
+  get_directory_property(hasParent PARENT_DIRECTORY)
+  if(hasParent)
+    message(STATUS "Has a parent scope.")
+    set(xyz_sensor_sdk_LIBRARIES xyz_sensor_sdk)
+  else()
+    message(STATUS "Doesn't have a parent scope.")
+    set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+    set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+    set(CMAKE_CXX_STANDARD 17)
+    find_package(xyz_sensor_sdk REQUIRED)
+    include_directories(${xyz_sensor_sdk_INCLUDE_DIRS})
+  endif()
+
+  # 将当前源码目录添加到目标文件的包含目录路径中
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+  # 定义可执行文件"capture", 并链接对应库
+  add_executable(capture capture.cpp)
+  target_link_libraries(capture ${xyz_sensor_sdk_LIBRARIES})
+
+  # 定义可执行文件"common_api", 并链接对应库
+  add_executable(common_api common_api.cpp)
+  target_link_libraries(common_api ${xyz_sensor_sdk_LIBRARIES})
+
+**基本流程图**
+
+使用xyz-sensor-sdk进行开发的程序流程如图:
+
+.. figure:: ../media/xyz_sdk_program.png
+  :align: center
+  :alt: xyz_sdk_program.png
+
+  图7 基本流程图
+
+**示例程序说明** (examples/capture.cpp)
+
+.. code-block:: c++
+
+  // 包含相关库文件及命名空间
+  #include <iostream>
+  #include <memory>
+  #include "xyz_sensor_sdk/sensor.h"
+  using namespace xyz::sensor;
+
+  // 主函数开始
+  int main(int argc, char *argv[]) {
+
+    // 扫描枚举出所有受支持的相机, 并将相机信息打印出来
+    std::vector<SensorInfo> sensor_list;
+    auto status = Sensor::EnumerateConnectedSensors(sensor_list);
+    if (!status.ok()) {
+      std::cout << status.message() << std::endl;
+      return status.code();
+    }
+    std::cout << "found " << sensor_list.size() << " connected sensors:" << std::endl;
+    for (const auto &info : sensor_list) {
+      std::cout << info.id << ", " << info.model << ", " << info.ip_address << std::endl;
+    }
+
+    // 为枚举到的第1个相机生成唯一的句柄(指针), 并通过句柄(指针)打开相机
+    if (!sensor_list.empty()) {
+      std::cout << "try to capture image using first connected sensor." << std::endl;
+      auto sensor_ptr = std::make_unique<Sensor>();
+      auto status = sensor_ptr->Open(sensor_list[0]);
+      if (!status.ok()) {
+        std::cout << status.message() << std::endl;
+        return status.code();
+      }
+
+      // 通过句柄(指针)进行拍照
+      status = sensor_ptr->Capture();
+
+      // 取出各个图形帧
+      if (status.ok()) {
+        Sensor::ColorFrame color_frame;
+        sensor_ptr->GetColorFrame(color_frame);
+        Sensor::DepthFrame depth_frame;
+        sensor_ptr->GetDepthFrame(depth_frame);
+        Sensor::PointXYZFrame point_cloud;
+        sensor_ptr->GetPointXYZFrame(point_cloud);
+      }
+    }
+
+    // 主程序返回, 所占用的内存资源将销毁, 相机将回到待机状态
+    return 0;
+  }
+
+enjoy!

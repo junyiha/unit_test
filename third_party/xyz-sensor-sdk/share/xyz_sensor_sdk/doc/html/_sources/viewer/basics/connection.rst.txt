@@ -1,0 +1,111 @@
+.. _connection:
+
+IP设置和连接相机
+=====================
+连接相机前，需确保工控机和相机IP地址在同一网段。
+
+设置工控机IP地址
+++++++++++++++++++++
+在设置相机IP前，需先修改连接相机的工控机网卡的静态IP，确保网卡IP处于相机的目标网段。例如：相机目标IP为192.168.37.111/255.255.255.0，则可将工控机网卡IP设置为192.168.37.101/255.255.255.0，注意不要与其他设备IP冲突。
+
+Windows系统
+--------------
+
+
+1. 在Windows桌面左下角搜索框搜索并打开“控制面板”。
+
+
+2. 选择“网络和Internet > 网络和共享中心 > 更改适配器设置”。
+
+3. 右键单击要修改的网卡，选择 **属性**。
+
+   .. figure:: img/PC_IP.png
+      :align: center
+      :width: 250px
+      :alt: PC_IP.png
+  
+      图1 工控机IP
+
+ 
+4. 单击 :guilabel:`Internet 协议版本4(TCP/IPv4)`，再单击 :guilabel:`属性`。
+
+   .. figure:: img/property.png
+      :align: center
+      :width: 350px
+      :alt: property.png
+  
+      图2 网络属性
+
+5. 选择 **使用下面的IP地址**，设置IP地址、子网掩码、默认网关。
+
+
+   .. figure:: img/static_PC.png
+      :align: center
+      :width: 350px
+      :alt: static_PC.png
+  
+      图3 修改工控机IP
+
+Ubuntu系统
+--------------
+
+
+.. |net| image:: img/net.png
+         :width: 20px
+
+.. |setup| image:: img/setup.png
+         :width: 20px
+
+
+1. 单击显示器桌面右上角网络图标 |net|，选择 “Ethernet Connected > Wired Settings”。
+
+   .. figure:: img/wired.png
+      :align: center
+      :width: 250px
+      :alt: wired.png
+  
+      图4 有线设置
+
+2. 单击网卡 Profile 右侧的 |setup|。
+
+   .. figure:: img/setting.png
+      :align: center
+      :width: 450px
+      :alt: setting.png
+  
+      图5 网卡设置
+
+3. 在 **IPv4** 页签下，选择 **Manual**，再设置IP地址、子网掩码，然后单击右上角 :guilabel:`Apply`。
+
+
+   .. figure:: img/modify_static_IP.png
+      :align: center
+      :width: 350px
+      :alt: modify_static_IP.png
+  
+      图6 修改静态IP
+
+
+
+连接相机与修改相机IP
++++++++++++++++++++++++++
+
+1. 单击XYZ Viewer界面左上角 :guilabel:`相机列表`，枚举并显示与工控机同网段的相机。
+
+   .. figure:: img/cameralist.png
+      :align: center
+      :width: 350px
+      :alt: cameralist.png
+  
+      图7 相机列表
+
+2. 单击 :guilabel:`Connected`，连接相机，或单击 :guilabel:`Modify`，修改相机的IP地址、子网掩码、默认网关。
+
+   .. figure:: img/modify_IP.png
+      :align: center
+      :width: 300px
+      :alt: modify_IP.png
+  
+      图8 修改相机IP
+
+3. 相机连接后，单击界面左上角的 :guilabel:`触发拍照`，确认相机连接成功且拍照正常。

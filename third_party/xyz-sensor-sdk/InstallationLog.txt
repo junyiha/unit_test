@@ -1,0 +1,122 @@
+************************************* Invoked: 周二 11月 7 14:03:35 2023
+[0] Arguments: /home/user/zjy-190/Documents/星猿哲/xyz-sensor-sdk-installer_staging_linux_amd64_0.5.4-pre.7+6ab318cb.run
+[31] Operations sanity check succeeded.
+[33] Language: en-US
+[2571] Preparing meta information download...
+[5431] Warning: Only C and default locale supported with the posix collation implementation
+[5431] Warning: Only C and default locale supported with the posix collation implementation
+[5431] Warning: Case insensitive sorting unsupported in the posix collation implementation
+[5431] Warning: Numeric mode unsupported in the posix collation implementation
+[12166] Installation space required: "280.08 MB" Temporary space required: "0.00 bytes" Local repository size: "0.00 bytes"
+[12167] Tmp and install directories are on the same volume. Volume mount point: "/" Free space available: "32.96 GB"
+[13258] backup  operation: Mkdir
+[13258] 	- arguments: /opt/xyz-sensor-sdk
+[13258] Done
+[13258] perform  operation: Mkdir
+[13258] 	- arguments: /opt/xyz-sensor-sdk
+[13258] Done
+[13258] Fallback: "/mnt/remote/190-mnt/zhangjunyi/Documents/星猿哲/xyz-sensor-sdk-installer_staging_linux_amd64_0.5.4-pre.7+6ab318cb.run --start-server PRODUCTION,/tmp/{25555da7-27ad-419e-83eb-ff5f116d6e6e},{10b30b6a-7561-4bf2-81a8-550a85103e00}"
+[16087] perform  operation: Mkdir
+[16087] 	- arguments: /opt/xyz-sensor-sdk
+[16088] Done
+[16089] Preparing the installation...
+[16089] Install size: 1 components
+[16129] Preparing to unpack components...
+[16131] backup com.xyzrobotics.root concurrent operation: Extract
+[16131] 	- arguments: installer://com.xyzrobotics.root/0.1.0bin.7z, /opt/xyz-sensor-sdk
+[16131] Started
+[16131] backup com.xyzrobotics.root concurrent operation: Extract
+[16131] 	- arguments: installer://com.xyzrobotics.root/0.1.0content.7z, /opt/xyz-sensor-sdk
+[16131] Started
+[16131] backup com.xyzrobotics.root concurrent operation: Extract
+[16131] 	- arguments: installer://com.xyzrobotics.root/0.1.0examples.7z, /opt/xyz-sensor-sdk
+[16131] Started
+[16131] backup com.xyzrobotics.root concurrent operation: Extract
+[16132] 	- arguments: installer://com.xyzrobotics.root/0.1.0include.7z, /opt/xyz-sensor-sdk
+[16132] Started
+[16132] backup com.xyzrobotics.root concurrent operation: Extract
+[16132] 	- arguments: installer://com.xyzrobotics.root/0.1.0lib.7z, /opt/xyz-sensor-sdk
+[16132] Started
+[16132] backup com.xyzrobotics.root concurrent operation: Extract
+[16132] 	- arguments: installer://com.xyzrobotics.root/0.1.0share.7z, /opt/xyz-sensor-sdk
+[16132] Started
+[16171] Unpacking components...
+[16171] perform com.xyzrobotics.root concurrent operation: Extract
+[16171] 	- arguments: installer://com.xyzrobotics.root/0.1.0bin.7z, /opt/xyz-sensor-sdk
+[16171] Started
+[16171] perform com.xyzrobotics.root concurrent operation: Extract
+[16171] 	- arguments: installer://com.xyzrobotics.root/0.1.0lib.7z, /opt/xyz-sensor-sdk
+[16171] Started
+[16171] perform com.xyzrobotics.root concurrent operation: Extract
+[16171] 	- arguments: installer://com.xyzrobotics.root/0.1.0share.7z, /opt/xyz-sensor-sdk
+[16171] Started
+[16172] perform com.xyzrobotics.root concurrent operation: Extract
+[16172] 	- arguments: installer://com.xyzrobotics.root/0.1.0content.7z, /opt/xyz-sensor-sdk
+[16172] Started
+[16172] perform com.xyzrobotics.root concurrent operation: Extract
+[16172] 	- arguments: installer://com.xyzrobotics.root/0.1.0examples.7z, /opt/xyz-sensor-sdk
+[16172] Started
+[16172] perform com.xyzrobotics.root concurrent operation: Extract
+[16172] 	- arguments: installer://com.xyzrobotics.root/0.1.0include.7z, /opt/xyz-sensor-sdk
+[16172] Started
+[18851] Installing component xyz sensor sdk
+[18852] backup com.xyzrobotics.root operation: CreateDesktopEntry
+[18852] 	- arguments: /usr/share/applications/xyz-viewer.desktop, Name=XYZ Viewer
+Type=Application
+Categories=Application;
+Encoding=UTF-8
+Icon=/opt/xyz-sensor-sdk/bin/xyz-viewer.png
+Exec=/opt/xyz-sensor-sdk/bin/xyz-viewer
+Terminal=false
+Name[en_US]=XYZ Viewer
+
+[18852] Done
+[18852] perform com.xyzrobotics.root operation: CreateDesktopEntry
+[18852] 	- arguments: /usr/share/applications/xyz-viewer.desktop, Name=XYZ Viewer
+Type=Application
+Categories=Application;
+Encoding=UTF-8
+Icon=/opt/xyz-sensor-sdk/bin/xyz-viewer.png
+Exec=/opt/xyz-sensor-sdk/bin/xyz-viewer
+Terminal=false
+Name[en_US]=XYZ Viewer
+
+[18854] Done
+[18854] backup com.xyzrobotics.root operation: AppendFile
+[18854] 	- arguments: /etc/environment, LD_LIBRARY_PATH="/opt/xyz-sensor-sdk/lib:$LD_LIBRARY_PATH"
+
+[18854] Warning: QFile::remove: Empty or null file name
+[18855] Done
+[18855] perform com.xyzrobotics.root operation: AppendFile
+[18855] 	- arguments: /etc/environment, LD_LIBRARY_PATH="/opt/xyz-sensor-sdk/lib:$LD_LIBRARY_PATH"
+
+[18856] Done
+[18856] backup com.xyzrobotics.root operation: AppendFile
+[18856] 	- arguments: /etc/environment, PYTHONPATH="/opt/xyz-sensor-sdk/lib/python/dist-packages:$PYTHONPATH"
+
+[18856] Warning: QFile::remove: Empty or null file name
+[18857] Done
+[18857] perform com.xyzrobotics.root operation: AppendFile
+[18857] 	- arguments: /etc/environment, PYTHONPATH="/opt/xyz-sensor-sdk/lib/python/dist-packages:$PYTHONPATH"
+
+[18858] Done
+[18858] backup com.xyzrobotics.root operation: AppendFile
+[18858] 	- arguments: /etc/environment, XYZ_SENSOR_SDK_ROOT="/opt/xyz-sensor-sdk"
+
+[18858] Warning: QFile::remove: Empty or null file name
+[18859] Done
+[18859] perform com.xyzrobotics.root operation: AppendFile
+[18859] 	- arguments: /etc/environment, XYZ_SENSOR_SDK_ROOT="/opt/xyz-sensor-sdk"
+
+[18859] Done
+[18859] backup com.xyzrobotics.root operation: License
+[18859] 	- arguments:
+[18859] Done
+[18859] perform com.xyzrobotics.root operation: License
+[18859] 	- arguments:
+[18860] Done
+[18878] Writing maintenance tool: "/opt/xyz-sensor-sdk/maintenancetool.new"
+[18878] Writing maintenance tool.
+[19112] Wrote permissions for maintenance tool.
+[19139] Maintenance tool hard restart: false.
+[19139] Installation finished!

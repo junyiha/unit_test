@@ -1,0 +1,14 @@
+.. _basics:
+
+通用操作
+=====================
+XYZ Viewer包含多种功能，本章将介绍通用操作和基本配置，内容如下。
+
+.. toctree::
+   :maxdepth: 2
+   
+   
+   basics/connection
+   basics/capture
+   basics/data
+   basics/log

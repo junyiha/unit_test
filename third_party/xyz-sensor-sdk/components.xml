@@ -1,0 +1,16 @@
+<Packages>
+    <ApplicationName>xyz sensor sdk</ApplicationName>
+    <ApplicationVersion>1.0.0</ApplicationVersion>
+    <Package>
+        <Name>com.xyzrobotics.root</Name>
+        <Title>xyz sensor sdk</Title>
+        <Description>xyz sensor sdk.</Description>
+        <SortingPriority>0</SortingPriority>
+        <TreeName moveChildren="false"></TreeName>
+        <Version>0.1.0</Version>
+        <LastUpdateDate></LastUpdateDate>
+        <InstallDate>2023-11-07</InstallDate>
+        <Size>266982983</Size>
+        <Checkable>true</Checkable>
+    </Package>
+</Packages>

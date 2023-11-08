@@ -1,0 +1,28 @@
+.. _log:
+
+日志管理
+=====================
+用户操作使用XYZ Viewer的动作均记录在日志当中。
+
+在菜单栏中单击“选项 > 显示日志”可在软件界面底部显示操作日志，如下图所示。
+
+    .. figure:: img/log.png
+      :align: center
+      :alt: log.png
+      :width: 700px
+  
+      图1 日志管理
+  
+ - 单击 :guilabel:`Options`，可勾选 :guilabel:`Auto-scroll`，日志可以自动滚屏显示。
+ - 单击 :guilabel:`Clear`，可清除当前屏幕上显示的所有日志。
+ - 单击 :guilabel:`Copy`，可复制当前所有日志。
+ - 在Filter搜索栏中输入关键字，可搜索日志，如下图所示。
+
+   .. figure:: img/search.png
+     :align: center
+     :alt: search.png
+     :width: 700px
+  
+     图2 日志搜索
+
+.. hint:: 在Windows系统中，日志默认保存在用户文件夹下的“xyz_log > xyz_sensor_viewer”文件中，例如完整路径可能为C:\\Users\\xyz\\xyz_log\\xyz_sensor_viewer。在Linux系统下默认保存在XXXXXX。

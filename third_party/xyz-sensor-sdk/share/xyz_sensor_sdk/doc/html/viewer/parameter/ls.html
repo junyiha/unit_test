@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LS系列相机 &mdash; XYZ SENSOR SDK 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ST系列相机" href="st.html" />
+    <link rel="prev" title="AL系列相机" href="al.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            XYZ SENSOR SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">安装指南</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/get_started.html">SDK安装</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">XYZ Viewer</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">软件界面</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basics.html">通用操作</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../parameter.html">参数配置</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="al.html">AL系列相机</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">LS系列相机</a></li>
+<li class="toctree-l2"><a class="reference internal" href="st.html">ST系列相机</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">xyz-sensor-sdk API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/get_started.html">API快速入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/build/library_api.html">Library API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">常见问题速查手册</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">1. SDK搜索不到相机</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html#id9">2. SDK无法连接相机</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html#id21">3. 相机取图慢或者取图失败</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">XYZ SENSOR SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../parameter.html">参数配置</a></li>
+      <li class="breadcrumb-item active">LS系列相机</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/viewer/parameter/ls.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ls">
+<span id="id1"></span><h1>LS系列相机<a class="headerlink" href="#ls" title="Permalink to this heading"></a></h1>
+<p>本章介绍LS系列相机的参数。可见等级不同，显示的参数有所不同。</p>
+<p><strong>获取控制</strong></p>
+<ul class="simple">
+<li><p>触发模式：不可编辑。</p></li>
+<li><p>触发源：不可编辑。</p></li>
+</ul>
+<p><strong>数据流控制</strong></p>
+<p>在Guru等级下，可勾选 <strong>打开数据流</strong>，开启数据流。</p>
+<p><strong>图像控制</strong></p>
+<ul class="simple">
+<li><p>曝光时间：点云采集的曝光时间。</p></li>
+<li><p>曝光时间2d：纹理图采集的曝光时间。</p></li>
+<li><p>增益：采集时的图像增益，对于黑色和吸光材质，图像增益越大，点云越完整，但对白色材质会越容易过曝光。</p></li>
+</ul>
+<p><strong>解码控制</strong></p>
+<ul class="simple">
+<li><p>解码模式：</p>
+<ul>
+<li><p>XYZ_LASER_DGP16：默认模式，适用于大部分常见场景。</p></li>
+<li><p>XYZ_LASER_DGNP16：该模式对过曝光有效。</p></li>
+<li><p>XYZ_LASER_DINP16：该模式可减少交叉反射产生的错误点。</p></li>
+<li><p>XYZ_LASER_SGP04：该模式可节省采集时间。</p></li>
+</ul>
+</li>
+<li><p>对比度阈值：只在格雷码为对比格雷码时生效，在过曝光场景下有更优，可以滤除飞点。</p></li>
+<li><p>信噪比阈值：滤除信噪比低于该阈值的点云，调高该阈值可滤除更多噪声点。</p></li>
+<li><p>深度尺度：不可编辑。</p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="al.html" class="btn btn-neutral float-left" title="AL系列相机" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="st.html" class="btn btn-neutral float-right" title="ST系列相机" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.08 XYZ ROBOTICS.INC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

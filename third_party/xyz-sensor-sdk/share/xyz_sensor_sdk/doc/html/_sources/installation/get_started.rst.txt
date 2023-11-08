@@ -1,0 +1,32 @@
+.. _installation_ref:
+
+SDK安装
+=====================
+本章介绍相机SDK下载和安装的步骤。
+
+1. XYZ Sensor SDK有Windows和Linux两个版本。
+
+   - 对于Windows版本，获取安装包之后，双击exe文件，打开XYZ Sensor SDK Installer安装程序，单击 :guilabel:`下一步` 开始安装。
+   - 对于Linux版本，打开终端并执行如下命令（命令中的文件名请根据实际修改），打开XYZ Sensor SDK Installer安装程序，单击 :guilabel:`下一步` 开始安装。
+
+     .. code-block::
+
+        chmod +x xyz-sensor-sdk-installer_production_linux_amd64_0.5.1.run
+        sudo./xyz-sensor-sdk-installer_production_linux_amd64_0.5.1.run
+
+2. 单击 :guilabel:`浏览` 指定安装目录，然后单击 :guilabel:`下一步`。Linux系统下的安装界面与Windows系统中的类似，此处以Windows系统下的安装界面为例。
+
+    .. figure:: img/path.png
+       :align: center
+       :alt: path.png
+       :width: 700px
+       
+       图1 安装界面
+
+   .. hint:: 安装目录必须是空文件夹，否则将无法继续安装。
+
+3. 根据安装向导提示依次勾选 **xyz sensor sdk** 组件，阅读并接受许可协议，选择开始菜单快捷方式（一般保持默认选项即可）。
+
+4. 完成上述安装设置后，单击 :guilabel:`安装`。
+
+5. 安装完成后，单击 :guilabel:`完成`。相机SDK分为API和XYZ Viewer两部分。在安装目录的bin文件夹中双击xyz-viewer.exe，即可打开XYZ Viewer软件。

@@ -1,0 +1,31 @@
+.. _data:
+
+保存数据
+=====================
+
+.. |selected| image:: img/selected.png
+            :width: 20px
+
+
+单击左上角 :guilabel:`保存选项`，设置保存的数据类型，并设置数据保存路径。
+
+- 选择保存的数据类型：支持保存RGB图、深度图、点云图、置信图、相机的原始数据。单击某一类型，右侧出现 |selected|，表示已选中，再次单击可取消选择。
+
+  .. figure:: img/data_type.png
+     :align: center
+     :width: 350px
+     :alt: data_type.png
+  
+     图1 数据类型
+
+- 设置保存路径：单击 :guilabel:`选择路径`，选择保存路径，单击 :guilabel:`OK`。
+
+  .. figure:: img/storage_path.png
+     :align: center
+     :width: 550px
+     :alt: storage_path.png
+  
+     图2 保存路径
+ 
+
+采集数据并调节参数后，单击左上角 :guilabel:`保存`，即可保存相应数据。

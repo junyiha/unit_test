@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IP设置和连接相机 &mdash; XYZ SENSOR SDK 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="采集图像" href="capture.html" />
+    <link rel="prev" title="通用操作" href="../basics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            XYZ SENSOR SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">安装指南</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/get_started.html">SDK安装</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">XYZ Viewer</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">软件界面</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../basics.html">通用操作</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">IP设置和连接相机</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">设置工控机IP地址</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#windows">Windows系统</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ubuntu">Ubuntu系统</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">连接相机与修改相机IP</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="capture.html">采集图像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html">保存数据</a></li>
+<li class="toctree-l2"><a class="reference internal" href="log.html">日志管理</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../parameter.html">参数配置</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">xyz-sensor-sdk API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/get_started.html">API快速入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/build/library_api.html">Library API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">常见问题速查手册</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">1. SDK搜索不到相机</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html#id9">2. SDK无法连接相机</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html#id21">3. 相机取图慢或者取图失败</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">XYZ SENSOR SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../basics.html">通用操作</a></li>
+      <li class="breadcrumb-item active">IP设置和连接相机</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/viewer/basics/connection.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ip">
+<span id="connection"></span><h1>IP设置和连接相机<a class="headerlink" href="#ip" title="Permalink to this heading"></a></h1>
+<p>连接相机前，需确保工控机和相机IP地址在同一网段。</p>
+<section id="id1">
+<h2>设置工控机IP地址<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p>在设置相机IP前，需先修改连接相机的工控机网卡的静态IP，确保网卡IP处于相机的目标网段。例如：相机目标IP为192.168.37.111/255.255.255.0，则可将工控机网卡IP设置为192.168.37.101/255.255.255.0，注意不要与其他设备IP冲突。</p>
+<section id="windows">
+<h3>Windows系统<a class="headerlink" href="#windows" title="Permalink to this heading"></a></h3>
+<ol class="arabic">
+<li><p>在Windows桌面左下角搜索框搜索并打开“控制面板”。</p></li>
+<li><p>选择“网络和Internet &gt; 网络和共享中心 &gt; 更改适配器设置”。</p></li>
+<li><p>右键单击要修改的网卡，选择 <strong>属性</strong>。</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../../_images/PC_IP.png"><img alt="PC_IP.png" src="../../_images/PC_IP.png" style="width: 250px;" /></a>
+<figcaption>
+<p><span class="caption-text">图1 工控机IP</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</li>
+<li><p>单击 <span class="guilabel">Internet 协议版本4(TCP/IPv4)</span>，再单击 <span class="guilabel">属性</span>。</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="../../_images/property.png"><img alt="property.png" src="../../_images/property.png" style="width: 350px;" /></a>
+<figcaption>
+<p><span class="caption-text">图2 网络属性</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</li>
+<li><p>选择 <strong>使用下面的IP地址</strong>，设置IP地址、子网掩码、默认网关。</p>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="../../_images/static_PC.png"><img alt="static_PC.png" src="../../_images/static_PC.png" style="width: 350px;" /></a>
+<figcaption>
+<p><span class="caption-text">图3 修改工控机IP</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</li>
+</ol>
+</section>
+<section id="ubuntu">
+<h3>Ubuntu系统<a class="headerlink" href="#ubuntu" title="Permalink to this heading"></a></h3>
+<ol class="arabic">
+<li><p>单击显示器桌面右上角网络图标 <a class="reference internal" href="../../_images/net.png"><img alt="net" src="../../_images/net.png" style="width: 20px;" /></a>，选择 “Ethernet Connected &gt; Wired Settings”。</p>
+<figure class="align-center" id="id6">
+<a class="reference internal image-reference" href="../../_images/wired.png"><img alt="wired.png" src="../../_images/wired.png" style="width: 250px;" /></a>
+<figcaption>
+<p><span class="caption-text">图4 有线设置</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</li>
+<li><p>单击网卡 Profile 右侧的 <a class="reference internal" href="../../_images/setup.png"><img alt="setup" src="../../_images/setup.png" style="width: 20px;" /></a>。</p>
+<figure class="align-center" id="id7">
+<a class="reference internal image-reference" href="../../_images/setting.png"><img alt="setting.png" src="../../_images/setting.png" style="width: 450px;" /></a>
+<figcaption>
+<p><span class="caption-text">图5 网卡设置</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</li>
+<li><p>在 <strong>IPv4</strong> 页签下，选择 <strong>Manual</strong>，再设置IP地址、子网掩码，然后单击右上角 <span class="guilabel">Apply</span>。</p>
+<figure class="align-center" id="id8">
+<a class="reference internal image-reference" href="../../_images/modify_static_IP.png"><img alt="modify_static_IP.png" src="../../_images/modify_static_IP.png" style="width: 350px;" /></a>
+<figcaption>
+<p><span class="caption-text">图6 修改静态IP</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</li>
+</ol>
+</section>
+</section>
+<section id="id2">
+<h2>连接相机与修改相机IP<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
+<ol class="arabic">
+<li><p>单击XYZ Viewer界面左上角 <span class="guilabel">相机列表</span>，枚举并显示与工控机同网段的相机。</p>
+<figure class="align-center" id="id9">
+<a class="reference internal image-reference" href="../../_images/cameralist.png"><img alt="cameralist.png" src="../../_images/cameralist.png" style="width: 350px;" /></a>
+<figcaption>
+<p><span class="caption-text">图7 相机列表</span><a class="headerlink" href="#id9" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</li>
+<li><p>单击 <span class="guilabel">Connected</span>，连接相机，或单击 <span class="guilabel">Modify</span>，修改相机的IP地址、子网掩码、默认网关。</p>
+<figure class="align-center" id="id10">
+<a class="reference internal image-reference" href="../../_images/modify_IP.png"><img alt="modify_IP.png" src="../../_images/modify_IP.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-text">图8 修改相机IP</span><a class="headerlink" href="#id10" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</li>
+<li><p>相机连接后，单击界面左上角的 <span class="guilabel">触发拍照</span>，确认相机连接成功且拍照正常。</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../basics.html" class="btn btn-neutral float-left" title="通用操作" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="capture.html" class="btn btn-neutral float-right" title="采集图像" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.08 XYZ ROBOTICS.INC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

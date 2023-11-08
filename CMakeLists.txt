@@ -4,8 +4,8 @@ project(UnitTest)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -93,6 +93,8 @@ set( executables
      test_api_v2
      test_nvr
      test_sqlite3
+     test_xyz
+     test_XYZCamera
     )
 
 # set(opencv_header_path "/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/opencv4/")
@@ -100,6 +102,7 @@ set( executables
 
 include_directories(${CMAKE_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/source/
+                    ${CMAKE_SOURCE_DIR}/third_party/xyz-sensor-sdk/include/
                     ${CMAKE_SOURCE_DIR}/third_party/boost/include/
                     ${CMAKE_SOURCE_DIR}/third_party/
                     # ${opencv_header_path}
@@ -116,7 +119,8 @@ include_directories(${CMAKE_SOURCE_DIR}
 
 link_directories(${CMAKE_SOURCE_DIR}/third_party/opencv4/lib/
                  ${opencv_library_path}
-                 ${CMAKE_SOURCE_DIR}/third_party/boost/lib/
+                  ${CMAKE_SOURCE_DIR}/third_party/xyz-sensor-sdk/lib/
+                  ${CMAKE_SOURCE_DIR}/third_party/boost/lib/
                  ${CMAKE_SOURCE_DIR}/third_party/sqlite3/lib/
                 #  /usr/local/TY_sdk/lib/linux/lib_x64/
                  ${CMAKE_SOURCE_DIR}/third_party/ty_lib/lib/linux/lib_x64
@@ -126,7 +130,7 @@ foreach(executable ${executables})
 
     # message("the value of executable is :${executable}.cc")
 
-    add_executable(${executable} ${CMAKE_SOURCE_DIR}/source/${executable}.cc ${CMAKE_SOURCE_DIR}/source/ParseFrame.cc ${CMAKE_SOURCE_DIR}/third_party/Mongoose/mongoose.c)
+    add_executable(${executable} ${CMAKE_SOURCE_DIR}/source/${executable}.cc ${CMAKE_SOURCE_DIR}/source/XYZCamera.cpp ${CMAKE_SOURCE_DIR}/source/ParseFrame.cc ${CMAKE_SOURCE_DIR}/third_party/Mongoose/mongoose.c)
     target_link_libraries(${executable} 
                           rt
                           pthread
@@ -160,5 +164,9 @@ foreach(executable ${executables})
                           boost_log_setup
                           boost_log
                           boost_thread
+
+                          xyz_sensor_sdk
+                          MVGigEVisionSDK
+                          MvCameraControl
                           )
 endforeach()

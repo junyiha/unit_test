@@ -1,0 +1,16 @@
+.. _parameter:
+
+参数配置
+=====================
+XYZ Viewer针对不同型号的相机提供了多种参数，供用户配置以满足不同的使用场景。按照相机型号，本章节分别介绍其参数配置。
+
+相机参数的可见等级分为Beginner、Expert和Guru三种，Expert包含Beginner中的全部参数，Guru包含Beginner和Expert中的全部参数。
+
+.. toctree::
+   :maxdepth: 2
+   
+   
+   parameter/al
+   parameter/ls
+   parameter/st
+

@@ -1,0 +1,316 @@
+1. SDK搜索不到相机
+==================
+
+问题原因
+--------
+
+-  相机、工控机、路由器网线连接异常
+-  ip冲突
+-  其他
+
+排查思路
+--------
+
+.. figure:: ./media/no_camera.png
+  :align: center
+  :scale: 50%
+  :alt: no_camera.png
+
+
+排查方法
+--------
+
+.. _排查网络连接问题:
+
+排查网络连接问题
+~~~~~~~~~~~~~~~~
+
+1. 首先需要确认相机已经上电并且启动成功，观察相机指示灯：
+
+（1）第一个指示灯（PWR）常亮&第二个指示灯（ACT）闪烁，即表示相机启动成功；
+
+（2）第四个指示灯（SPD）常亮&第三个指示灯（LNK）闪烁，即表示相机连接成功；
+
+2. 检查网线连接是否正确
+
+（1）需要确认相机端网络航插是否安装到位，外部只剩余两圈螺纹；
+
+.. figure:: ./media/camera_cable_connection.png
+  :align: center
+  :scale: 50%
+  :alt: camera_cable_connection.png
+
+  相机端网线正确连接方式
+
+（2）检查交换机接线方式是否正确或网线有无松动，交换机网口指示灯需要常亮；
+
+（3）检查电脑端接线方式是否正确或网线有无松动，工控机网口指示灯需要常亮；
+
+3. 确认电脑端网络连接成功
+
+Windows：
+
+打开网络和Internet设置->更改适配器选项->查看相机连接的网络：
+
+（1）如果显示为“未识别网络”，则为正常；
+
+.. figure:: ./media/win_normal_connection.png
+  :align: center
+  :alt: win_normal_connection.png
+
+  Windows工控机网络正确连接
+
+（2）如果显示为“网络电缆被拔出”，则需要检查网线连接是否正确；如果显示已禁用，则需要手动打开该网卡设备
+
+.. figure:: ./media/win_not_connection.png
+  :align: center
+  :alt: win_not_connection.png
+
+  工控机网络未连接
+
+.. figure:: ./media/win_disable.png
+  :align: center
+  :alt: win_disable.png
+
+  工控机网络未启用
+
+Ubuntu：
+
+打开左面右上角网络连接图标，如果网卡连接上了显示connected，如果是off则该网卡被关闭了，需要打开；如果没连上则不会显示该网卡设备
+
+.. figure:: ./media/linux_network.png
+  :align: center
+  :alt: linux_network.png
+
+  Ubuntu 工控机网络连接
+
+排查防火墙/杀毒软件阻止使用问题
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+（1）打开网络和Internet设置->Windows防火墙->允许应用通过防火墙
+
+.. figure:: ./media/open_firewall.png
+  :align: center
+  :alt: open_firewall.png
+
+（2）选择“允许其他应用”；浏览定位到要使用的程序，例如xyz_studio_max_bin.exe/xyz-viewer.exe等；将“网络类型”中的“专用”和“公用”选项都选中；添加；
+
+.. figure:: ./media/enable_xyz_soft.png
+  :align: center
+  :alt: enable_xyz_soft.png
+
+（3）检查是否添加成功；
+
+.. figure:: ./media/check_firewall.png
+  :align: center
+  :alt: check_firewall.png
+
+排查是否ip冲突（XYZ-ST和XYZ-AL相机会有该问题）
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+断开工控机与其他设备的连接，将无法枚举到的相机直连工控机，看该相机是否能枚举到，枚举到后通过sdk的修改ip工具修改该相机ip，使其唯一
+
+重启相机
+~~~~~~~~
+
+如以上步骤全部尝试后，仍无法连接相机，请尝试重新启动相机。
+
+**相机重启步骤：**
+
+1. 拔出电源线插头或，相机断电。
+2. 等待 10秒左右，重新插入电源线插头，相机通电。
+
+联系技术人员
+~~~~~~~~~~~~
+
+如以上步骤全部尝试后，仍无法连接相机，请联系技术支持。
+
+2. SDK无法连接相机
+==================
+
+.. _问题原因-1:
+
+问题原因
+--------
+
+-  相机与工控机 IP 地址不在同一网段
+-  IP 地址冲突
+-  相机被其他软件占用，资源没释放
+-  其他
+
+.. _排查思路-1:
+
+排查思路
+--------
+
+.. figure:: ./media/cam_start_failed.png
+  :align: center
+  :scale: 50%
+  :alt: cam_start_failed.png
+
+.. _排查方法-1:
+
+排查方法
+--------
+
+排查相机与工控机 IP 地址不在同一网段问题
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**排查步骤：**
+
+1. 查看工控机 IP 地址，请参考 设置 IP 地址 。
+2. 查看相机 IP 地址，请参考 设置 IP 地址 。
+3. 确保相机与工控机 IP 地址在同一网段。如果不在同一网段，请 设置相机 IP
+   地址 ，使相机 IP 地址与工控机在同一网段。
+4. 运行 SDK，重新扫描并连接相机。
+
+排查是否有ip冲突（XYZ-LS相机）
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+如果XYZ-LS相机返回error code
+-2147483103或者0x80000221，则是ip冲突问题，需要修改相机ip使其唯一，请参考 设置
+IP 地址 。
+
+**排查相机是否已经在其他软件中启动，资源未释放**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+查看是否有不同的软件同时占用的相机，包括刚刚退出的max、不同版本的max、xyz-viewer、MVS等，需要查看任务管理器，清除掉多余的后台软件；
+
+Windows：
+
+.. figure:: ./media/win_task_manager.png
+  :align: center
+  :scale: 50%
+  :alt: win_task_manager.png
+
+  Windows任务管理器
+
+Ubuntu：
+
+查看xyz-viewer，在终端输入命令： ``ps aux | grep xyz-viewer``
+
+.. figure:: ./media/linux_sdk_task.png
+  :align: center
+  :alt: linux_sdk_task.png
+
+  Ubuntu xyz-viewer 任务
+
+查看xyz-studio-max：\ ``ps aux | grep xyz_studio_max``
+
+.. figure:: ./media/linux_max_task.png
+  :align: center
+  :alt: linux_max_task.png
+
+  Ubuntu xyz-studio-max 任务
+
+
+终止相关进程：\ ``sudo kill process_id``
+
+.. figure:: ./media/linux_kill_proc.png
+  :align: center
+  :alt: linux_kill_proc.png
+
+  Ubuntu 终止相关进程
+
+.. _重启相机-1:
+
+重启相机
+~~~~~~~~
+
+如以上步骤全部尝试后，仍无法启动相机，请尝试重新启动相机。
+
+**相机重启步骤：**
+
+1. 拔出电源线插头或，相机断电。
+2. 等待 10秒左右，重新插入电源线插头，相机通电。
+
+.. _联系技术人员-1:
+
+联系技术人员
+~~~~~~~~~~~~
+
+如以上步骤全部尝试后，仍无法启动相机，请联系技术支持。
+
+3. 相机取图慢或者取图失败
+=========================
+
+.. _问题原因-2:
+
+问题原因
+--------
+
+-  相机网线没完全接好
+-  工控未识别到千兆网
+-  其他
+
+.. _排查思路-2:
+
+排查思路
+--------
+
+.. figure:: ./media/cam_slow.png
+  :align: center
+  :scale: 50%
+  :alt: cam_slow.png
+
+.. _排查方法-2:
+
+排查方法
+--------
+
+**排查相机网线是否完全接好**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**排查步骤：**
+
+参考 :ref:`排查网络连接问题` 中检查网线连接是否正确
+
+**排查工控机是否识别到千兆网**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**排查步骤：**
+
+Windows：确认PC网络状态，打开网络和Internet设置->更改适配器选项->双击相机连接的网络->查看速度->正常为1.0Gbps；如果为10Mbps或者100Mbps，请确认路由或者PC连接相机的网卡是否支持千兆网；
+
+.. figure:: ./media/win_right_net.png
+  :align: center
+  :alt: win_right_net.png
+
+  Windows 网络正确连接状态
+
+Ubuntu：打开设置（Setting）->找到对应的网卡->点击设置按钮->查看details中连接速度是否是1000Mb/s；如果为10Mb/s或者100Mb/s，请确认路由或者PC连接相机的网卡是否支持千兆网；
+
+.. figure:: ./media/linux_right_net.png
+  :align: center
+  :scale: 50%
+  :alt: linux_right_net.png
+
+  Ubuntu 网络正确连接状态
+
+
+.. figure:: ./media/linux_bad_net.png
+  :align: center
+  :scale: 50%
+  :alt: linux_bad_net.png
+
+  Ubuntu 网络错误连接状态
+
+
+.. _重启相机-2:
+
+重启相机
+~~~~~~~~
+
+如以上步骤全部尝试后，相机仍拍照失败或者取图慢，请尝试重新启动相机。
+
+**相机重启步骤：**
+
+1. 拔出电源线插头或，相机断电。
+2. 等待 10秒左右，重新插入电源线插头，相机通电。
+
+.. _联系技术人员-2:
+
+联系技术人员
+~~~~~~~~~~~~
+
+如以上步骤全部尝试后，相机仍拍照失败或者取图慢，请联系技术支持。

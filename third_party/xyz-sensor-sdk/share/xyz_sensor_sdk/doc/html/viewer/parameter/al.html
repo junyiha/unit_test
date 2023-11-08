@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AL系列相机 &mdash; XYZ SENSOR SDK 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="LS系列相机" href="ls.html" />
+    <link rel="prev" title="参数配置" href="../parameter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            XYZ SENSOR SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">安装指南</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/get_started.html">SDK安装</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">XYZ Viewer</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../ui.html">软件界面</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basics.html">通用操作</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../parameter.html">参数配置</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">AL系列相机</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ls.html">LS系列相机</a></li>
+<li class="toctree-l2"><a class="reference internal" href="st.html">ST系列相机</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">xyz-sensor-sdk API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/get_started.html">API快速入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/build/library_api.html">Library API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">常见问题速查手册</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">1. SDK搜索不到相机</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html#id9">2. SDK无法连接相机</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html#id21">3. 相机取图慢或者取图失败</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">XYZ SENSOR SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../parameter.html">参数配置</a></li>
+      <li class="breadcrumb-item active">AL系列相机</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/viewer/parameter/al.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="al">
+<span id="id1"></span><h1>AL系列相机<a class="headerlink" href="#al" title="Permalink to this heading"></a></h1>
+<p>本章节介绍AL系列相机的参数配置。</p>
+<p><strong>串流参数</strong></p>
+<p>用户可勾选 <span class="guilabel">打开串流</span> 以显示原图。该参数可见等级为Guru。</p>
+<p><strong>相机采集参数</strong></p>
+<p>设置相机采集时的基本参数，具体如下。</p>
+<ul class="simple">
+<li><p>曝光时间（us）：取值范围为5000到50000，步长为1000。数值越高，图像越亮，但会增加采集时间。</p></li>
+<li><p>相机增益（db）：增益指相机的感光度，其取值范围为0到16.0，步长为1.0。当拍摄场景亮度较暗、且不想增加投图时间时，可以通过增大相机增益，来提升图像亮度，但同时也会增加图像中的噪点。</p></li>
+</ul>
+<p><strong>解码参数</strong></p>
+<p>设置图像解码的基本参数，具体如下。</p>
+<ul class="simple">
+<li><p>投图模式：</p>
+<ul>
+<li><p>快速模式(XYZ_D3010_VGP04)。</p></li>
+<li><p>高精度模式(XYZ_D3010_VGP08)：默认模式，比XYZ_D3010_VGP04的精度更高，但速度减慢。</p></li>
+<li><p>反光快速模式(XYZ_D3010_VXP04)。</p></li>
+<li><p>反光高精度模式(XYZ_D3010_VXP08)。</p></li>
+<li><p>标定模式(XYZ_D3010_CGP16)：不会生成点云。</p></li>
+</ul>
+</li>
+<li><p>解码亮度阈值：取值0到100之间的整数。解码亮度小于该阈值的点云会被去除。该阈值越大，去除的点云越多，但剩余点云的可信度越高。</p></li>
+<li><p>解码信噪比阈值：取值范围为0到1.0，步长为0.1。解码信噪比小于该阈值的点云会被去除。该阈值越大，去除的点云越多，但剩余点云的可信度越高。</p></li>
+</ul>
+<p><strong>点云重建参数</strong></p>
+<p>重建点云时需要设置的基本参数，具体如下。</p>
+<ul class="simple">
+<li><p>成像点云的最小深度阈值（mm）：取值100到800之间的整数。深度值z小于该阈值的点云会被去除。</p></li>
+<li><p>成像点云的最大深度阈值（mm）：取值1100到3500之间的整数。深度值z大于该阈值的点云会被去除。</p></li>
+<li><p>深度图平滑：该部分参数的可见等级全部为Guru。</p>
+<ul>
+<li><p>点云双边滤波核边长：取值-1到51之间的奇数。默认值为-1，即关闭噪声滤波。该值越大，点云越平滑。</p></li>
+<li><p>点云双边滤波标准差：取值3到151之间的奇数。该值越大，相似度更高的点将具有更高的权重，会保留更多细节和边缘。</p></li>
+</ul>
+</li>
+<li><p>点云后处理：生成点云后对点云的处理参数。</p>
+<ul>
+<li><p>点云聚类去噪参数：该类基于边缘增长进行点云聚类，簇内点数量小于阈值则被认定为噪声并被去除。</p>
+<ul>
+<li><p>噪声点云簇内最大点数量阈值：取值50到1000之间的整数。表示一个噪声点云簇的中点的最大数量。当点云簇中点数量小于等于阈值被认定为噪声，大于阈值则认定为有效值。该阈值越小，去除的点云越多。</p></li>
+<li><p>聚类点xy向最大差异阈值（m）：取值范围为0.0005到0.5，步长为0.0001。两点之间的x坐标或者y坐标大于这个阈值时，两点被判为属于不同的点云簇。该阈值越小，去除的点云越多。</p></li>
+<li><p>聚类点z向最大差异阈值（m）：取值范围为0.0005到0.5，步长为0.0001。两点之间的z坐标大于这个阈值时，两点被判为属于不同的点云簇。该阈值越小，去除的点云越多。</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>补偿：该类参数针对一些值进行补偿修正，该部分参数的可见等级全部为Guru。</p>
+<ul>
+<li><p>深度补偿。</p>
+<ul>
+<li><p>开启深度补偿：用户自行决定是否开启深度补偿。</p></li>
+<li><p>斜率：取值范围是0.0~2.0，步长为0.00001。</p></li>
+<li><p>截距（m）：取值范围是-1.0~1.0，步长为0.00001。</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../parameter.html" class="btn btn-neutral float-left" title="参数配置" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ls.html" class="btn btn-neutral float-right" title="LS系列相机" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.08 XYZ ROBOTICS.INC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

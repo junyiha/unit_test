@@ -1,0 +1,35 @@
+[settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=9
+    os=Linux
+
+[requires]
+
+
+[options]
+
+
+[full_settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=9
+    os=Linux
+
+[full_requires]
+    xyz-sensor-dependency/2.1.11@xyz-robotics/staging:abd3ca9581f5ec3d6672fa2ee8818b1f09dbb082
+    xyz-stereo/2.3.0@xyz-robotics/staging:abd3ca9581f5ec3d6672fa2ee8818b1f09dbb082
+    xyz-structured-light/2.2.1@xyz-robotics/staging:abd3ca9581f5ec3d6672fa2ee8818b1f09dbb082
+
+[full_options]
+
+
+[recipe_hash]
+    ec6c184b5495b48de2eb9678c8996ca7
+
+[env]
+

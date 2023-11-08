@@ -1,0 +1,97 @@
+.. _capture:
+
+采集图像
+=====================
+相机连接成功后可以采集图像，在 **Camera Control** 区域提供了两种采集图像的方式，分别如下。
+
+- 触发拍照：单击可触发相机拍照一次。
+- 连续触发：单击相机可连续拍照，同时按钮变为 :guilabel:`停止`，再次单击可停止拍照。
+ 
+拍照成功后效果如下图所示，照片会显示在预览区域。
+
+.. figure:: img/capture.png
+  :align: center
+  :alt: capture.png
+  :width: 700px
+  
+  图1 拍照成功
+
+XYZ Viewer提供纹理图、深度图、点云图、IR Left、IR Right和置信图。
+
+- 纹理图（texture）：显示物体表面的特征、灰度、颜色等信息，XYZ Viewer采集的纹理图示例如下。
+
+.. figure:: img/texture.png
+  :align: center
+  :alt: texture.png
+  :width: 500px
+  
+  图2 纹理图示例
+
+- 深度图（depth）：包含深度信息，表示物体表面到相机的距离，XYZ Viewer采集的深度图示例如下。
+
+.. figure:: img/depth.png
+  :align: center
+  :alt: depth.png
+  :width: 500px
+  
+  图3 深度图示例
+  
+- 点云图（cloud）：显示物体点云，点云是目标空间分布和目标表面特征的海量点的集合，XYZ Viewer采集的点云图示例如下。
+
+.. figure:: img/cloud.png
+  :align: center
+  :alt: cloud.png
+  :width: 500px
+  
+  图4 点云图示例
+
+- IR Left（左视角红外图）：显示左侧红外镜头采集的图像，仅ST系列相机支持，其示例图如下。
+
+.. figure:: img/irl.png
+  :align: center
+  :alt: irl.png
+  :width: 500px
+  
+  图5 IR Left图示例
+
+- IR Right（右视角红外图）：显示右侧红外镜头采集的图像，仅ST系列相机支持，其示例图如下。
+
+.. figure:: img/irr.png
+  :align: center
+  :alt: irr.png
+  :width: 500px
+  
+  图6 IR Right图示例
+
+- 置信图（confident）：显示先验信息和算法迭代得到的图像，仅AL和LS系列相机支持，XYZ Viewer采集的置信图示例如下。
+
+.. figure:: img/confident.png
+  :align: center
+  :alt: confident.png
+  :width: 500px
+  
+  图7 置信图示例
+
+在预览区域，可单击鼠标右键拖动图像，也可滑动鼠标滚轮放大缩小图像。针对点云图，可单击鼠标左键旋转图像。
+
+在右侧 **View Setting** 区域单击 :guilabel:`重置视角`，可使图像居中并回到拍照视角。针对点云图，还可根据需要自行选择是否显示坐标系和网格，并设置点云颜色和点的大小尺寸，如下图所示。
+
+.. figure:: img/cloudset.png
+  :align: center
+  :alt: cloudset.png
+  :width: 200px
+  
+  图8 点云图显示设置
+
+  
+
+
+在菜单中选择“视图 > Multi Viewer”，可在预览区同时查看多个不同类型的图像，如下图所示。在菜单中选择“视图 > Single Viewer”，可回到单类型图像查看模式。
+
+.. figure:: img/multi.png
+  :align: center
+  :alt: multi.png
+  :width: 500px
+  
+  图9 Multi Viewer
+

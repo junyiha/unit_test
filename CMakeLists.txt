@@ -68,7 +68,7 @@ set( executables
     #  test_tmp
     #  test_sqlpp11
     #  test_map
-    #  test_file
+     test_file
     #  test_function_time
     #  test_asan
     #  test_get_meminfo
@@ -94,7 +94,7 @@ set( executables
     #  test_nvr
     #  test_sqlite3
     #  test_xyz
-     test_XYZCamera
+    #  test_XYZCamera
     )
 
 # set(opencv_header_path "/mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/opencv4/")

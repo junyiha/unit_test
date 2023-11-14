@@ -131,7 +131,13 @@ foreach(executable ${executables})
 
     # message("the value of executable is :${executable}.cc")
 
-    add_executable(${executable} ${CMAKE_SOURCE_DIR}/source/${executable}.cc ${CMAKE_SOURCE_DIR}/source/XYZCamera.cpp ${CMAKE_SOURCE_DIR}/source/ParseFrame.cc ${CMAKE_SOURCE_DIR}/third_party/Mongoose/mongoose.c)
+    add_executable(${executable} 
+                   ${CMAKE_SOURCE_DIR}/source/${executable}.cpp
+                  #  ${CMAKE_SOURCE_DIR}/source/old_src/${executable}.cc 
+                   ${CMAKE_SOURCE_DIR}/source/old_src/XYZCamera.cpp 
+                   ${CMAKE_SOURCE_DIR}/source/old_src/ParseFrame.cc 
+                   ${CMAKE_SOURCE_DIR}/third_party/Mongoose/mongoose.c
+                   )
     target_link_libraries(${executable} 
                           rt
                           pthread

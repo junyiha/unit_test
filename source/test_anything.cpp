@@ -404,6 +404,42 @@ int test_marco()
     return 0;
 }
 
+int test_for_loop()
+{
+    for (int i = 0; i < -1; i++)
+    {
+        printf("%d\n", i);
+    }
+
+    std::vector<int> tmp_array(3,1);
+
+    // for (int j = 0; j < tmp_array.size() - 1; j++)
+    // {
+    //     printf("%d\n", j);
+    // }
+
+    for (auto it = tmp_array.begin(); it != tmp_array.end(); it++)
+    {
+        if (it == tmp_array.end() - 1)
+            break;
+
+        printf("%d \n", *it);
+    }
+
+    return 0;
+}
+
+#include "httplib.h"
+
+int test_httplib_client()
+{
+    // httplib::Client cli("192.169.0.152", "28001");
+
+    // auto res = cli.Get("/api/extension/common/list")
+
+    // std::cerr << res.
+}
+
 int main(int argc, char *argv[])
 {
     for (int i = 1; i < argc; i++)
@@ -412,6 +448,10 @@ int main(int argc, char *argv[])
         if (arg == "")
         {
 
+        }
+        else if (arg == "--test-for-loop")
+        {
+            test_for_loop();
         }
         else if (arg == "--test-marco")
         {

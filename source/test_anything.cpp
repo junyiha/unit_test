@@ -429,15 +429,47 @@ int test_for_loop()
     return 0;
 }
 
+#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 
 int test_httplib_client()
 {
-    // httplib::Client cli("192.169.0.152", "28001");
+    // httplib::Client cli("http://192.169.0.152:28001");
+    httplib::Client cli("192.169.0.152", 28001);
 
-    // auto res = cli.Get("/api/extension/common/list")
+    auto res = cli.Get("/api/extension/common/list");
 
-    // std::cerr << res.
+    printf("%s \n", res->body.c_str());
+
+    return 0;
+}
+
+int test_mnc()
+{
+    httplib::SSLClient cli("www.norzoro.cn");
+
+    std::string data = R"(
+        {
+            "device":"123456qer"
+        }
+    )";
+
+    auto res = cli.Post("/ecms/api/cmd/playlist", data, "Content-Type: application/json");
+
+    printf("%s \n", res->body.c_str());
+
+    return 0;
+}
+
+int test_robot()
+{
+    httplib::Client cli("192.169.0.125:9999");
+
+    auto res = cli.Get("/api/common/getCurStatus");
+
+    printf("%s \n", res->body.c_str());
+
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -448,6 +480,18 @@ int main(int argc, char *argv[])
         if (arg == "")
         {
 
+        }
+        else if (arg == "--test-robot")
+        {
+            test_robot();
+        }
+        else if (arg == "--test-mnc")
+        {
+            test_mnc();
+        }
+        else if (arg == "--test-httplib-client")
+        {
+            test_httplib_client();
         }
         else if (arg == "--test-for-loop")
         {

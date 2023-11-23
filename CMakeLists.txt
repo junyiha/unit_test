@@ -175,5 +175,8 @@ foreach(executable ${executables})
                           xyz_sensor_sdk
                           MVGigEVisionSDK
                           MvCameraControl
+
+                          ssl
+                          crypto
                           )
 endforeach()

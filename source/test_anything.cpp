@@ -475,6 +475,11 @@ int test_robot()
 #include "boost/log/core.hpp"
 #include "boost/log/trivial.hpp"
 #include "boost/log/expressions.hpp"
+#include "boost/log/sinks/text_file_backend.hpp"
+#include "boost/log/utility/setup/file.hpp"
+#include "boost/log/utility/setup/common_attributes.hpp"
+#include "boost/log/sources/severity_logger.hpp"
+#include "boost/log/sources/record_ostream.hpp"
 
 namespace logging = boost::log;
 namespace sinks = boost::log::sinks;
@@ -486,23 +491,63 @@ namespace keywords = boost::log::keywords;
 
 void init()
 {
+#ifdef LOG_V1
+    // /*v1*/
+    logging::add_file_log("/data/home/user/workspace/unit_test/data/test_anything.log");
     logging::core::get()->set_filter
     (
         logging::trivial::severity >= logging::trivial::info
     );
+
+#elif LOG_V2
+    // /*v2*/
+    logging::add_file_log
+    (
+        keywords::file_name = "/data/home/user/workspace/unit_test/data/test_anything_%N.log",
+        keywords::rotation_size = 10 * 1024 * 1024,
+        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+        keywords::format = "[%TimeStamp%]: %Message%"
+    );
+    logging::core::get()->set_filter
+    (
+        logging::trivial::severity >= logging::trivial::info
+    );
+
+#elif LOG_V3
+    /*v3*/
+    logging::add_file_log
+    (
+        keywords::file_name = "/data/home/user/workspace/unit_test/data/test_anything_%N.log",
+        keywords::rotation_size = 10 * 1024 * 1024,
+        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+        keywords::format = 
+        (
+            expr::stream
+                << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S")
+                << ": <" << logging::trivial::severity
+                << "> " << expr::smessage
+        )
+    );
+    logging::core::get()->set_filter
+    (
+        logging::trivial::severity >= logging::trivial::info
+    );
+#endif
 }
 
 int test_boost_log_trivial()
 {
     init();
+    logging::add_common_attributes();
+    using namespace logging::trivial;
+    src::severity_logger<severity_level> lg;
 
-
-    BOOST_LOG_TRIVIAL(trace) << "A trace severity message";
-    BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
-    BOOST_LOG_TRIVIAL(info) << "An informational severity message";
-    BOOST_LOG_TRIVIAL(warning) << "A warning severity message";
-    BOOST_LOG_TRIVIAL(error) << "An error severity message";
-    BOOST_LOG_TRIVIAL(fatal) << "A fatal severity message";
+    BOOST_LOG_SEV(lg, trace) << "A trace severity message";
+    BOOST_LOG_SEV(lg, debug) << "A debug severity message";
+    BOOST_LOG_SEV(lg, info) << "An informational severity message";
+    BOOST_LOG_SEV(lg, warning) << "A warning severity message";
+    BOOST_LOG_SEV(lg, error) << "An error severity message";
+    BOOST_LOG_SEV(lg, fatal) << "A fatal severity message";
 
     return 0;
 }
@@ -547,7 +592,7 @@ int test_httplib_server()
         if (!camera_list.empty())
         {
             item_data["camera_id"] = camera_list.at(0).first;
-            item_data["record_uri"] = std::string("rtsp://192.169.4.16:554/live/afda");
+            item_data["record_uri"] = std::string("rtsp://192.169.5.60:554/live/cloud_play");
             item_data["record_fmt"] = "rtsp";
             reply_data["playlists"].push_back(item_data);
         }
@@ -560,14 +605,35 @@ int test_httplib_server()
     return 0;
 }
 
+#include "glog/logging.h"
+
+int test_glog()
+{
+    // LOG(INFO) << "info.log";
+    FLAGS_logtostderr = 1;
+    LOG(INFO) << "stderr";
+    // FLAGS_logtostderr = 0;
+    // FLAGS_log_dir = "/data/home/user/workspace/unit_test/data/";
+
+    LOG(INFO) << "hello world";
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
+    google::InitGoogleLogging(argv[0]);
+    
     for (int i = 1; i < argc; i++)
     {
         std::string arg = argv[i];
         if (arg == "")
         {
 
+        }
+        else if (arg == "--test-glog")
+        {
+            test_glog();
         }
         else if (arg == "--test-httplib-server")
         {

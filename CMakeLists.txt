@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Debug")
 
 add_definitions(-DBOOST_LOG_DYN_LINK=1)
+add_definitions(-DLOG_V2=1)
 
 set( executables 
     #  test_boost
@@ -106,6 +107,7 @@ include_directories(${CMAKE_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/third_party/xyz-sensor-sdk/include/
                     ${CMAKE_SOURCE_DIR}/third_party/boost/include/
                     ${CMAKE_SOURCE_DIR}/third_party/
+                    ${CMAKE_SOURCE_DIR}/third_party/glog/include/
                     # ${opencv_header_path}
                     ${CMAKE_SOURCE_DIR}/third_party/opencv4/include/opencv4/
                     ${CMAKE_SOURCE_DIR}/third_party/eigen3/
@@ -123,6 +125,7 @@ link_directories(${CMAKE_SOURCE_DIR}/third_party/opencv4/lib/
                   ${CMAKE_SOURCE_DIR}/third_party/xyz-sensor-sdk/lib/
                   ${CMAKE_SOURCE_DIR}/third_party/boost/lib/
                  ${CMAKE_SOURCE_DIR}/third_party/sqlite3/lib/
+                 ${CMAKE_SOURCE_DIR}/third_party/glog/lib/
                 #  /usr/local/TY_sdk/lib/linux/lib_x64/
                  ${CMAKE_SOURCE_DIR}/third_party/ty_lib/lib/linux/lib_x64
                  /usr/local/lib/)
@@ -154,23 +157,25 @@ foreach(executable ${executables})
                         #   pcl_visualization
                         #   pcl_filters
                         #   boost_system
-                          boost_atomic
-                          boost_chrono
-                          boost_container
-                          boost_context
-                          boost_contract
-                          boost_coroutine
-                          boost_date_time
-                          boost_exception
-                          boost_fiber
-                          boost_system
-                          boost_filesystem
-                          boost_graph
-                          boost_json
-                          boost_locale
+                          # boost_atomic
+                          # boost_chrono
+                          # boost_container
+                          # boost_context
+                          # boost_contract
+                          # boost_coroutine
+                          # boost_date_time
+                          # boost_exception
+                          # boost_fiber
+                          # boost_system
+                          # boost_filesystem
+                          # boost_graph
+                          # boost_json
+                          # boost_locale
                           boost_log_setup
                           boost_log
                           boost_thread
+
+                          glog
 
                           xyz_sensor_sdk
                           MVGigEVisionSDK

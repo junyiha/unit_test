@@ -13,3 +13,4 @@ web_root
 *.pcd
 *.db
 build
+data/*

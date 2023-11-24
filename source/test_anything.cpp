@@ -609,13 +609,20 @@ int test_httplib_server()
 
 int test_glog()
 {
-    // LOG(INFO) << "info.log";
+    // 输出到终端
     FLAGS_logtostderr = 1;
     LOG(INFO) << "stderr";
-    // FLAGS_logtostderr = 0;
-    // FLAGS_log_dir = "/data/home/user/workspace/unit_test/data/";
-
     LOG(INFO) << "hello world";
+
+    // 输出到文件
+    FLAGS_logtostderr = 0;
+    FLAGS_log_dir = "/data/home/user/workspace/unit_test/data/";
+    FLAGS_log_prefix = true;
+    FLAGS_minloglevel = google::INFO;
+    
+    LOG(INFO) << "stderr";
+    LOG(INFO) << "hello world";
+
 
     return 0;
 }

@@ -472,6 +472,94 @@ int test_robot()
     return 0;
 }
 
+#include "boost/log/core.hpp"
+#include "boost/log/trivial.hpp"
+#include "boost/log/expressions.hpp"
+
+namespace logging = boost::log;
+namespace sinks = boost::log::sinks;
+namespace src = boost::log::sources;
+namespace expr = boost::log::expressions;
+namespace attrs = boost::log::attributes;
+namespace keywords = boost::log::keywords;
+
+
+void init()
+{
+    logging::core::get()->set_filter
+    (
+        logging::trivial::severity >= logging::trivial::info
+    );
+}
+
+int test_boost_log_trivial()
+{
+    init();
+
+
+    BOOST_LOG_TRIVIAL(trace) << "A trace severity message";
+    BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
+    BOOST_LOG_TRIVIAL(info) << "An informational severity message";
+    BOOST_LOG_TRIVIAL(warning) << "A warning severity message";
+    BOOST_LOG_TRIVIAL(error) << "An error severity message";
+    BOOST_LOG_TRIVIAL(fatal) << "A fatal severity message";
+
+    return 0;
+}
+
+#include "old_src/json.hpp"
+
+int test_httplib_server()
+{
+    httplib::Server svr;
+
+    svr.Get("/", [](const httplib::Request& req, httplib::Response& res) {
+        res.set_content("hello, this is httplib HTTP server", "text/plain");
+    });
+
+    svr.Post("/api/play", [](const httplib::Request& req, httplib::Response& res) {
+        if (req.has_header("Content-Type") && req.get_header_value("Content-Type") == "application/json")
+        {
+            std::cerr << "\ndata: \n" << req.body << std::endl;
+        }
+
+        nlohmann::json parsed_data;
+        nlohmann::json reply_data;
+        nlohmann::json item_data;
+        std::vector<std::pair<std::string, std::string>> camera_list;
+
+        try 
+        {
+            parsed_data = nlohmann::json::parse(req.body);
+            for (auto &it : parsed_data["cameralist"])
+            {
+                camera_list.push_back(std::make_pair(it["id"], it["name"]));
+            }
+        }
+        catch (nlohmann::json::parse_error &e)
+        {
+
+        }
+        catch (nlohmann::json::type_error &e)
+        {
+
+        }
+        if (!camera_list.empty())
+        {
+            item_data["camera_id"] = camera_list.at(0).first;
+            item_data["record_uri"] = std::string("rtsp://192.169.4.16:554/live/afda");
+            item_data["record_fmt"] = "rtsp";
+            reply_data["playlists"].push_back(item_data);
+        }
+
+        res.set_content(reply_data.dump(), "application/json");
+    });
+
+    svr.listen("0.0.0.0", 28009);
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     for (int i = 1; i < argc; i++)
@@ -480,6 +568,14 @@ int main(int argc, char *argv[])
         if (arg == "")
         {
 
+        }
+        else if (arg == "--test-httplib-server")
+        {
+            test_httplib_server();
+        }
+        else if (arg == "--test-boost-log-trivial")
+        {
+            test_boost_log_trivial();
         }
         else if (arg == "--test-robot")
         {

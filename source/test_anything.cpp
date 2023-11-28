@@ -18,7 +18,7 @@
 const int ALERT_INTERVAL_SECONDS = 3;  // 告警时间间隔为60秒
 std::time_t lastAlertTime = 0;  // 上次告警时间的初始值为0
 
-void processRequest()
+int processRequest()
 {
     // 模拟请求处理过程
     bool hasError = true;  // 假设出现异常情况
@@ -36,6 +36,8 @@ void processRequest()
             lastAlertTime = currentTime;
         }
     }
+
+    return 0;
 }
 
 #include <cstdio>
@@ -232,7 +234,8 @@ int arm_time()
 
 #include <random>
 
-std::string generateRandomMixedString(int size) {
+int generateRandomMixedString() {
+    int size = 5;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> dist(0, 2);
@@ -262,8 +265,9 @@ std::string generateRandomMixedString(int size) {
             randomString.push_back(static_cast<char>(lowerDist(gen)));
         }
     }
+    std::cerr << randomString << std::endl;
 
-    return randomString;
+    return 0;
 }
 
 extern "C"
@@ -631,86 +635,37 @@ int main(int argc, char *argv[])
 {
     google::InitGoogleLogging(argv[0]);
     
-    for (int i = 1; i < argc; i++)
+    std::map<std::string, std::function<int()>> cmd_map = {
+        {"--test-glog", test_glog},
+        {"--test-httplib-server", test_httplib_server},
+        {"--test-boost-log-trivial", test_boost_log_trivial},
+        {"--test-robot", test_robot},
+        {"--test-mnc", test_mnc},
+        {"--test-httplib-client", test_httplib_client},
+        {"--test-for-loop", test_for_loop},
+        {"--test-marco", test_marco},
+        {"--test-ceil", test_ceil},
+        {"--test-hashmap-1", test_hashmap_1},
+        {"--test-get-memery-info", GetMemInfo},
+        {"--test-generate-random-id", generateRandomMixedString},
+        {"--test-eigen-hello", test_eigen_hello},
+        {"--test-eigen-vector3f", test_eigen_vector3f},
+        {"--test-ascii", test_ascii},
+        {"--test-asan", test_asan},
+        {"--process-request", processRequest}
+    };
+
+    auto it = cmd_map.find(argv[1]);
+    if (it != cmd_map.end())
     {
-        std::string arg = argv[i];
-        if (arg == "")
-        {
-
-        }
-        else if (arg == "--test-glog")
-        {
-            test_glog();
-        }
-        else if (arg == "--test-httplib-server")
-        {
-            test_httplib_server();
-        }
-        else if (arg == "--test-boost-log-trivial")
-        {
-            test_boost_log_trivial();
-        }
-        else if (arg == "--test-robot")
-        {
-            test_robot();
-        }
-        else if (arg == "--test-mnc")
-        {
-            test_mnc();
-        }
-        else if (arg == "--test-httplib-client")
-        {
-            test_httplib_client();
-        }
-        else if (arg == "--test-for-loop")
-        {
-            test_for_loop();
-        }
-        else if (arg == "--test-marco")
-        {
-            test_marco();
-        }
-        else if (arg == "--test-ceil")
-        {
-            test_ceil();
-        }
-        else if (arg == "--test-hashmap-1")
-        {
-            test_hashmap_1();
-        }
-        else if (arg == "--test-get-memery-info")
-        {
-            GetMemInfo();
-        }
-        else if (arg == "--test-generate-random-id")
-        {
-            generateRandomMixedString(5);
-        }
-        else if (arg == "--test-eigen-hello")
-        {
-            test_eigen_hello();
-        }
-        else if (arg == "--test-eigen-vector3f")
-        {
-            test_eigen_vector3f();
-        }
-        else if (arg == "--test-ascii")
-        {
-            test_ascii();
-        }
-        else if (arg == "--test-asan")
-        {
-            test_asan();
-        }
-        else if (arg == "--process-request")
-        {
-            processRequest();
-        }
-        else 
-        {
-
-        }
+        it->second();
     }
+    else 
+    {
+        std::cerr << "invalid command: " << argv[1] << std::endl;
+    }
+
+    google::ShutdownGoogleLogging();
 
     return 0;
 }

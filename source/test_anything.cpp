@@ -631,6 +631,157 @@ int test_glog()
     return 0;
 }
 
+#include "boost/asio.hpp"
+
+void Print(const boost::system::error_code& ec)
+{
+    std::cerr << "Hello world" << std::endl;
+
+    return ;
+}
+
+int test_boost_asio_hello()
+{
+    boost::asio::io_service io_service;
+
+    boost::asio::steady_timer timer(io_service, boost::asio::chrono::seconds(1));
+    timer.async_wait(&Print);
+
+    io_service.run();
+
+    return 1;
+}
+
+#include "boost/beast.hpp"
+
+int test_boost_beast_hello()
+{
+    boost::asio::io_context io_context;
+
+    boost::asio::ip::tcp::acceptor acceptor(io_context, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 8000));
+    acceptor.listen();
+
+    while (true)
+    {
+        boost::asio::ip::tcp::socket socket(io_context);
+        acceptor.accept(socket);
+
+        try 
+        {
+            boost::beast::flat_buffer buffer;
+            boost::beast::http::request<boost::beast::http::string_body> request;
+
+            boost::beast::http::read(socket, buffer, request);
+
+            boost::beast::http::response<boost::beast::http::string_body> response{boost::beast::http::status::ok, request.version()};
+            response.set(boost::beast::http::field::server, "Boost HTTP Server");
+            response.body() = "Hello, World!";
+            response.prepare_payload();
+
+            boost::beast::http::write(socket, response);
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
+        }
+    }
+
+    return 0;    
+}
+
+namespace beast = boost::beast;  // from "boost/beast.hpp"
+namespace http = beast::http;    // from "boost/beast/http.hpp"
+namespace net = boost::asio;     // from "boost/asio.hpp"
+using tcp = net::ip::tcp;        // from "boost/asio/ip/tcp.hpp"
+
+int test_boost_beast_client()
+{
+    try 
+    {
+        // std::string host = "http://127.0.0.1";
+        std::string host = "www.baidu.com";
+        std::string port = "80";
+        std::string target = "/";
+        int version = 10;
+        net::io_context ioc;
+        tcp::resolver resolver(ioc);
+        beast::tcp_stream stream(ioc);
+
+        auto const results = resolver.resolve(host, port);
+        stream.connect(results);
+
+        http::request<http::string_body> req{http::verb::get, target, version};
+        req.set(http::field::host, host);
+        req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+
+        http::write(stream, req);
+
+        beast::flat_buffer buffer;
+        http::response<http::dynamic_body> res;
+        http::read(stream, buffer, res);
+
+        std::cerr << res << std::endl;
+
+        beast::error_code ec;
+        stream.socket().shutdown(tcp::socket::shutdown_both, ec);
+        if (ec && ec != beast::errc::not_connected)
+        {
+            throw beast::system_error{ec};
+        }
+    }
+    catch (std::exception const& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 0;
+    }
+
+    return 1;
+}
+
+int test_boost_asio_thread_pool()
+{
+    boost::asio::io_context io_context;
+    boost::asio::thread_pool pool(4);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        boost::asio::post(pool, [](){
+            std::cout << "Task executed in thread: " << std::this_thread::get_id() << std::endl;
+        });
+    }
+
+    pool.join();
+
+    return 1;
+}
+
+int test_boost_asio_ip_tcp_socket()
+{
+    boost::asio::io_context io_context;
+    boost::asio::ip::tcp::socket socket(io_context);
+
+    try
+    {
+        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8000);
+        socket.connect(endpoint);
+
+        std::string message = "Hello, Server!";
+        socket.write_some(boost::asio::buffer(message));
+
+        char data[128];
+        size_t len = socket.read_some(boost::asio::buffer(data, 128));
+        std::cerr << "Received: " << std::string(data, len) << std::endl;
+
+        socket.close();
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+
+    return 1;
+}
+
 int main(int argc, char *argv[])
 {
     google::InitGoogleLogging(argv[0]);
@@ -652,7 +803,12 @@ int main(int argc, char *argv[])
         {"--test-eigen-vector3f", test_eigen_vector3f},
         {"--test-ascii", test_ascii},
         {"--test-asan", test_asan},
-        {"--process-request", processRequest}
+        {"--process-request", processRequest},
+        {"--test-boost-asio-hello", test_boost_asio_hello},
+        {"--test-boost-beast-hello", test_boost_beast_hello},
+        {"--test-boost-beast-client", test_boost_beast_client},
+        {"--test-boost-beast-thread-pool", test_boost_asio_thread_pool},
+        {"--test-boost-asio-ip-tcp-socket", test_boost_asio_ip_tcp_socket}
     };
 
     auto it = cmd_map.find(argv[1]);

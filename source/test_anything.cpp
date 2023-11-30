@@ -9,11 +9,8 @@
  * 
  */
 
-#include <iostream>
-#include <chrono>
-#include <ctime>
-#include <thread>
-#include <string>
+#include "entry.hpp"
+
 
 const int ALERT_INTERVAL_SECONDS = 3;  // 告警时间间隔为60秒
 std::time_t lastAlertTime = 0;  // 上次告警时间的初始值为0
@@ -39,9 +36,6 @@ int processRequest()
 
     return 0;
 }
-
-#include <cstdio>
-#include <cstdlib>
 
 int test_asan()
 {
@@ -71,8 +65,6 @@ int test_ascii()
     
     return 0;
 }
-
-#include <Eigen/Dense>
 
 int test_eigen_hello() {
     // 创建矩阵
@@ -156,8 +148,8 @@ public:
 
 extern "C"
 {
-    #include <sys/types.h>
-    #include <sys/ipc.h>
+
+
 }
 
 int test_ftok()
@@ -179,8 +171,6 @@ int test_ftok()
     
     return 0;
 }
-
-#include <chrono>
 
 // 要测试运行时间的函数
 void myFunction()
@@ -232,8 +222,6 @@ int arm_time()
     return 0;
 }
 
-#include <random>
-
 int generateRandomMixedString() {
     int size = 5;
     std::random_device rd;
@@ -270,11 +258,6 @@ int generateRandomMixedString() {
     return 0;
 }
 
-extern "C"
-{
-    #include <sys/sysinfo.h>
-}
-
 int GetMemInfo()
 {
     int ret;
@@ -296,8 +279,6 @@ int GetMemInfo()
     std::cerr << "used memory: " << used_memory << " MB" << std::endl;
     return 0;
 }
-
-#include <unordered_map>
 
 int test_hashmap_1()
 {
@@ -330,12 +311,6 @@ int test_hashmap_1()
     return 0;
 }
 
-extern "C"
-{
-    #include <unistd.h>
-    #include <signal.h>
-}
-
 int test_kill_process()
 {
     pid_t pid = 13509;  // 要杀死的进程的PID
@@ -349,8 +324,6 @@ int test_kill_process()
 
     return 0;
 }
-
-#include <thread>
 
 int test_lambda()
 {
@@ -383,8 +356,6 @@ int test_lambda()
     }
     return 0;
 }
-
-#include <cmath>
 
 int test_ceil()
 {
@@ -433,9 +404,6 @@ int test_for_loop()
     return 0;
 }
 
-#define CPPHTTPLIB_OPENSSL_SUPPORT
-#include "httplib.h"
-
 int test_httplib_client()
 {
     // httplib::Client cli("http://192.169.0.152:28001");
@@ -476,14 +444,6 @@ int test_robot()
     return 0;
 }
 
-#include "boost/log/core.hpp"
-#include "boost/log/trivial.hpp"
-#include "boost/log/expressions.hpp"
-#include "boost/log/sinks/text_file_backend.hpp"
-#include "boost/log/utility/setup/file.hpp"
-#include "boost/log/utility/setup/common_attributes.hpp"
-#include "boost/log/sources/severity_logger.hpp"
-#include "boost/log/sources/record_ostream.hpp"
 
 namespace logging = boost::log;
 namespace sinks = boost::log::sinks;
@@ -491,7 +451,6 @@ namespace src = boost::log::sources;
 namespace expr = boost::log::expressions;
 namespace attrs = boost::log::attributes;
 namespace keywords = boost::log::keywords;
-
 
 void init()
 {
@@ -556,8 +515,6 @@ int test_boost_log_trivial()
     return 0;
 }
 
-#include "old_src/json.hpp"
-
 int test_httplib_server()
 {
     httplib::Server svr;
@@ -609,8 +566,6 @@ int test_httplib_server()
     return 0;
 }
 
-#include "glog/logging.h"
-
 int test_glog()
 {
     // 输出到终端
@@ -631,8 +586,6 @@ int test_glog()
     return 0;
 }
 
-#include "boost/asio.hpp"
-
 void Print(const boost::system::error_code& ec)
 {
     std::cerr << "Hello world" << std::endl;
@@ -651,8 +604,6 @@ int test_boost_asio_hello()
 
     return 1;
 }
-
-#include "boost/beast.hpp"
 
 int test_boost_beast_hello()
 {
@@ -782,9 +733,77 @@ int test_boost_asio_ip_tcp_socket()
     return 1;
 }
 
+// 模拟目标位姿 x,y,z,rx,ry,rz
+int test_generate_target()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::uniform_real_distribution<> x_dis(-40, 40);
+    std::uniform_real_distribution<> y_dis(0, 40);
+    std::uniform_real_distribution<> z_dis(0, 10);
+    std::uniform_real_distribution<> rx_dis(-3.14, 3.14);
+    std::uniform_real_distribution<> ry_dis(-3.14, 3.14);
+    std::uniform_real_distribution<> rz_dis(-3.14, 3.14);
+
+    for (int i = 0; i < 10; ++i)
+    {
+        LOG(INFO) << "x: " << x_dis(gen) << ", "
+                  << "y: " << y_dis(gen) << ", "
+                  << "z: " << z_dis(gen) << ", "
+                  << "rx: " << rx_dis(gen) << ", "
+                  << "ry: " << ry_dis(gen) << ", "
+                  << "rz: " << rz_dis(gen) << "\n";
+    }
+
+    return 1;
+}
+
+class Book 
+{
+public:
+    std::string title;
+    int year;
+
+    Book(const std::string& t, int y) : title(t), year(y) {}
+};
+
+bool compareByYear(const Book& a, const Book& b)
+{
+    return a.year < b.year;
+}
+
+int test_sort_book_class()
+{
+    std::vector<Book> books = {
+        {"Book A", 2000},
+        {"Book B", 200},
+        {"Book C", 20},
+        {"Book D", 210},
+        {"Book E", 203200}
+    };
+
+    LOG(INFO) << "Original order: " << "\n";
+    for (const auto& book : books)
+    {
+        LOG(INFO) << "book's title: " << book.title << ", book's year: " << book.year << "\n";
+    }
+
+    std::sort(books.begin(), books.end(), compareByYear);
+
+    LOG(INFO) << "Sorted by Year: " << "\n";
+        for (const auto& book : books)
+    {
+        LOG(INFO) << "book's title: " << book.title << ", book's year: " << book.year << "\n";
+    }
+
+    return 1;
+}
+
 int main(int argc, char *argv[])
 {
     google::InitGoogleLogging(argv[0]);
+    FLAGS_logtostderr = 1;
     
     std::map<std::string, std::function<int()>> cmd_map = {
         {"--test-glog", test_glog},
@@ -808,7 +827,10 @@ int main(int argc, char *argv[])
         {"--test-boost-beast-hello", test_boost_beast_hello},
         {"--test-boost-beast-client", test_boost_beast_client},
         {"--test-boost-beast-thread-pool", test_boost_asio_thread_pool},
-        {"--test-boost-asio-ip-tcp-socket", test_boost_asio_ip_tcp_socket}
+        {"--test-boost-asio-ip-tcp-socket", test_boost_asio_ip_tcp_socket},
+        {"--test-generate-target", test_generate_target},
+        {"--test-business", test_business},
+        {"--test-sort-book-class", test_sort_book_class}
     };
 
     auto it = cmd_map.find(argv[1]);

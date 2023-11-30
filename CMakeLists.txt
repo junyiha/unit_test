@@ -130,12 +130,15 @@ link_directories(${CMAKE_SOURCE_DIR}/third_party/opencv4/lib/
                  ${CMAKE_SOURCE_DIR}/third_party/ty_lib/lib/linux/lib_x64
                  /usr/local/lib/)
 
+aux_source_directory(${CMAKE_SOURCE_DIR}/source/ src_file_array)
+
 foreach(executable ${executables})
 
     # message("the value of executable is :${executable}.cc")
 
     add_executable(${executable} 
-                   ${CMAKE_SOURCE_DIR}/source/${executable}.cpp
+                   ${src_file_array}
+                  #  ${CMAKE_SOURCE_DIR}/source/${executable}.cpp
                   #  ${CMAKE_SOURCE_DIR}/source/old_src/${executable}.cc 
                    ${CMAKE_SOURCE_DIR}/source/old_src/XYZCamera.cpp 
                    ${CMAKE_SOURCE_DIR}/source/old_src/ParseFrame.cc 

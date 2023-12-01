@@ -32,6 +32,8 @@ extern "C"
 #include <thread>
 #include <cmath>
 
+#include "protocol.hpp"
+
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 
@@ -39,6 +41,8 @@ extern "C"
 
 #include "glog/logging.h"
 
-int test_business();
+int test_business(Message& message);
 
-int test_asio();
+int test_asio(Message& message);
+
+int test_anything(Message& message);

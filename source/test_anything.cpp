@@ -810,11 +810,8 @@ int test_sort_book_class()
     return 1;
 }
 
-int main(int argc, char *argv[])
+int test_anything(Message& message)
 {
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_logtostderr = 1;
-    
     std::map<std::string, std::function<int()>> cmd_map = {
         {"--test-glog", test_glog},
         {"--test-httplib-server", test_httplib_server},
@@ -839,22 +836,16 @@ int main(int argc, char *argv[])
         {"--test-boost-beast-thread-pool", test_boost_asio_thread_pool},
         {"--test-boost-asio-ip-tcp-socket", test_boost_asio_ip_tcp_socket},
         {"--test-generate-target", test_generate_target},
-        {"--test-business", test_business},
         {"--test-sort-book-class", test_sort_book_class},
-        {"--test-asio", test_asio}
     };
-
-    auto it = cmd_map.find(argv[1]);
+    std::string cmd = message.message_pool[2];
+    auto it = cmd_map.find(cmd);
     if (it != cmd_map.end())
     {
         it->second();
+        return 1;
     }
-    else 
-    {
-        std::cerr << "invalid command: " << argv[1] << std::endl;
-    }
-
-    google::ShutdownGoogleLogging();
+    std::cerr << "invalid command: " << cmd << std::endl;
 
     return 0;
 }

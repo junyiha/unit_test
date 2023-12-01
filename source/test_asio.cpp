@@ -11,7 +11,7 @@
 #include "entry.hpp"
 #include "asio.hpp"
 
-int test_asio()
+int test_asio(Message& message)
 {
     LOG(INFO) << "test asio begin..." << "\n";
     asio::io_context io;

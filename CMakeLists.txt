@@ -107,6 +107,7 @@ include_directories(${CMAKE_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/third_party/xyz-sensor-sdk/include/
                     ${CMAKE_SOURCE_DIR}/third_party/boost/include/
                     ${CMAKE_SOURCE_DIR}/third_party/
+                    ${CMAKE_SOURCE_DIR}/third_party/asio/
                     ${CMAKE_SOURCE_DIR}/third_party/glog/include/
                     # ${opencv_header_path}
                     ${CMAKE_SOURCE_DIR}/third_party/opencv4/include/opencv4/

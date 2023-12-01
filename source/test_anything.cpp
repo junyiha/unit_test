@@ -11,6 +11,16 @@
 
 #include "entry.hpp"
 
+#include "boost/log/core.hpp"
+#include "boost/log/trivial.hpp"
+#include "boost/log/expressions.hpp"
+#include "boost/log/sinks/text_file_backend.hpp"
+#include "boost/log/utility/setup/file.hpp"
+#include "boost/log/utility/setup/common_attributes.hpp"
+#include "boost/log/sources/severity_logger.hpp"
+#include "boost/log/sources/record_ostream.hpp"
+#include "boost/asio.hpp"
+#include "boost/beast.hpp"
 
 const int ALERT_INTERVAL_SECONDS = 3;  // 告警时间间隔为60秒
 std::time_t lastAlertTime = 0;  // 上次告警时间的初始值为0
@@ -830,7 +840,8 @@ int main(int argc, char *argv[])
         {"--test-boost-asio-ip-tcp-socket", test_boost_asio_ip_tcp_socket},
         {"--test-generate-target", test_generate_target},
         {"--test-business", test_business},
-        {"--test-sort-book-class", test_sort_book_class}
+        {"--test-sort-book-class", test_sort_book_class},
+        {"--test-asio", test_asio}
     };
 
     auto it = cmd_map.find(argv[1]);

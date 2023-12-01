@@ -205,6 +205,146 @@ int asio_chrono_make_strand()
     return 1;
 }
 
+int asio_bind_executor()
+{
+    asio::io_context io;
+
+    asio::strand<asio::io_context::executor_type> strand(io.get_executor());
+
+    auto handler = asio::bind_executor(strand, [](const int& ec) {
+        if (!ec)
+        {
+            LOG(INFO) << "handler executed in strand!" << "\n";
+        }
+    });
+    int ec = 0;
+    handler(ec);
+
+    io.run();
+
+    return 1;
+}
+
+// error
+int asio_tcp_hello()
+{
+    std::string addr = "www.baidu.com";
+    asio::io_context io_context;
+
+    try 
+    {
+        asio::ip::tcp::resolver resolver(io_context);
+        asio::ip::tcp::resolver::results_type end_points = resolver.resolve(addr, "daytime");
+
+        asio::ip::tcp::socket socket(io_context);
+        asio::connect(socket, end_points);
+
+        for (;;)
+        {
+            std::array<char, 128> buf;
+            asio::error_code error;
+            
+            size_t len = socket.read_some(asio::buffer(buf), error);
+
+            if (error == asio::error::eof)
+            {
+                break;
+            }
+            else if (error)
+            {
+                throw asio::system_error(error);
+            }
+
+            LOG(INFO) << buf.data() << "\n";
+        }
+    }
+    catch (std::exception& e)
+    {
+        LOG(ERROR) << e.what() << "\n";
+    }
+
+    return 1;
+}
+
+std::string make_daytime_string()
+{
+    time_t now = std::time(nullptr);
+
+    return std::ctime(&now);
+}
+
+int asio_tcp_synchronous()
+{
+    try 
+    {
+        asio::io_context io;
+
+        asio::ip::tcp::acceptor acceptor(io, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 13000));
+
+        for (;;)
+        {
+            asio::ip::tcp::socket socket(io);
+            acceptor.accept(socket);
+
+            std::string message = make_daytime_string();
+
+            asio::error_code ignored_error;
+            asio::write(socket, asio::buffer(message), ignored_error);
+        }
+    }
+    catch (std::exception& e)
+    {
+        LOG(ERROR) << e.what() << "\n";
+    }
+
+    return 1;
+}
+
+// //
+// // main.cpp
+// // ~~~~~~~~
+// //
+// // Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// //
+// // Distributed under the Boost Software License, Version 1.0. (See accompanying
+// // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// //
+
+// #include <iostream>
+// #include <string>
+// #include <asio.hpp>
+// #include "server.hpp"
+
+// int main(int argc, char* argv[])
+// {
+//   try
+//   {
+//     // Check command line arguments.
+//     if (argc != 4)
+//     {
+//       std::cerr << "Usage: http_server <address> <port> <doc_root>\n";
+//       std::cerr << "  For IPv4, try:\n";
+//       std::cerr << "    receiver 0.0.0.0 80 .\n";
+//       std::cerr << "  For IPv6, try:\n";
+//       std::cerr << "    receiver 0::0 80 .\n";
+//       return 1;
+//     }
+
+//     // Initialise the server.
+//     http::server::server s(argv[1], argv[2], argv[3]);
+
+//     // Run the server until stopped.
+//     s.run();
+//   }
+//   catch (std::exception& e)
+//   {
+//     std::cerr << "exception: " << e.what() << "\n";
+//   }
+
+//   return 0;
+// }
+
+
 int test_asio(Message& message)
 {
     LOG(INFO) << "test asio begin..." << "\n";
@@ -216,7 +356,10 @@ int test_asio(Message& message)
         {"asio-timer-bind-member-function", asio_timer_bind_member_function},
         {"asio-timer-multi-thread", asio_timer_multi_thread},
         {"asio-chrono-seconds", asio_chrono_seconds},
-        {"asio-chrono-make-strand", asio_chrono_make_strand}
+        {"asio-chrono-make-strand", asio_chrono_make_strand},
+        {"asio-bind-executor", asio_bind_executor},
+        {"asio-tcp-hello", asio_tcp_hello},
+        {"asio-tcp-asychronous", asio_tcp_synchronous}
     };
 
     std::string cmd = message.message_pool[2];

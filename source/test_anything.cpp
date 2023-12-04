@@ -578,20 +578,23 @@ int test_httplib_server()
 
 int test_glog()
 {
-    // 输出到终端
-    FLAGS_logtostderr = 1;
-    LOG(INFO) << "stderr";
-    LOG(INFO) << "hello world";
+    // // 输出到终端
+    // FLAGS_logtostderr = 1;
+    // LOG(INFO) << "stderr";
+    // LOG(INFO) << "hello world";
 
-    // 输出到文件
-    FLAGS_logtostderr = 0;
-    FLAGS_log_dir = "/data/home/user/workspace/unit_test/data/";
-    FLAGS_log_prefix = true;
-    FLAGS_minloglevel = google::INFO;
+    // // 输出到文件
+    // FLAGS_logtostderr = 0;
+    // FLAGS_log_dir = "/data/home/user/workspace/unit_test/data/";
+    // FLAGS_log_prefix = true;
+    // FLAGS_minloglevel = google::INFO;
     
-    LOG(INFO) << "stderr";
-    LOG(INFO) << "hello world";
-
+    for (int i = 0; i < 100000; i++)
+    {
+        LOG(INFO) << "index: " << i << "\n";
+        LOG(INFO) << "hello world" << "\n";
+        LOG(INFO) << "stderr" << "\n";
+    }
 
     return 0;
 }

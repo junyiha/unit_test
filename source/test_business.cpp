@@ -82,12 +82,44 @@ int target_pool_business()
     return 1;
 }
 
+int test_target_pool_area()
+{
+    // x: -0.186795, y: -0.436419, z: 0.0515753
+    // -0.186795, -0.436419, 0.0515753
+    TargetPoolV2::SpacePoint_t left_back_point(-0.5, -0.2, 0);
+    TargetPoolV2::SpacePoint_t left_front_point(0, -0.2, 0);
+    TargetPoolV2::SpacePoint_t right_back_point(-0.5, -0.7, 0);
+    TargetPoolV2::SpacePoint_t right_front_point(0, -0.7, 0);
+
+    TargetPoolV2::TargetArea_t target_area(left_back_point, right_back_point, left_front_point, right_front_point);
+
+    TargetPoolV2::TargetPool target_pool;
+    TargetPoolV2::Target_t target;
+
+    target_pool.SetTargetArea(target_area);
+    target.first.index = 1;
+    target.second = {-0.186795, -0.436419, 0.0515753, 12, 23, 45};
+    target_pool.Push(target);
+
+    TargetPoolV2::Target_t tmp;
+    int res = target_pool.Pop(tmp);
+    if (res != 1)
+    {
+        LOG(WARNING) << "no target data" << "\n";
+        return 0;
+    }
+
+    LOG(INFO) << "x: " << tmp.second.at(0) << ", y: " << tmp.second.at(1) << ", z: " << tmp.second.at(2) << "\n";
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
 
     std::map<std::string, std::function<int()>> cmd_map = {
-        {"target-pool-business", target_pool_business}
+        {"target-pool-business", target_pool_business},
+        {"test-target-pool-area", test_target_pool_area}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

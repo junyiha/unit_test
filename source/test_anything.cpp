@@ -813,6 +813,35 @@ int test_sort_book_class()
     return 1;
 }
 
+int test_vector_multi_delete()
+{
+    std::vector<int> arr = {1, 2, 3, 2, 523, 2, 52341, 2, 1, 2};
+
+    for (auto& it : arr)
+    {
+        LOG(INFO) << "value: " << it << "\n";
+    }
+
+    for (auto it = arr.begin(); it != arr.end();)
+    {
+        if (*it == 2)
+        {
+            arr.erase(it);
+        }
+        else 
+        {
+            it++;
+        }
+    }
+
+    for (auto& it : arr)
+    {
+        LOG(INFO) << "value: " << it << "\n";
+    }
+    
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -840,6 +869,7 @@ int test_anything(Message& message)
         {"--test-boost-asio-ip-tcp-socket", test_boost_asio_ip_tcp_socket},
         {"--test-generate-target", test_generate_target},
         {"--test-sort-book-class", test_sort_book_class},
+        {"--test-vector-multi-delete",test_vector_multi_delete}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

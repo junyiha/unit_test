@@ -113,13 +113,220 @@ int test_target_pool_area()
     return 1;
 }
 
+/**
+    #使能方法。
+    #static：静态网络配置。
+    #dhcp：动态网络配置。
+    #resolv：DNS服务器地址配置。
+    --enable
+    static
+
+    #网卡名称。
+    --ifname
+    eth1
+
+    #IPV4地址，掩码前缀长度，网关，跃点
+    #注1：网关和跃点可以为空，但分割符必须存在。
+    #注2：如果存在多个网关，则必须指定不同的跃点。
+    #注3：第一个网关，将被指定为默认网关。
+    --address4
+    192.168.1.150,24,192.168.1.1,0
+    172.16.1.150,16,172.16.1.1,100
+
+    #IPV6地址，掩码前缀长度，网关，跃点
+    --address6
+    fe80::6e2b:59ff:feec:9447,64,fe80::6e2b:59ff:feec:9447::0001,0
+ */
+int modify_ip_config()
+{
+    std::string config_file = "/data/home/user/workspace/unit_test/data/ip_config.txt";
+    nlohmann::json request_data;
+
+    request_data["enable"] = "static";
+    request_data["ifname"] = "eth0";
+    request_data["address4"] = "192.169.5.68";
+    request_data["netmask"] = "16";
+    request_data["gateway"] = "192.169.4.1";
+    request_data["address6"] = "fe80::6e2b:59ff:feec:9447,64,fe80::6e2b:59ff:feec:9447::0001,0";
+
+    std::string output_data = request_data.dump();
+
+    LOG(INFO) << "request data: " << "\n"
+              << output_data << "\n";
+
+    std::fstream file(config_file, std::ios::in | std::ios::out | std::ios::trunc);
+    if (!file.is_open())
+    {
+        LOG(ERROR) << "can't not open file: " << config_file << "\n";
+        return 0;
+    }
+
+    std::ostringstream os_out;
+
+    os_out << "# 使能方法:" << "\n"
+           << "--enable" << "\n"
+           << std::string(request_data["enable"]) << "\n"
+           << "# 网卡名称: " << "\n"
+           << "--ifname" << "\n"
+           << std::string(request_data["ifname"]) << "\n"
+           << "# IPV4地址: " << "\n"
+           << "--address4" << "\n"
+           << std::string(request_data["address4"]) << ", " << std::string(request_data["netmask"]) << ", " << std::string(request_data["gateway"]) << "\n";
+
+    file.write(os_out.str().c_str(), os_out.str().size());
+
+    file.close();
+
+    return 1;
+}
+
+int multi_modify_ip_config()
+{
+    std::string config_dir = "/data/home/user/workspace/unit_test/data/";
+    nlohmann::json request_data;
+    nlohmann::json item_data;
+
+    item_data["enable"] = "static";
+    item_data["ifname"] = "eth0";
+    item_data["address4"] = "192.169.5.68";
+    item_data["netmask"] = "16";
+    item_data["gateway"] = "192.169.4.1";
+    item_data["address6"] = "fe80::6e2b:59ff:feec:9447,64,fe80::6e2b:59ff:feec:9447::0001,0";
+    request_data["ip_config_array"].push_back(item_data);
+
+    item_data["enable"] = "dhcp";
+    item_data["ifname"] = "eth1";
+    request_data["ip_config_array"].push_back(item_data);
+
+    std::string output_data = request_data.dump();
+
+    LOG(INFO) << "request data: " << "\n"
+              << output_data << "\n";
+
+    for (auto& it : request_data["ip_config_array"])
+    {
+        std::string config_file = config_dir + std::string(it["enable"]) + ".conf";
+        std::fstream file(config_file, std::ios::in | std::ios::out | std::ios::trunc);
+        if (!file.is_open())
+        {
+            LOG(ERROR) << "can't not open file: " << config_file << "\n";
+            return 0;
+        }
+
+        std::ostringstream os_out;
+
+        os_out << "# 使能方法:" << "\n"
+            << "--enable" << "\n"
+            << std::string(it["enable"]) << "\n"
+            << "# 网卡名称: " << "\n"
+            << "--ifname" << "\n"
+            << std::string(it["ifname"]) << "\n"
+            << "# IPV4地址: " << "\n"
+            << "--address4" << "\n"
+            << std::string(it["address4"]) << ", " << std::string(it["netmask"]) << ", " << std::string(it["gateway"]) << "\n";
+
+        file.write(os_out.str().c_str(), os_out.str().size());
+
+        file.close();
+    }
+
+    return 1;
+}
+
+/**
+I20231207 17:21:36.527149 66512 zhangjunyi_business.cpp:1204] point cloud compute successfully
+I20231207 17:21:36.527206 66512 zhangjunyi_business.cpp:1214] index: 0
+timestamp: 2.67614e+06
+timestamp_str: 2676142.992336
+x: -0.317008,y: -0.444065,z: 0.0538538,rx: -2.70031,ry: -1.57728,rz: 0.015535
+I20231207 17:21:36.527253 66512 TargetPool.hpp:321] x: -0.317008, y: -0.444065, z: 0.0538538
+I20231207 17:21:36.527272 66512 zhangjunyi_business.cpp:1214] index: 1
+timestamp: 2.67614e+06
+timestamp_str: 2676142.992336
+x: -0.585516,y: -0.411483,z: 0.0589553,rx: -2.27372,ry: -2.13099,rz: 0.0251893
+I20231207 17:21:36.527297 66512 TargetPool.hpp:321] x: -0.317008, y: -0.444065, z: 0.0538538
+I20231207 17:21:36.527312 66512 TargetPool.hpp:321] x: -0.585516, y: -0.411483, z: 0.0589553
+I20231207 17:21:36.527329 66512 zhangjunyi_business.cpp:1214] index: 2
+timestamp: 2.67614e+06
+timestamp_str: 2676142.992336
+x: 0.371249,y: -0.512091,z: 0.0415001,rx: 3.12769,ry: -0.0613223,rz: -0.0235519
+ * 
+ */
+int test_target_pool_double_free()
+{
+    TargetPoolV2::Target_t target;
+    TargetPoolV2::TargetPool target_pool;
+
+    TargetPoolV2::SpacePoint_t detect_area_left_back_point(-0.5, -0.2, 0);
+    TargetPoolV2::SpacePoint_t detect_area_left_front_point(0, -0.2, 0);
+    TargetPoolV2::SpacePoint_t detect_area_right_back_point(-0.5, -0.7, 0);
+    TargetPoolV2::SpacePoint_t detect_area_right_front_point(0, -0.7, 0);
+    TargetPoolV2::TargetArea_t detect_area(detect_area_left_back_point, detect_area_right_back_point, detect_area_left_front_point, detect_area_right_front_point);
+
+    target_pool.SetTargetArea(detect_area);
+
+    target.first.index = 0;
+    target.second = {-0.317008, -0.444065, 0.0538538, -2.70031, -1.57728, 0.015535};
+    target_pool.Push(target);
+
+    target.first.index = 1;
+    target.second = {-0.585516, -0.411483, 0.0589553, -2.27372, -2.13099, 0.0251893};
+    target_pool.Push(target);
+
+    target.first.index = 2;
+    target.second = {0.371249, -0.512091, 0.0415001, 3.12769, -0.0613223, -0.0235519};
+    target_pool.Push(target);
+
+    return 1;
+}
+
+// x: 0.241932,y: -0.443853,z: 0.053811,rx: -2.6995,ry: -1.57606,rz: 0.0188795
+int test_grab_area_target_pool()
+{
+    TargetPoolV2::Target_t target;
+    TargetPoolV2::TargetPool grab_area_target_pool;
+    TargetPoolV2::SpacePoint_t grab_area_left_back_point(0.2, -0.2, 0);
+    TargetPoolV2::SpacePoint_t grab_area_left_front_point(0.45, -0.2, 0);
+    TargetPoolV2::SpacePoint_t grab_area_right_back_point(0.2, -0.45, 0);
+    TargetPoolV2::SpacePoint_t grab_area_right_front_point(0.45, -0.45, 0);
+    TargetPoolV2::TargetArea_t grab_area(grab_area_left_back_point, grab_area_right_back_point, grab_area_left_front_point, grab_area_right_front_point);
+
+    grab_area_target_pool.SetTargetArea(grab_area);
+    target.first.index = 0;
+    target.second = {0.241932, -0.443853, 0.053811, -2.6995, -1.57606, 0.0188795};
+    grab_area_target_pool.Push(target);
+
+    while (true)
+    {
+        TargetPoolV2::Target_t tmp_target;
+        int res = grab_area_target_pool.Pop(tmp_target);
+        if (res != 1)
+        {
+            break;
+        }
+        LOG(INFO) << "index: " << target.first.index << "\n"
+                  << target.second[0] << ", "
+                  << target.second[1] << ", "
+                  << target.second[2] << ", "
+                  << target.second[3] << ", "
+                  << target.second[4] << ", "
+                  << target.second[5] << "\n";       
+    }
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
 
     std::map<std::string, std::function<int()>> cmd_map = {
         {"target-pool-business", target_pool_business},
-        {"test-target-pool-area", test_target_pool_area}
+        {"test-target-pool-area", test_target_pool_area},
+        {"modify-ip-config", modify_ip_config},
+        {"multi-modify-ip-config", multi_modify_ip_config},
+        {"test-target-pool-double-free", test_target_pool_double_free},
+        {"test-grab-area-target-pool", test_grab_area_target_pool}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

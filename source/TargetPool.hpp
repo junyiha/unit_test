@@ -251,8 +251,8 @@ namespace TargetPoolV2
             }
             m_pool.push_back(target);
 
+            AreaV2();
             Sort();
-            Area();
 
             return;
         }
@@ -271,8 +271,8 @@ namespace TargetPoolV2
 
             Delete();
 
+            AreaV2();
             Sort();
-            Area();
 
             return 1;
         }
@@ -305,6 +305,7 @@ namespace TargetPoolV2
                 if (!IsInArea(*it))
                 {
                     m_pool.erase(it);
+                    m_pool.shrink_to_fit();
                 }
                 else 
                 {
@@ -312,6 +313,22 @@ namespace TargetPoolV2
                 }
             }
 
+
+            return;
+        }
+
+        void AreaV2()
+        {
+            std::deque<Target_t> tmp_pool;
+            tmp_pool.swap(m_pool);
+
+            for (auto& it : tmp_pool)
+            {
+                if (IsInArea(it))
+                {
+                    m_pool.push_back(it);
+                }
+            }
 
             return;
         }

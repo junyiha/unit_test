@@ -869,6 +869,36 @@ int test_ifstream_read_data()
     return 1;
 }
 
+static bool CustomPredicate(double a, double b)
+{
+    if (std::abs(a - b) <= 0.05)
+    {
+        return true;
+    }
+    else 
+    {
+        return false;
+    }
+}
+
+int test_std_equal()
+{
+    std::vector<double> vec1 = {2.2, 2.1, 2.2};
+    std::vector<double> vec2 = {2.22, 2.12, 2.22};
+
+    bool is_equal = std::equal(vec1.begin(), vec1.end(), vec2.begin(), CustomPredicate);
+    if (is_equal)
+    {
+        LOG(INFO) << "两个序列中对应元素误差在0.05以内,所以相等 \n";
+    }
+    else 
+    {
+        LOG(ERROR) << "两个序列中对应元素误差在0.05以外,所以不相等 \n";
+    }
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -897,7 +927,8 @@ int test_anything(Message& message)
         {"--test-generate-target", test_generate_target},
         {"--test-sort-book-class", test_sort_book_class},
         {"--test-vector-multi-delete",test_vector_multi_delete},
-        {"--test-ifstream", test_ifstream_read_data}
+        {"--test-ifstream", test_ifstream_read_data},
+        {"test-std-equal", test_std_equal}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

@@ -316,6 +316,61 @@ int test_grab_area_target_pool()
     return 1;
 }
 
+// 192.169.5.68, 16, 192.169.4.1
+int test_parse_string_in_regex()
+{
+    // std::string data_str = "192.169.5.68, 16, 192.169.4.1";
+    std::string data_str = "192.169.5.68, 16, ";
+
+    std::vector<char> addr, netmask, gateway;
+    addr.resize(20);
+    netmask.resize(20);
+    gateway.resize(20);
+
+    int num = std::sscanf(data_str.c_str(), "%[^,], %[^,], %[^,]", addr.data(), netmask.data(), gateway.data());
+    LOG(INFO) << "address: " << std::string(addr.data()) << "\n"
+                << "netmask: " << std::string(netmask.data()) << "\n"
+                << "gateway: " << std::string(gateway.data()) << "\n";
+
+    return 1;
+}
+
+// 192.169.5.68, 16, 192.169.4.1
+int test_parse_string_in_regex_v2()
+{
+    // std::string data_str = "192.169.5.68, 16, 192.169.4.1";
+    std::string data_str = "192.169.5.68, 16, ";
+
+    std::string addr, netmask, gateway;
+
+    int cnt = 0;
+    for (auto& it : data_str)
+    {
+        if (it != ',' && cnt == 0)
+        {
+            addr += it;
+        }
+        else if (it != ',' && cnt == 1)
+        {
+            netmask += it;
+        }
+        else if (it != ',' && cnt == 2)
+        {
+            gateway += it;
+        }
+        else 
+        {
+            cnt++;
+        }
+    }
+
+    LOG(INFO) << "addr: " << addr << "\n"
+              << "netmask: " << netmask << "\n"
+              << "gateway: " << gateway << "\n";
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -326,7 +381,9 @@ int test_business(Message& message)
         {"modify-ip-config", modify_ip_config},
         {"multi-modify-ip-config", multi_modify_ip_config},
         {"test-target-pool-double-free", test_target_pool_double_free},
-        {"test-grab-area-target-pool", test_grab_area_target_pool}
+        {"test-grab-area-target-pool", test_grab_area_target_pool},
+        {"test-parse-string-in-regex", test_parse_string_in_regex},
+        {"test-parse-string-in-regex-v2", test_parse_string_in_regex_v2}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

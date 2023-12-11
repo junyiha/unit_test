@@ -842,6 +842,33 @@ int test_vector_multi_delete()
     return 1;
 }
 
+int test_ifstream_read_data()
+{
+    std::string config_file = "/data/home/user/workspace/unit_test/data/static.conf";
+    std::ifstream file;
+
+    file.open(config_file, std::ios::in);
+    if (!file.is_open())
+    {
+        LOG(ERROR) << "open config file failed: " << config_file << "\n";
+        return 0;
+    }
+
+    file.seekg(0, std::ios::end);
+    std::streampos file_size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<char> data_buffer(file_size);
+
+    file.read(data_buffer.data(), file_size);
+    file.close();
+
+    std::string data_string = std::string(data_buffer.data());
+    LOG(INFO) << "data string: " << data_string << "\n";
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -869,7 +896,8 @@ int test_anything(Message& message)
         {"--test-boost-asio-ip-tcp-socket", test_boost_asio_ip_tcp_socket},
         {"--test-generate-target", test_generate_target},
         {"--test-sort-book-class", test_sort_book_class},
-        {"--test-vector-multi-delete",test_vector_multi_delete}
+        {"--test-vector-multi-delete",test_vector_multi_delete},
+        {"--test-ifstream", test_ifstream_read_data}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

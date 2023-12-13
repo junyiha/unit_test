@@ -371,6 +371,72 @@ int test_parse_string_in_regex_v2()
     return 1;
 }
 
+bool test_CheckSubnetMask(const std::string subnet_mask)
+{
+    bool found_zero = false;
+    std::string tmp = subnet_mask;
+    tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
+    std::bitset<32> bits(tmp);
+
+    for (int i = 31; i >= 0; --i)
+    {
+        if (!bits.test(i))
+        {
+            found_zero = true;
+        }
+        else if (found_zero)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// 255.255.0.0
+int test_DecimalToBinarySubnetMask()
+{
+    const std::string subnet_mask = "255.255.0.0";
+    // const std::string subnet_mask = "255.255.0.255";
+
+    std::stringstream ss(subnet_mask);
+    std::string segment;
+    std::vector<int> decimal_segments;
+
+    while (std::getline(ss, segment, '.'))
+    {
+        int decimal_value = std::stoi(segment);
+        decimal_segments.push_back(decimal_value);
+    }
+
+    std::string binary_subnet_mask;
+    int subnet_mask_number = 0;
+    for (int segment_value : decimal_segments)
+    {
+        std::bitset<8> bits(segment_value);
+        subnet_mask_number += bits.count();
+        binary_subnet_mask += bits.to_string();
+        binary_subnet_mask += ".";
+    }
+
+    binary_subnet_mask.pop_back();
+
+    if (test_CheckSubnetMask(binary_subnet_mask))
+    {
+        LOG(INFO) << "decimal subnet mask: " << subnet_mask << "\n" 
+                  << "subnet mask number: " << subnet_mask_number << "\n"
+                  << "binary subnet mask: " << binary_subnet_mask << "\n";
+    }
+    else 
+    {
+        LOG(ERROR) << "decimal subnet mask: " << subnet_mask << "\n" 
+                   << "subnet mask number: " << subnet_mask_number << "\n"
+                   << "binary subnet mask: " << binary_subnet_mask << "\n";
+    }
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -383,7 +449,8 @@ int test_business(Message& message)
         {"test-target-pool-double-free", test_target_pool_double_free},
         {"test-grab-area-target-pool", test_grab_area_target_pool},
         {"test-parse-string-in-regex", test_parse_string_in_regex},
-        {"test-parse-string-in-regex-v2", test_parse_string_in_regex_v2}
+        {"test-parse-string-in-regex-v2", test_parse_string_in_regex_v2},
+        {"test-decimal-to-binary-subnet-mask", test_DecimalToBinarySubnetMask}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

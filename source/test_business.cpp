@@ -394,6 +394,11 @@ bool test_CheckSubnetMask(const std::string subnet_mask)
 }
 
 // 255.255.0.0
+/**
+ * @brief 十进制子网掩码转二进制，并输出CIDR(classless inter-domain routing，无类域间路由)
+ * 
+ * @return int 
+ */
 int test_DecimalToBinarySubnetMask()
 {
     const std::string subnet_mask = "255.255.0.0";
@@ -437,6 +442,64 @@ int test_DecimalToBinarySubnetMask()
     return 1;
 }
 
+int test_BinaryToDecimalSubnetMask()
+{
+    const std::string binary_subnet_mask = "11111111.11111111.00000000.00000000";    
+    
+    std::stringstream ss(binary_subnet_mask);
+    std::string segment;
+    std::vector<std::string> binary_segments;
+
+    while (std::getline(ss, segment, '.'))
+    {
+        std::bitset<8> bits(segment);
+        std::stringstream s;
+        s << bits.to_ulong();
+        binary_segments.push_back(s.str());
+    }
+
+    std::string decimal_subnet_mask;
+    for (const std::string& segment_value : binary_segments)
+    {
+        decimal_subnet_mask += segment_value;
+        decimal_subnet_mask += ".";
+    }
+
+    decimal_subnet_mask.pop_back();
+
+    LOG(INFO) << "binary subnet mask: " << binary_subnet_mask << "\n"
+              << "decimal subnet mask: " << decimal_subnet_mask << "\n";
+
+    return 1;
+}
+
+int test_CIDRToDecimalSubnetMask()
+{
+    // int cidr = 16;
+    int cidr = 15;
+    std::bitset<32> bits;
+    std::vector<std::bitset<8>> binary_subnet_mask_array(4, std::bitset<8>(0));
+    // std::vector<std::bitset<8>> binary_subnet_mask_array;
+    // binary_subnet_mask_array.resize(4);
+    
+    for (int i = 0; i < cidr; i++)
+    {
+        binary_subnet_mask_array.at(i / 8).set(i % 8);
+    }
+    std::string decimal_subnet_mask;
+    for (auto& binary_subnet_mask : binary_subnet_mask_array)
+    {
+        decimal_subnet_mask += std::to_string(binary_subnet_mask.to_ulong());
+        decimal_subnet_mask += ".";
+    }
+    decimal_subnet_mask.pop_back();
+
+    LOG(INFO) << "CIDR: " << cidr << "\n"
+              << "decimal subnet mask: " << decimal_subnet_mask << "\n";
+    
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -450,7 +513,9 @@ int test_business(Message& message)
         {"test-grab-area-target-pool", test_grab_area_target_pool},
         {"test-parse-string-in-regex", test_parse_string_in_regex},
         {"test-parse-string-in-regex-v2", test_parse_string_in_regex_v2},
-        {"test-decimal-to-binary-subnet-mask", test_DecimalToBinarySubnetMask}
+        {"test-decimal-to-binary-subnet-mask", test_DecimalToBinarySubnetMask},
+        {"test-binary-to-decimal-subnet-mask", test_BinaryToDecimalSubnetMask},
+        {"test-cidr-to-decimal-subnet-mask", test_CIDRToDecimalSubnetMask}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

@@ -500,6 +500,23 @@ int test_CIDRToDecimalSubnetMask()
     return 1;
 }
 
+int test_vcr_get_velocity()
+{
+    httplib::Client cli("http://192.169.0.152:28001");
+
+    auto res = cli.Get("/api/detectors/detector/getVelocity");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "Get request failed \n";
+        return 0;
+    }
+
+    LOG(INFO) << "response body data: \n"
+              << res->body << "\n";
+ 
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -515,7 +532,8 @@ int test_business(Message& message)
         {"test-parse-string-in-regex-v2", test_parse_string_in_regex_v2},
         {"test-decimal-to-binary-subnet-mask", test_DecimalToBinarySubnetMask},
         {"test-binary-to-decimal-subnet-mask", test_BinaryToDecimalSubnetMask},
-        {"test-cidr-to-decimal-subnet-mask", test_CIDRToDecimalSubnetMask}
+        {"test-cidr-to-decimal-subnet-mask", test_CIDRToDecimalSubnetMask},
+        {"test-vcr-get-velocity", test_vcr_get_velocity}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

@@ -576,6 +576,35 @@ int test_httplib_server()
     return 0;
 }
 
+int test_httplib_server_v2()
+{
+    httplib::Server svr;
+
+    svr.Get("/hi", [](const httplib::Request& , httplib::Response& res) {
+        res.set_content("hello world", "text/plain");
+    });
+
+    svr.listen("0.0.0.0", 13000);
+
+    return 1;
+}
+
+int test_httplib_client_v2()
+{
+    httplib::Client cli("http://192.169.4.16:13000");
+
+    auto res = cli.Get("/hi");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "connect to server failed\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+
+    return 1;
+}
+
 int test_glog()
 {
     // // 输出到终端
@@ -904,6 +933,8 @@ int test_anything(Message& message)
     std::map<std::string, std::function<int()>> cmd_map = {
         {"--test-glog", test_glog},
         {"--test-httplib-server", test_httplib_server},
+        {"--test-httplib-server-v2", test_httplib_server_v2},
+        {"--test-httplib-client-v2", test_httplib_client_v2},
         {"--test-boost-log-trivial", test_boost_log_trivial},
         {"--test-robot", test_robot},
         {"--test-mnc", test_mnc},

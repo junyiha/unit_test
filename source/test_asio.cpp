@@ -300,50 +300,32 @@ int asio_tcp_synchronous()
     return 1;
 }
 
-// //
-// // main.cpp
-// // ~~~~~~~~
-// //
-// // Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-// //
-// // Distributed under the Boost Software License, Version 1.0. (See accompanying
-// // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-// //
+int asio_tcp_client()
+{
+    try 
+    {
+        asio::io_context io_context;
 
-// #include <iostream>
-// #include <string>
-// #include <asio.hpp>
-// #include "server.hpp"
+        asio::ip::tcp::socket socket(io_context);
+        asio::ip::tcp::endpoint end_point(asio::ip::address::from_string("192.169.4.16"), 13000);
+        asio::ip::tcp::resolver resolver(io_context);
 
-// int main(int argc, char* argv[])
-// {
-//   try
-//   {
-//     // Check command line arguments.
-//     if (argc != 4)
-//     {
-//       std::cerr << "Usage: http_server <address> <port> <doc_root>\n";
-//       std::cerr << "  For IPv4, try:\n";
-//       std::cerr << "    receiver 0.0.0.0 80 .\n";
-//       std::cerr << "  For IPv6, try:\n";
-//       std::cerr << "    receiver 0::0 80 .\n";
-//       return 1;
-//     }
+        asio::connect(socket, resolver.resolve(end_point));
+        std::string message = "hello server";
+        asio::write(socket, asio::buffer(message.data(), message.size()));
 
-//     // Initialise the server.
-//     http::server::server s(argv[1], argv[2], argv[3]);
+        char response[1024];
+        std::size_t reply_length = asio::read(socket, asio::buffer(response, 1024));
+        LOG(INFO) << "response message: \n"
+                  << std::string(response, reply_length) << "\n";
+    }
+    catch (std::exception& e)
+    {
+        LOG(ERROR) << e.what() << "\n";
+    }
 
-//     // Run the server until stopped.
-//     s.run();
-//   }
-//   catch (std::exception& e)
-//   {
-//     std::cerr << "exception: " << e.what() << "\n";
-//   }
-
-//   return 0;
-// }
-
+    return 1;
+}
 
 int test_asio(Message& message)
 {
@@ -359,7 +341,8 @@ int test_asio(Message& message)
         {"asio-chrono-make-strand", asio_chrono_make_strand},
         {"asio-bind-executor", asio_bind_executor},
         {"asio-tcp-hello", asio_tcp_hello},
-        {"asio-tcp-asychronous", asio_tcp_synchronous}
+        {"asio-tcp-asychronous", asio_tcp_synchronous},
+        {"asio-tcp-client", asio_tcp_client}
     };
 
     std::string cmd = message.message_pool[2];

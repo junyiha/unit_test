@@ -19,18 +19,21 @@ extern "C"
     #include <signal.h>
 }
 
-#include <iostream>
-#include <chrono>
 #include <ctime>
-#include <thread>
-#include <string>
 #include <cstdio>
 #include <cstdlib>
-#include <Eigen/Dense>
+#include <cmath>
+
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include <string>
 #include <random>
 #include <unordered_map>
 #include <thread>
-#include <cmath>
+#include <memory>
+
+#include <Eigen/Dense>
 
 #include "protocol.hpp"
 
@@ -46,3 +49,5 @@ int test_business(Message& message);
 int test_asio(Message& message);
 
 int test_anything(Message& message);
+
+int test_network(Message& message);

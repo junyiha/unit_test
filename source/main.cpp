@@ -45,7 +45,8 @@ int main(int argc, char *argv[])
     std::map<std::string, std::function<int(Message& message)>> cmd_map = {
         {"--test-asio", test_asio},
         {"--test-anything", test_anything},
-        {"--test-business", test_business}
+        {"--test-business", test_business},
+        {"--test-network", test_network}
     };
 
     auto it = cmd_map.find(argv[1]);

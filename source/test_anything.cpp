@@ -928,6 +928,15 @@ int test_std_equal()
     return 1;
 }
 
+int test_thread_hardware_concurrency()
+{
+    const uint32_t num_threads = std::thread::hardware_concurrency();
+
+    LOG(INFO) << "std::thread::hardware_concurrency(): " << num_threads << "\n";
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -959,7 +968,8 @@ int test_anything(Message& message)
         {"--test-sort-book-class", test_sort_book_class},
         {"--test-vector-multi-delete",test_vector_multi_delete},
         {"--test-ifstream", test_ifstream_read_data},
-        {"test-std-equal", test_std_equal}
+        {"--test-std-equal", test_std_equal},
+        {"--test-thread-hardware-concurrency", test_thread_hardware_concurrency}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

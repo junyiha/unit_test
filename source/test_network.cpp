@@ -215,6 +215,17 @@ int beast_http_server_async(Message& message)
 
 static void handle_event(mg_connection *connect, int ev, void *ev_data, void *fn_data)
 {
+    struct mg_http_message* hm = (struct mg_http_message*)ev_data;
+    LOG(INFO) << "ev: " << ev << "\n";
+    switch (ev)
+    {
+        case MG_EV_HTTP_MSG:
+            mg_http_reply(connect, 200, "text/plain", "hello, mongoose");
+            connect->is_draining = 1;
+            break;
+        default:
+            break;
+    }
 }
 
 int mongoose_http_server(Message& message)
@@ -225,9 +236,135 @@ int mongoose_http_server(Message& message)
 
     mg_mgr_init(&mgr);
 
-    connect = mg_listen(&mgr, "0.0.0.0:13000", func, nullptr);
+    connect = mg_http_listen(&mgr, "0.0.0.0:13000", func, nullptr);
 
-    mg_mgr_poll(&mgr, 1000);
+    for (;;)
+    {
+        mg_mgr_poll(&mgr, 1000);
+    }
+
+    mg_mgr_free(&mgr);
+
+    return 1;
+}
+
+void EventHandler(mg_connection* connect, struct mg_http_message* ev_data)
+{
+    mg_http_reply(connect, 200, "text/plain", "hello mongoose");
+    connect->is_draining = 1;
+
+    return;
+}
+
+int mongoose_http_server_sync(Message& message)
+{
+    struct mg_mgr mgr;
+    struct mg_connection *connect;
+    mg_event_handler_t func = [](mg_connection *connect, int ev, void *ev_data, void *fn_data)
+    {
+        struct mg_http_message* hm = (struct mg_http_message*)ev_data;
+        LOG(INFO) << "ev: " << ev << "\n";
+        switch (ev)
+        {
+            case MG_EV_HTTP_MSG:
+            {
+                EventHandler(connect, hm);
+                break;
+            }
+            default:
+                break;
+        }
+    };
+
+    mg_mgr_init(&mgr);
+
+    connect = mg_http_listen(&mgr, "0.0.0.0:13000", func, nullptr);
+
+    for (;;)
+    {
+        mg_mgr_poll(&mgr, 1000);
+    }
+
+    mg_mgr_free(&mgr);
+
+    return 1;
+}
+
+int mongoose_http_server_async(Message& message)
+{
+    struct mg_mgr mgr;
+    struct mg_connection *connect;
+    mg_event_handler_t func = [](mg_connection *connect, int ev, void *ev_data, void *fn_data)
+    {
+        struct mg_http_message* hm = (struct mg_http_message*)ev_data;
+        LOG(INFO) << "ev: " << ev << "\n";
+        switch (ev)
+        {
+            case MG_EV_HTTP_MSG:
+            {
+                std::thread tmp(EventHandler, connect, hm);
+                tmp.detach();
+                break;
+            }
+            default:
+                break;
+        }
+    };
+
+    mg_mgr_init(&mgr);
+
+    connect = mg_http_listen(&mgr, "0.0.0.0:13000", func, nullptr);
+
+    for (;;)
+    {
+        mg_mgr_poll(&mgr, 1000);
+    }
+
+    mg_mgr_free(&mgr);
+
+    return 1;
+}
+
+int mongoose_http_client(Message& message)
+{
+    bool done = false;
+    struct mg_mgr mgr;
+    struct mg_connection* connect = NULL;
+    mg_event_handler_t func = [](mg_connection *connect, int ev, void *ev_data, void *fn_data)
+    {
+        LOG(INFO) << "ev: " << ev << "\n";
+        switch (ev)
+        {
+            case MG_EV_CONNECT:
+            {
+                struct mg_str host = mg_url_host("http://192.169.4.16:13000/api/");
+                mg_printf(connect, "GET %s HTTP/1.0 \r\nContent-Type:text/plain\r\n\r\n", mg_url_uri("http://192.169.4.16:13000/api/"));
+                mg_printf(connect, "Hello, mongoose server\r\n");
+                break;
+            }
+            case MG_EV_HTTP_MSG:
+            {
+                struct mg_http_message* hm = static_cast<struct mg_http_message*>(ev_data);
+                printf("%.*s", (int)hm->message.len, hm->message.ptr);
+                *(bool *)fn_data = true;
+                break;
+            }
+            default:
+                break;
+        }
+    };
+
+    mg_mgr_init(&mgr);
+
+    for (;;)
+    {
+        // if (done)
+        // {
+        //     break;
+        // }
+        mg_http_connect(&mgr, "http://192.169.4.16:13000/api/", func, &done);
+        mg_mgr_poll(&mgr, 1000);
+    }
 
     mg_mgr_free(&mgr);
 
@@ -242,7 +379,10 @@ int test_network(Message& message)
         {"beast-http-server-sync", beast_http_server_sync},
         {"beast-http-server-async", beast_http_server_async},
         {"beast-http-client-sync", beast_http_client_sync},
-        {"mongoose-http-server", mongoose_http_server}
+        {"mongoose-http-server", mongoose_http_server},
+        {"mongoose-http-server-async", mongoose_http_server_async},
+        {"mongoose-http-server-sync", mongoose_http_server_sync},
+        {"mongoose-http-client", mongoose_http_client}
     };
 
     std::string cmd = message.message_pool.at(2);

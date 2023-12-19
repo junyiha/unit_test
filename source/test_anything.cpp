@@ -1048,6 +1048,62 @@ int GetFilesInDirectory()
     return 1;
 }
 
+int test_default_creator_function()
+{
+    class Test 
+    {
+    private:
+        std::string m_data;
+    
+    public:
+        Test() = delete;
+        Test(const std::string data) : m_data(data)
+        {
+
+        };
+        ~Test()
+        {
+            m_data = "";
+        }
+    
+        void Print()
+        {
+            LOG(INFO) << m_data << "\n";
+        }
+    };
+
+    // Test test;
+    // test.Print();
+
+    Test test2("hello, world");
+    test2.Print();
+
+    return 1;
+}
+
+int test_exception_logic_error()
+{
+    auto tmp = [](int x, int y){
+        if (y == 0)
+        {
+            throw std::logic_error("Division by zero is not allowed");
+        }
+        LOG(INFO) << "Result of division: " << x / y << std::endl;
+    };
+
+    try
+    {
+        tmp(10, 0);
+    }
+    catch (const std::logic_error& e)
+    {
+        LOG(ERROR) << "Caught logic_error: " << e.what() << std::endl;
+        return 0;
+    }
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -1082,7 +1138,9 @@ int test_anything(Message& message)
         {"--test-std-equal", test_std_equal},
         {"--test-thread-hardware-concurrency", test_thread_hardware_concurrency},
         {"--test-thread-lambda-creator", test_thread_lambda_creator},
-        {"--get-files-in-directory", GetFilesInDirectory}
+        {"--get-files-in-directory", GetFilesInDirectory},
+        {"--test-default-creator-function", test_default_creator_function},
+        {"--test-exception-logic-error", test_exception_logic_error}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

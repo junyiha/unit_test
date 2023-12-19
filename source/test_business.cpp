@@ -517,6 +517,98 @@ int test_vcr_get_velocity()
     return 1;
 }
 
+int test_vcr_vision_algorithm()
+{
+    int ec {0};
+    const std::string vision_algorithm_dir = "/data/vcr/VisionAlgorithms/";
+    std::vector<std::string> files;
+    std::vector<std::string> directorys;
+
+    ec = get_dir_and_file_from_path(vision_algorithm_dir, directorys, files);
+    if (ec != 1)
+    {
+        return 0;
+    }
+
+    std::vector<std::string> json_configs;
+    for (const std::string& directory : directorys)
+    {
+        std::string tmp_dir_path = vision_algorithm_dir + directory;
+        std::vector<std::string> tmp_directorys;
+        std::vector<std::string> tmp_files;
+        ec = get_dir_and_file_from_path(tmp_dir_path, tmp_directorys, tmp_files);
+        if (ec != 1)
+        {
+            LOG(ERROR) << "Invalid directory value: " << tmp_dir_path << "\n";
+            continue;
+        }
+        for (const std::string& tmp_file : tmp_files)
+        {
+            if (tmp_file == "detector.json")
+            {
+                std::string tmp_dir = tmp_dir_path + "/" + tmp_file;
+                json_configs.push_back(tmp_dir);
+            }
+        }
+    }
+
+    std::vector<DetectorConfig> detector_configs;
+    for (const std::string& json_config : json_configs)
+    {
+        LOG(INFO) << "json configuration file path: " << json_config << "\n";
+        DetectorConfig detector_config;
+        nlohmann::json parsed_data;
+        std::ifstream file(json_config, std::ios::in);
+        
+        if (!file.is_open())
+        {
+            LOG(ERROR) << "Invalid json config file: " << json_config << "\n";
+            continue;
+        }
+        try 
+        {
+            file >> parsed_data;
+            detector_config.detector_type = parsed_data["detector-type"];
+            detector_config.detector_gap = parsed_data["detector-gap"];
+            detector_config.detector_fps = parsed_data["detector-fps"];
+            detector_config.detector_thresholds = parsed_data["detector-thresholds"];
+            detector_config.tracker_type = parsed_data["tracker-type"];
+            detector_config.trace_case = parsed_data["trace-case"];
+            detector_config.detector_model.name = parsed_data["detector-models"]["name"];
+            for (auto& file : parsed_data["detector-models"]["file"])
+            {
+                detector_config.detector_model.file.push_back(std::string(file));
+            }
+            detector_config.detector_model.type = parsed_data["detector-models"]["type"];
+        }
+        catch (nlohmann::json::parse_error &e)
+        {
+            LOG(ERROR) << "parse error: " << e.what() << "\n";
+            file.close();
+            continue;
+        }
+        catch (nlohmann::json::type_error &e)
+        {
+            LOG(ERROR) << "type error: " << e.what() << "\n";
+            file.close();
+            continue;
+        }
+        detector_configs.push_back(detector_config);
+    }
+
+    for (const auto& detector_config : detector_configs)
+    {
+        LOG(INFO) << "detector-type: " << detector_config.detector_type << "\n"
+                  << "detector-fps: " << detector_config.detector_fps << "\n";
+        for (const auto& it : detector_config.detector_model.file)
+        {
+            LOG(INFO) << "model file path: " << it << "\n";
+        }
+    }
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -533,7 +625,8 @@ int test_business(Message& message)
         {"test-decimal-to-binary-subnet-mask", test_DecimalToBinarySubnetMask},
         {"test-binary-to-decimal-subnet-mask", test_BinaryToDecimalSubnetMask},
         {"test-cidr-to-decimal-subnet-mask", test_CIDRToDecimalSubnetMask},
-        {"test-vcr-get-velocity", test_vcr_get_velocity}
+        {"test-vcr-get-velocity", test_vcr_get_velocity},
+        {"test-vcr-vision-algorithm", test_vcr_vision_algorithm}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

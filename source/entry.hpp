@@ -17,6 +17,7 @@ extern "C"
     #include <sys/ipc.h>
     #include <sys/sysinfo.h>
     #include <signal.h>
+    #include <dirent.h>
 }
 
 #include <ctime>
@@ -51,3 +52,15 @@ int test_asio(Message& message);
 int test_anything(Message& message);
 
 int test_network(Message& message);
+
+///////////////////////////////////////////////////////////////
+
+/**
+ * @brief Get the dir and file from path object
+ * 
+ * @param path 
+ * @param directorys 
+ * @param files 
+ * @return int 1 success | 0 fail | other unknown
+ */
+int get_dir_and_file_from_path(const std::string path, std::vector<std::string>& directorys, std::vector<std::string>& files);

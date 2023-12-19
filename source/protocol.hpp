@@ -57,3 +57,100 @@ public:
         return *this;
     }
 };
+
+class DetectorModel
+{
+public:
+    std::string name;
+    std::vector<std::string> file;
+    std::string type;
+
+public:
+    DetectorModel()
+    {
+        name = "";
+        file.clear();
+        type = "";
+    }
+    DetectorModel(const DetectorModel& other)
+    {
+        name = other.name;
+        file = other.file;
+        type = other.type;
+    }
+    ~DetectorModel()
+    {
+        name = "";
+        file.clear();
+        type = "";
+    }
+
+    DetectorModel& operator=(const DetectorModel& other)
+    {
+        if (this != &other)
+        {
+            name = other.name;
+            file = other.file;
+            type = other.type;
+        }
+
+        return *this;
+    }
+};
+
+class DetectorConfig
+{
+public:
+    int detector_type;
+    int detector_gap;
+    int detector_fps;
+    double detector_thresholds;
+    int tracker_type;
+    int trace_case;
+    DetectorModel detector_model;
+
+public:
+    DetectorConfig()
+    {
+        detector_type = 0;
+        detector_gap = 0;
+        detector_fps = 0;
+        detector_thresholds = 0;
+        tracker_type = 0;
+        trace_case = 0;
+    }
+    DetectorConfig(const DetectorConfig& other)
+    {
+        detector_type = other.detector_type;
+        detector_gap = other.detector_gap;
+        detector_fps = other.detector_fps;
+        detector_thresholds = other.detector_thresholds;
+        tracker_type = other.tracker_type;
+        trace_case = other.trace_case;
+        detector_model = other.detector_model;
+    }
+    ~DetectorConfig()
+    {
+        detector_type = 0;
+        detector_gap = 0;
+        detector_fps = 0;
+        detector_thresholds = 0;
+        tracker_type = 0;
+        trace_case = 0;
+    }
+    DetectorConfig& operator=(const DetectorConfig& other)
+    {
+        if (this != &other)
+        {
+            detector_type = other.detector_type;
+            detector_gap = other.detector_gap;
+            detector_fps = other.detector_fps;
+            detector_thresholds = other.detector_thresholds;
+            tracker_type = other.tracker_type;
+            trace_case = other.trace_case;
+            detector_model = other.detector_model;
+        }
+
+        return *this;
+    }
+};

@@ -1008,6 +1008,46 @@ int test_thread_lambda_creator()
     return 1;
 }
 
+int GetFilesInDirectory()
+{
+    int ec = 0;
+    std::string dir_path = "/data/vcr/VisionAlgorithms/";
+    std::vector<std::string> directorys;
+    std::vector<std::string> files;
+
+    ec = get_dir_and_file_from_path(dir_path, directorys, files);
+    if (ec != 1)
+    {
+        return 0;
+    }
+
+    for (const std::string& directory : directorys)
+    {
+        LOG(INFO) << directory << "\n";
+        std::string tmp_dir_path = dir_path + directory;
+        std::vector<std::string> tmp_directorys;
+        std::vector<std::string> tmp_files;
+        ec = get_dir_and_file_from_path(tmp_dir_path, tmp_directorys, tmp_files);
+        if (ec != 1)
+        {
+            LOG(ERROR) << "Invalid directory value: " << tmp_dir_path << "\n";
+            continue;
+        }
+
+        LOG(INFO) << "directory path:" << tmp_dir_path << "\n";
+        for (const std::string& tmp_directory : tmp_directorys)
+        {
+            LOG(INFO) << tmp_directory << "\n";
+        }
+        LOG(INFO) << "files: \n";
+        for (const std::string& tmp_file : tmp_files)
+        {
+            LOG(INFO) << tmp_file << "\n";
+        }
+    }
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -1041,7 +1081,8 @@ int test_anything(Message& message)
         {"--test-ifstream", test_ifstream_read_data},
         {"--test-std-equal", test_std_equal},
         {"--test-thread-hardware-concurrency", test_thread_hardware_concurrency},
-        {"--test-thread-lambda-creator", test_thread_lambda_creator}
+        {"--test-thread-lambda-creator", test_thread_lambda_creator},
+        {"--get-files-in-directory", GetFilesInDirectory}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

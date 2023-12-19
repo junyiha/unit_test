@@ -937,6 +937,77 @@ int test_thread_hardware_concurrency()
     return 1;
 }
 
+int test_thread_lambda_creator()
+{
+    std::string msg = "this is a message";
+    std::thread tmp([](std::string msg){
+        LOG(INFO) << "lambda function creator\n"
+                  << "message: " << msg << "\n";
+    }, msg);
+
+    tmp.join();
+
+    class Test
+    {
+    public:
+        std::string message;
+
+    public:
+        void test(std::string msg)
+        {
+            std::thread tmp([](std::string msg){
+                LOG(INFO) << "lambda function in class\n"
+                          << "message: " << msg << "\n";
+                return;
+            }, msg);
+
+            tmp.join();
+        }
+
+        void test2()
+        {
+            std::thread tmp([](std::string msg){
+                LOG(INFO) << "lambda function in class\n"
+                          << "member message: " << msg << "\n";
+                return;
+            }, message);
+
+            tmp.join();
+        }
+
+        void test3()
+        {
+            std::thread tmp([](Test* this_ptr){
+                LOG(INFO) << "lambda function in class\n"
+                          << "this_ptr->message: " << this_ptr->message << "\n";
+                return;
+            }, this);
+
+            tmp.join();
+        }
+
+        void test4()
+        {
+            std::thread tmp([this](){
+                LOG(INFO) << "lambda function in class\n"
+                          << "this_ptr->message: " << this->message << "\n";
+                return;
+            });
+
+            tmp.join();
+        }
+    };
+
+    Test test;
+    test.message = "hello world";
+    test.test(msg);
+    test.test2();
+    test.test3();
+    test.test4();
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -969,7 +1040,8 @@ int test_anything(Message& message)
         {"--test-vector-multi-delete",test_vector_multi_delete},
         {"--test-ifstream", test_ifstream_read_data},
         {"--test-std-equal", test_std_equal},
-        {"--test-thread-hardware-concurrency", test_thread_hardware_concurrency}
+        {"--test-thread-hardware-concurrency", test_thread_hardware_concurrency},
+        {"--test-thread-lambda-creator", test_thread_lambda_creator}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

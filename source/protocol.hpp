@@ -154,3 +154,131 @@ public:
         return *this;
     }
 };
+
+class Robot 
+{
+public:
+    virtual const char* Product() = 0;
+};
+
+class Cob final : public Robot
+{
+public:
+    const char* Product() override 
+    {
+        return "I'm Cob robot!!!";
+    }
+};
+
+class Dob final : public Robot
+{
+public:
+    const char* Product() override
+    {
+        return "I'm Dob robot!!!";
+    }
+};
+
+class Eob final : public Robot 
+{
+public:
+    const char* Product() override
+    {
+        return "I'm Eob robot!!!";
+    }
+};
+
+enum class RobotList : unsigned int 
+{
+    COB = 1,
+    DOB = 2,
+    EOB = 3
+};
+
+class Tool 
+{
+public:
+    virtual const char* Product() = 0;
+};
+
+class Sucker final : public Tool 
+{
+public:
+    const char* Product() override
+    {
+        return "I'm the sucker tool!!!";
+    }
+};
+
+class Jaw final : public Tool
+{
+public:
+    const char* Product() override
+    {
+        return "I'm the jaw tool!!!";
+    };
+};
+
+enum class ToolList : unsigned int 
+{
+    SUCKER = 1,
+    JAW = 2
+};
+
+template <typename TL, typename T>
+class ObjectPool
+{
+public:
+    using Object_t = std::pair<TL, T*>;
+
+private:
+    std::vector<Object_t> m_pool;
+    unsigned int m_size;
+
+public:
+    ObjectPool() = delete;
+    ObjectPool(int max_size) : m_size(max_size)
+    {
+
+    }
+    virtual ~ObjectPool()
+    {
+        Clear();                                                                                
+    }
+
+public:
+    int Push(Object_t object)
+    {
+        m_pool.push_back(object);
+
+        return 1;
+    }
+
+    int Pop(TL robot_product, Object_t& target)
+    {
+        auto it = std::find_if(m_pool.begin(), m_pool.end(), [=](Object_t object){
+            return object.first == robot_product;
+        });
+
+        if (it != m_pool.end())
+        {
+            target = *it;
+            return 1;
+        }
+
+        return 0;
+    }
+
+    void Clear()
+    {
+        for (Object_t object : m_pool)
+        {
+            if (object.second != nullptr)
+            {
+                delete object.second;
+                object.second = nullptr;
+            }
+        }
+        m_pool.clear();
+    }
+};

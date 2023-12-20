@@ -609,6 +609,363 @@ int test_vcr_vision_algorithm()
     return 1;
 }
 
+int test_manage_multi_object()
+{
+    // 抽象类 Shape
+    class Shape {
+    public:
+        // 纯虚函数，用于表示不同功能的对象
+        virtual void draw() const = 0;
+    };
+
+    // 派生类 Circle
+    class Circle : public Shape {
+    public:
+        void draw() const override {
+            std::cout << "Drawing a circle" << std::endl;
+            // 在这里实现绘制圆的具体功能
+        }
+    };
+
+    // 派生类 Rectangle
+    class Rectangle : public Shape {
+    public:
+        void draw() const override {
+            std::cout << "Drawing a rectangle" << std::endl;
+            // 在这里实现绘制矩形的具体功能
+        }
+    };
+
+    Circle circle;
+    Rectangle rectangle;
+
+    Shape* shapes[] = {&circle, &rectangle};
+
+    for (Shape* shape : shapes)
+    {
+        shape->draw();
+    }
+
+    int cmd;
+    std::cin >> cmd;
+
+    Robot* robot;
+
+    switch (static_cast<RobotList>(cmd))
+    {
+        case RobotList::COB:
+        {
+            robot = new Cob();
+            break;
+        }
+        case RobotList::DOB:
+        {
+            robot = new Dob();
+            break;
+        }
+        case RobotList::EOB:
+        {
+            robot = new Eob();
+            break;
+        }
+        default:
+        {
+            LOG(ERROR) << "Invalid valud" << "\n";
+            return 0;
+        }
+    }
+
+    LOG(INFO) << "robot's product: " << robot->Product() << "\n";
+
+    std::vector<Robot*> robots;
+    std::vector<int> cmds;
+
+    while (true)
+    {
+        int tmp_cmd = 0;
+        std::cin >> tmp_cmd;
+        if (tmp_cmd == 0)
+        {
+            LOG(WARNING) << "quit...\n";
+            break;
+        }
+        cmds.push_back(tmp_cmd);
+    }
+    for (const int i : cmds)
+    {
+        Robot* tmp_robot {nullptr};
+        switch (static_cast<RobotList>(i))
+        {
+            case RobotList::COB:
+            {
+                tmp_robot = new Cob();
+                break;
+            }
+            case RobotList::DOB:
+            {
+                tmp_robot = new Dob();
+                break;
+            }
+            case RobotList::EOB:
+            {
+                tmp_robot = new Eob();
+                break;
+            }
+            default:
+            {
+                LOG(ERROR) << "Invalid valud" << "\n";
+                return 0;
+            }
+        }
+        robots.push_back(tmp_robot);
+    }
+    
+    LOG(INFO) << "multi robot:\n";
+    for (Robot* it : robots)
+    {
+        LOG(INFO) << "robot's product: " << it->Product() << "\n";
+        delete it;
+        it = nullptr;
+    }
+
+    return 1;
+}
+
+int test_robot_pool()
+{
+    class RobotPool
+    {
+    private:
+        std::vector<std::pair<RobotList, Robot*>> m_pool;
+        unsigned int m_size;
+
+    public:
+        RobotPool() = delete;
+        RobotPool(int max_size) : m_size(max_size)
+        {
+
+        }
+        virtual ~RobotPool()
+        {
+            Clear();                                                                                
+        }
+
+    public:
+        int Push(std::pair<RobotList, Robot*> robot)
+        {
+            m_pool.push_back(robot);
+
+            return 1;
+        }
+
+        int Pop(RobotList robot_product, std::pair<RobotList, Robot*>& target)
+        {
+            auto it = std::find_if(m_pool.begin(), m_pool.end(), [=](std::pair<RobotList, Robot*> robot){
+                return robot.first == robot_product;
+            });
+
+            if (it != m_pool.end())
+            {
+                target = *it;
+                return 1;
+            }
+
+            LOG(ERROR) << "Invalid robot list enum value: " << static_cast<int>(robot_product) << "\n";
+
+            return 0;
+        }
+
+        void Clear()
+        {
+            for (std::pair<RobotList, Robot*> robot : m_pool)
+            {
+                if (robot.second != nullptr)
+                {
+                    delete robot.second;
+                    robot.second = nullptr;
+                }
+            }
+            m_pool.clear();
+        }
+    };
+
+    RobotPool robot_pool(10);
+    std::vector<int> cmds;
+
+    while (true)
+    {
+        int tmp_cmd = 0;
+        std::cin >> tmp_cmd;
+        if (tmp_cmd == 0)
+        {
+            LOG(WARNING) << "quit...\n";
+            break;
+        }
+        cmds.push_back(tmp_cmd);
+    }
+    for (int cmd : cmds)
+    {
+        Robot* tmp_robot {nullptr};
+        switch (static_cast<RobotList>(cmd))
+        {
+            case RobotList::COB:
+            {
+                tmp_robot = new Cob();
+                robot_pool.Push(std::make_pair(RobotList::COB, tmp_robot));
+                break;
+            }
+            case RobotList::DOB:
+            {
+                tmp_robot = new Dob();
+                robot_pool.Push(std::make_pair(RobotList::DOB, tmp_robot));
+                break;
+            }
+            case RobotList::EOB: 
+            {
+                tmp_robot = new Eob();
+                robot_pool.Push(std::make_pair(RobotList::EOB, tmp_robot));
+                break;
+            }
+            default:
+            {
+                LOG(ERROR) << "Invalid valud" << "\n";
+                return 0;
+            }
+        }
+    }
+
+    int cmd;
+    std::cin >> cmd;
+    std::pair<RobotList, Robot*> robot;
+    int res = robot_pool.Pop(static_cast<RobotList>(cmd), robot);
+    if (res != 1)
+    {
+        return 0;
+    }
+
+    LOG(INFO) << "input command: " << cmd << ", and the robot's product is: " << robot.second->Product() << "\n";
+
+    return 1;
+}
+
+int test_template_robot_pool()
+{
+    ObjectPool<RobotList, Robot> robot_pool(10);
+    std::vector<int> cmds;
+
+    while (true)
+    {
+        int tmp_cmd = 0;
+        std::cin >> tmp_cmd;
+        if (tmp_cmd == 0)
+        {
+            LOG(WARNING) << "quit...\n";
+            break;
+        }
+        cmds.push_back(tmp_cmd);
+    }
+    for (int cmd : cmds)
+    {
+        Robot* tmp_robot {nullptr};
+        switch (static_cast<RobotList>(cmd))
+        {
+            case RobotList::COB:
+            {
+                tmp_robot = new Cob();
+                robot_pool.Push(std::make_pair(RobotList::COB, tmp_robot));
+                break;
+            }
+            case RobotList::DOB:
+            {
+                tmp_robot = new Dob();
+                robot_pool.Push(std::make_pair(RobotList::DOB, tmp_robot));
+                break;
+            }
+            case RobotList::EOB: 
+            {
+                tmp_robot = new Eob();
+                robot_pool.Push(std::make_pair(RobotList::EOB, tmp_robot));
+                break;
+            }
+            default:
+            {
+                LOG(ERROR) << "Invalid valud" << "\n";
+                return 0;
+            }
+        }
+    }
+
+    int cmd;
+    std::cin >> cmd;
+    ObjectPool<RobotList, Robot>::Object_t robot;
+    int res = robot_pool.Pop(static_cast<RobotList>(cmd), robot);
+    if (res != 1)
+    {
+        return 0;
+    }
+
+    LOG(INFO) << "input command: " << cmd << ", and the robot's product is: " << robot.second->Product() << "\n";
+
+    return 1;
+}
+
+int test_template_tool_pool()
+{
+    ObjectPool<ToolList, Tool> tool_pool(10);
+    std::vector<int> cmds;
+
+    while (true)
+    {
+        int tmp_cmd = 0;
+        std::cin >> tmp_cmd;
+        if (tmp_cmd == 0)
+        {
+            LOG(WARNING) << "quit...\n";
+            break;
+        }
+        cmds.push_back(tmp_cmd);
+    }
+    for (int cmd : cmds)
+    {
+        switch (static_cast<ToolList>(cmd))
+        {
+            case ToolList::SUCKER:
+            {
+                Tool* tmp_tool {nullptr};
+                tmp_tool = new Sucker();
+                tool_pool.Push(std::make_pair(ToolList::SUCKER, tmp_tool));
+                break;
+            }
+            case ToolList::JAW:
+            {
+                Tool* tmp_tool {nullptr};
+                tmp_tool = new Jaw();
+                tool_pool.Push(std::make_pair(ToolList::JAW, tmp_tool));
+                break;
+            }
+            default:
+            {
+                LOG(ERROR) << "Invalid value: " << cmd << "\n";
+                return 0;
+            }
+        }
+    }
+
+    int cmd = 0;
+    std::cin >> cmd;
+    ObjectPool<ToolList, Tool>::Object_t tool;
+    int res = tool_pool.Pop(static_cast<ToolList>(cmd), tool);
+    if (res != 1)
+    {
+        LOG(ERROR) << "Invalid value: " << cmd << "\n";
+        return 0;
+    }
+
+    LOG(INFO) << "tool's product: " << tool.second->Product() << "\n";
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -626,7 +983,10 @@ int test_business(Message& message)
         {"test-binary-to-decimal-subnet-mask", test_BinaryToDecimalSubnetMask},
         {"test-cidr-to-decimal-subnet-mask", test_CIDRToDecimalSubnetMask},
         {"test-vcr-get-velocity", test_vcr_get_velocity},
-        {"test-vcr-vision-algorithm", test_vcr_vision_algorithm}
+        {"test-vcr-vision-algorithm", test_vcr_vision_algorithm},
+        {"test-manage-multi-object", test_manage_multi_object},
+        {"test-robot-pool", test_robot_pool},
+        {"test-template-tool-pool", test_template_tool_pool}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

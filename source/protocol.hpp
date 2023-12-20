@@ -155,6 +155,68 @@ public:
     }
 };
 
+class RoboticArmConfig
+{
+public:
+    struct Meta_t 
+    {
+        std::string product;
+        std::string vendor;
+    };
+    struct Address_t
+    {
+        std::string ip;
+        size_t port;
+    };
+
+    std::string hash_id;
+    Meta_t meta;
+    Address_t address;
+
+public:
+    RoboticArmConfig()
+    {
+        hash_id = "";
+        meta.product = "";
+        meta.vendor = "";
+        address.ip = "";
+        address.port = 0;
+    }
+    RoboticArmConfig(const RoboticArmConfig& other)
+    {
+        hash_id = other.hash_id;
+        meta = other.meta;
+        address = other.address;
+    }
+    ~RoboticArmConfig()
+    {
+        hash_id = "";
+        meta.product = "";
+        meta.vendor = "";
+        address.ip = "";
+        address.port = 0;
+    }
+
+    RoboticArmConfig& operator=(const RoboticArmConfig& other)
+    {
+        if (this != &other)
+        {
+            hash_id = other.hash_id;
+            meta = other.meta;
+            address = other.address;
+        }
+
+        return *this;
+    }
+
+    void GenerateHashId()
+    {
+        std::hash<std::string> hasher;
+
+        hash_id = std::to_string(hasher(meta.product + meta.vendor));
+    }
+};
+
 class Robot 
 {
 public:
@@ -185,6 +247,24 @@ public:
     const char* Product() override
     {
         return "I'm Eob robot!!!";
+    }
+};
+
+class SIMRobot3kg final : public Robot
+{
+public:
+    const char* Product() override
+    {
+        return "I'm SIMRobot 3kg!!!";
+    }
+};
+
+class SIMRobot10kg final : public Robot
+{
+public:
+    const char* Product() override
+    {
+        return "I'm SIMRobot 10kg!!!";
     }
 };
 
@@ -263,6 +343,21 @@ public:
         if (it != m_pool.end())
         {
             target = *it;
+            return 1;
+        }
+
+        return 0;
+    }
+
+    int GetObjectRef(TID object_id, Object_t& object_ref)
+    {
+        auto it = std::find_if(m_pool.begin(), m_pool.end(), [=](Object_t object){
+            return object.first == object_id;
+        });
+
+        if (it != m_pool.end())
+        {
+            object_ref = *it;
             return 1;
         }
 

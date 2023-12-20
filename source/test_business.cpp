@@ -1100,6 +1100,163 @@ int test_template_tool_pool()
     return 1;
 }
 
+int get_devices_config(const std::string config_path, std::vector<RoboticArmConfig>& robotic_arm_configs)
+{
+    std::ifstream file(config_path, std::ios::in);
+    if (!file.is_open())
+    {
+        LOG(ERROR) << "Invalid config path: " << config_path << "\n";
+        return 0;
+    }
+
+    nlohmann::json parsed_data;
+    try
+    {
+        file >> parsed_data;
+        for (auto& it : parsed_data["robotic_arm"])
+        {
+            RoboticArmConfig robotic_arm_config;
+            robotic_arm_config.meta.product = it["meta"]["product"];
+            robotic_arm_config.meta.vendor = it["meta"]["vendor"];
+            robotic_arm_config.address.ip = it["address"]["ip"];
+            robotic_arm_config.address.port = it["address"]["port"];
+            robotic_arm_config.GenerateHashId();
+            robotic_arm_configs.push_back(robotic_arm_config);
+        }
+        file.close();
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        LOG(ERROR) << "parse error, config file path: " << config_path << "\n";
+        file.close();
+        return 0;
+    }
+    catch (nlohmann::json::type_error& e)
+    {
+        LOG(ERROR) << "type error, config file path: " << config_path << "\n";
+        file.close();
+        return 0;
+    }
+
+    return 1;
+}
+
+int test_parse_devices_config()
+{
+    const std::string config_path = "/data/vcr/Configurations/devices.json";
+    std::vector<RoboticArmConfig> robotic_arm_configs;
+
+    int res = get_devices_config(config_path, robotic_arm_configs);
+    if (res != 1)
+    {
+        return 0;
+    }
+
+    for (auto& robotic_arm_config : robotic_arm_configs)
+    {
+        LOG(INFO) << "product: " << robotic_arm_config.meta.product << "\n"
+                  << "vendor: " << robotic_arm_config.meta.vendor << "\n"
+                  << "hash id: " << robotic_arm_config.hash_id << "\n";
+    }
+
+    return 1;
+}
+
+int test_template_robot_pool_in_class_hash_id()
+{
+    class RoboticArm 
+    {
+    private:
+        ObjectPool<std::string, Robot> m_robot_pool;
+        std::vector<RoboticArmConfig> m_robotic_arm_configs;
+        std::string m_config_path;
+
+    public:
+        RoboticArm() = delete;
+        RoboticArm(unsigned int max_size, const std::string config_path) : m_robot_pool(max_size), m_config_path(config_path)
+        {
+            if (get_devices_config(m_config_path, m_robotic_arm_configs) != 1)
+            {
+                throw std::logic_error("invalid config");
+            }
+            for (auto& robotic_arm_config : m_robotic_arm_configs)
+            {
+                if (robotic_arm_config.meta.product == "SIMRobot" &&
+                    robotic_arm_config.meta.vendor == "3kg")
+                {
+                    Robot* tmp_robot = new SIMRobot3kg();
+                    m_robot_pool.Push(std::make_pair(robotic_arm_config.hash_id, tmp_robot));
+                }
+                else if (robotic_arm_config.meta.product == "SIMRobot" && 
+                         robotic_arm_config.meta.vendor == "10kg")
+                {
+                    Robot* tmp_robot = new SIMRobot10kg();
+                    m_robot_pool.Push(std::make_pair(robotic_arm_config.hash_id, tmp_robot));
+                }
+                else 
+                {
+                    LOG(WARNING) << "invalid robotic arm's meta information\n";
+                }
+            }
+        }
+        virtual ~RoboticArm()
+        {
+
+        }
+
+    public:
+        void List(std::vector<std::string>& list)
+        {
+            for (auto& robotic_arm : m_robotic_arm_configs)
+            {
+                list.push_back(robotic_arm.hash_id);
+            }
+        }
+
+        Robot* GetRobotPointer(std::string hash_id)
+        {
+            auto it = std::find_if(m_robotic_arm_configs.begin(), m_robotic_arm_configs.end(), [=](RoboticArmConfig robotic_arm_config) {
+                return robotic_arm_config.hash_id == hash_id;
+            });
+            if (it != m_robotic_arm_configs.end())
+            {
+                ObjectPool<std::string, Robot>::Object_t robot;
+                int res = m_robot_pool.GetObjectRef(it->hash_id, robot);
+                if (res == 1)
+                {
+                    return robot.second;
+                }
+            }
+
+            return nullptr;
+        }
+    };
+
+    RoboticArm robotic_arm(10, std::string("/data/vcr/Configurations/devices.json"));
+
+    std::vector<std::string> robotic_arm_list;
+    robotic_arm.List(robotic_arm_list);
+    LOG(INFO) << "robotic arm's list: \n";
+    for (auto &it : robotic_arm_list)
+    {
+        LOG(INFO) << it << "\n";
+    }
+    
+    std::string cmd;
+    std::cin >> cmd;
+    std::string message;
+    Robot* tmp_robot = robotic_arm.GetRobotPointer(cmd);
+    if (tmp_robot == nullptr)
+    {
+        LOG(ERROR) << "receive robotic arm's message failed, cmd: " << cmd << "\n";
+        return 0;
+    }
+
+    LOG(INFO) << "robotic arm(" << cmd << ")'s message is: " << std::string(tmp_robot->Product()) << "\n";
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -1121,7 +1278,9 @@ int test_business(Message& message)
         {"test-manage-multi-object", test_manage_multi_object},
         {"test-robot-pool", test_robot_pool},
         {"test-template-tool-pool", test_template_tool_pool},
-        {"test-template-robot-pool-in-class", test_template_robot_pool_in_class}
+        {"test-template-robot-pool-in-class", test_template_robot_pool_in_class},
+        {"test-parse-devices-config", test_parse_devices_config},
+        {"test-template-robot-pool-in-class-hash-id", test_template_robot_pool_in_class_hash_id}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

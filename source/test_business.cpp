@@ -909,6 +909,140 @@ int test_template_robot_pool()
     return 1;
 }
 
+int test_template_robot_pool_in_class()
+{
+    class RoboticArm 
+    {
+    private:
+        const std::vector<std::pair<RobotList, std::string>> m_robot_list = 
+        {
+            {RobotList::COB, "cob"},
+            {RobotList::DOB, "dob"},
+            {RobotList::EOB, "eob"}
+        };
+
+    private:
+        ObjectPool<RobotList, Robot> m_robot_pool;
+
+    public:
+        RoboticArm() = delete;
+        RoboticArm(unsigned int max_size) : m_robot_pool(max_size)
+        {
+
+        }
+        virtual ~RoboticArm()
+        {
+
+        }
+
+    public:
+        void List(std::vector<std::string>& list)
+        {
+            for (auto& robotic_arm : m_robot_list)
+            {
+                list.push_back(robotic_arm.second);
+            }
+        }
+        int Create(std::string product)
+        {
+            auto it = std::find_if(m_robot_list.begin(), m_robot_list.end(), [=](std::pair<RobotList, std::string> robot){
+                return robot.second == product;
+            });
+            if (it != m_robot_list.end())
+            {
+                switch (it->first)
+                {
+                    case RobotList::COB:
+                    {
+                        Robot* tmp_robot = new Cob();
+                        m_robot_pool.Push(std::make_pair(it->first, tmp_robot));
+                        break;
+                    }
+                    case RobotList::DOB:
+                    {
+                        Robot* tmp_robot = new Dob();
+                        m_robot_pool.Push(std::make_pair(it->first, tmp_robot));
+                        break;
+                    }
+                    case RobotList::EOB:
+                    {
+                        Robot* tmp_robot = new Eob();
+                        m_robot_pool.Push(std::make_pair(it->first, tmp_robot));
+                        break;
+                    }
+                    default:
+                    {
+                        LOG(ERROR) << "Invalid value: " << static_cast<int>(it->first) << "\n";
+                        break;
+                    }
+                }
+                return 1;
+            }
+            LOG(ERROR) << "Invalid robot's product: " << product << "\n";
+
+            return 0;
+        }
+        void Destroy(std::string product)
+        {
+            auto it = std::find_if(m_robot_list.begin(), m_robot_list.end(), [=](std::pair<RobotList, std::string> robot) {
+                return robot.second == product;
+            });
+            if (it != m_robot_list.end())
+            {
+                m_robot_pool.Delete(it->first);
+            }
+        }
+        int Message(std::string product, std::string& message)
+        {
+            auto it = std::find_if(m_robot_list.begin(), m_robot_list.end(), [=](std::pair<RobotList, std::string> robot) {
+                return robot.second == product;
+            });
+            if (it != m_robot_list.end())
+            {
+                std::pair<RobotList, Robot*> robot;
+                int res = m_robot_pool.Pop(it->first, robot);
+                if (res == 1)
+                {
+                    message = std::string(robot.second->Product());
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+    };
+
+    RoboticArm robotic_arm(10);
+
+    std::vector<std::string> robotic_arm_list;
+    robotic_arm.List(robotic_arm_list);
+    LOG(INFO) << "robotic arm's list: \n";
+    for (auto &it : robotic_arm_list)
+    {
+        LOG(INFO) << it << "\n";
+    }
+    
+    std::string cmd;
+    std::cin >> cmd;
+    int res = robotic_arm.Create(cmd);
+    if (res != 1)
+    {
+        LOG(ERROR) << "create robotic arm failed, cmd: " << cmd << "\n";
+        return 0;
+    }
+    std::string message;
+    res = robotic_arm.Message(cmd, message);
+    if (res != 1)
+    {
+        LOG(ERROR) << "receive robotic arm's message failed, cmd: " << cmd << "\n";
+        return 0;
+    }
+
+    LOG(INFO) << "robotic arm(" << cmd << ")'s message is: " << message << "\n";
+
+    return 1;
+}
+
 int test_template_tool_pool()
 {
     ObjectPool<ToolList, Tool> tool_pool(10);
@@ -986,7 +1120,8 @@ int test_business(Message& message)
         {"test-vcr-vision-algorithm", test_vcr_vision_algorithm},
         {"test-manage-multi-object", test_manage_multi_object},
         {"test-robot-pool", test_robot_pool},
-        {"test-template-tool-pool", test_template_tool_pool}
+        {"test-template-tool-pool", test_template_tool_pool},
+        {"test-template-robot-pool-in-class", test_template_robot_pool_in_class}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

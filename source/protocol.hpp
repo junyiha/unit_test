@@ -225,11 +225,11 @@ enum class ToolList : unsigned int
     JAW = 2
 };
 
-template <typename TL, typename T>
+template <typename TID, typename T>
 class ObjectPool
 {
 public:
-    using Object_t = std::pair<TL, T*>;
+    using Object_t = std::pair<TID, T*>;
 
 private:
     std::vector<Object_t> m_pool;
@@ -237,7 +237,7 @@ private:
 
 public:
     ObjectPool() = delete;
-    ObjectPool(int max_size) : m_size(max_size)
+    ObjectPool(unsigned int max_size) : m_size(max_size)
     {
 
     }
@@ -254,10 +254,10 @@ public:
         return 1;
     }
 
-    int Pop(TL robot_product, Object_t& target)
+    int Pop(TID object_id, Object_t& target)
     {
         auto it = std::find_if(m_pool.begin(), m_pool.end(), [=](Object_t object){
-            return object.first == robot_product;
+            return object.first == object_id;
         });
 
         if (it != m_pool.end())
@@ -267,6 +267,24 @@ public:
         }
 
         return 0;
+    }
+
+    void Delete(TID object_id)
+    {
+        auto it = std::find_if(m_pool.begin(), m_pool.end(), [=](Object_t object){
+            return object.first == object_id;
+        });
+
+        if (it != m_pool.end())
+        {
+            if (it->second != nullptr)
+            {
+                delete it->second;
+                it->second = nullptr;
+            }
+            m_pool.erase(it);
+            m_pool.shrink_to_fit();
+        }
     }
 
     void Clear()

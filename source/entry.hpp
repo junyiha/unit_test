@@ -16,8 +16,15 @@ extern "C"
     #include <sys/types.h>
     #include <sys/ipc.h>
     #include <sys/sysinfo.h>
+    #include <sys/socket.h>
+    #include <sys/ioctl.h>
+    #include <sys/poll.h>
+    #include <arpa/inet.h>
     #include <signal.h>
     #include <dirent.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <netinet/in.h>
 }
 
 #include <ctime>

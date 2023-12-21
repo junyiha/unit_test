@@ -1104,6 +1104,323 @@ int test_exception_logic_error()
     return 1;
 }
 
+void handle_request(int client_socket)
+{
+    char buffer[1024];
+    memset(buffer, 0, 1024);
+
+    // read data from client
+    read(client_socket, buffer, 1024 - 1);
+    printf("Received request:\n%s\n", buffer);
+
+    // send HTTP response
+    const char* response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<h1>Hello, this is a simple HTTP server in C</hi>";
+    write(client_socket, response, strlen(response));
+
+    // close connection of client
+    close(client_socket);
+}
+
+int test_c_http_server()
+{
+    const unsigned int port = 8080;
+    int server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    memset(&client_addr, 0, sizeof(client_addr));
+    socklen_t addr_len = sizeof(client_addr);
+
+    // create socket
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1)
+    {
+        perror("Socket creation failed\n");
+        return EXIT_FAILURE;
+    }
+
+    // set address and port 
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    server_addr.sin_port = htons(port);
+
+    // bind socket
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr))  == -1 )
+    {
+        perror("Socket listen failed");
+        close(server_socket);
+        return EXIT_FAILURE;
+    }
+
+    printf("Server running on port %d...\n", port);
+
+    if (listen(server_socket, 5) == -1)
+    {
+        perror("listen failed");
+        return EXIT_FAILURE;
+    }
+
+    while (1)
+    {
+        // accept connection of client
+        client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len);
+        if (client_socket == -1)
+        {
+            perror("Accept failed\n");
+            continue;;
+        }
+
+        // process request of client
+        handle_request(client_socket);
+    }
+
+    close(server_socket);
+
+    return EXIT_SUCCESS;
+}
+
+int test_c_poll_http_server()
+{
+    const unsigned int port = 8080;
+    const unsigned int max_clients = 100;
+    int server_socket, client_sockets[max_clients];
+    struct sockaddr_in server_addr, client_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    memset(&client_addr, 0, sizeof(client_addr));
+    socklen_t addr_len = sizeof(client_addr);
+
+    // create socket
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1)
+    {
+        perror("Socket creation failed\n");
+        return EXIT_FAILURE;
+    }
+
+    // set address and port 
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    server_addr.sin_port = htons(port);
+
+    int opt = 1;
+    if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
+    {
+        perror("Setsockopt failed");
+        return EXIT_FAILURE;
+    }
+
+    // bind socket
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr))  == -1 )
+    {
+        perror("Socket listen failed");
+        close(server_socket);
+        return EXIT_FAILURE;
+    }
+
+    printf("Server running on port %d...\n", port);
+
+    if (listen(server_socket, 5) == -1)
+    {
+        perror("listen failed");
+        return EXIT_FAILURE;
+    }
+
+    memset(client_sockets, 0, sizeof(client_sockets));
+    struct pollfd fds[max_clients];
+    int num_clients = 0;
+
+    // add server socket to the poll list
+    fds[0].fd = server_socket;
+    fds[0].events = POLLIN;
+    num_clients++;
+
+    while (1)
+    {
+        int activity = poll(fds, num_clients, -1);
+        if (activity < 0)
+        {
+            perror("Poll error");
+            return EXIT_FAILURE;
+        }
+
+        // check for incoming connect
+        if (fds[0].revents & POLLIN)
+        {
+            int new_socket;
+            if ((new_socket = accept(server_socket, (struct sockaddr*)&client_addr, (socklen_t *)&addr_len)) < 0)
+            {
+                perror("Accept failed");
+                return EXIT_FAILURE;
+            }
+
+            // add new connection to the array
+            int i;
+            for (i = 1; i < max_clients; i++)
+            {
+                if (client_sockets[i] == 0)
+                {
+                    client_sockets[i] = new_socket;
+                    fds[i].fd = new_socket;
+                    fds[i].events = POLLIN;
+                    num_clients++;
+                    break;
+                }
+            }
+        }
+
+        // check for IO operation on client sockets
+        for (int i = 1; i < num_clients; i++)
+        {
+            if (fds[i].revents & POLLIN)
+            {
+                int valread;
+                size_t buffer_max_size = 10240;
+                char buffer[buffer_max_size];
+                if ((valread = read(fds[i].fd, buffer, buffer_max_size)) <= 0)
+                {
+                    close(fds[i].fd);
+                    client_sockets[i] = 0;
+                    fds[i].fd = -1;
+                    num_clients--;
+                }
+                else 
+                {
+                    // handle request and send response
+                    printf("Received request:\n%s\n", std::string(buffer, valread).c_str());
+                    const char* response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<h1>Hello, this is a simple HTTP server in C</hi>\n";
+                    write(fds[i].fd, response, strlen(response));
+                    close(fds[i].fd);
+                }
+            }
+        }
+    }
+
+    close(server_socket);
+
+    return EXIT_SUCCESS;
+}
+
+int test_c_epoll_http_server()
+{
+    const unsigned int port = 8080;
+    const unsigned int max_clients = 100;
+    int server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    memset(&client_addr, 0, sizeof(client_addr));
+    socklen_t addr_len = sizeof(client_addr);
+
+    // create socket
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1)
+    {
+        perror("Socket creation failed\n");
+        return EXIT_FAILURE;
+    }
+
+    // set address and port 
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    server_addr.sin_port = htons(port);
+
+    int opt = 1;
+    if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
+    {
+        perror("Setsockopt failed");
+        return EXIT_FAILURE;
+    }
+
+    // bind socket
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr))  == -1 )
+    {
+        perror("Socket listen failed");
+        close(server_socket);
+        return EXIT_FAILURE;
+    }
+
+    printf("Server running on port %d...\n", port);
+
+    if (listen(server_socket, 5) == -1)
+    {
+        perror("listen failed");
+        return EXIT_FAILURE;
+    }
+
+    // create epoll instance
+    int epoll_fd = epoll_create1(0);
+    if (epoll_fd == -1) 
+    {
+        perror("Epoll creation failed");
+        return EXIT_FAILURE;
+    }
+
+    struct epoll_event event, events[max_clients];
+    event.events = EPOLLIN;
+    event.data.fd = server_socket;
+
+    // add server socket to epoll
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_socket, &event) == -1)
+    {
+        perror("Epoll control failed");
+        return EXIT_FAILURE;
+    }
+
+    while (1)
+    {
+        int num_events = epoll_wait(epoll_fd, events, max_clients, -1);
+        if (num_events == -1)
+        {
+            perror("Epoll wait failed");
+            return EXIT_FAILURE;
+        }
+
+        for (int i = 0; i < num_events; i++)
+        {
+            if (events[i].data.fd == server_socket)
+            {
+                // accept incoming connection
+                if ((client_socket = accept(server_socket, (struct sockaddr*)&client_addr, (socklen_t *)&addr_len)) < 0)
+                {
+                    perror("Accept failed");
+                    return EXIT_FAILURE;
+                }
+
+                event.events = POLLIN | EPOLLET;
+                event.data.fd = client_socket;
+
+                // add client socket to epoll
+                if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket, &event) == -1)
+                {
+                    perror("Epoll control failed");
+                    return EXIT_FAILURE;
+                }
+                printf("New connection, socket fd: %d, ip: %s, port: %d\n", client_socket, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+            }
+            else 
+            {
+                // Handle data on client socket
+                int fd = events[i].data.fd;
+                int valread;
+                char buffer[1024];
+                if ((valread = read(fd, buffer, 1024)) <= 0) {
+                    // Connection closed or error
+                    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+                    close(fd);
+                    printf("Client disconnected, socket fd: %d\n", fd);
+                } else {
+                    // Handle request and send response
+                    printf("Received request:\n%s\n", buffer);
+                    const char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html><body><h1>Hello, World!</h1></body></html>\n";
+                    write(fd, response, strlen(response));
+                    close(fd);
+                }
+            }
+        }
+    }
+
+    close(server_socket);
+    return EXIT_SUCCESS;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -1140,7 +1457,10 @@ int test_anything(Message& message)
         {"--test-thread-lambda-creator", test_thread_lambda_creator},
         {"--get-files-in-directory", GetFilesInDirectory},
         {"--test-default-creator-function", test_default_creator_function},
-        {"--test-exception-logic-error", test_exception_logic_error}
+        {"--test-exception-logic-error", test_exception_logic_error},
+        {"--test-c-http-server", test_c_http_server},
+        {"--test-c-poll-http-server", test_c_poll_http_server},
+        {"--test-c-epoll-http-server", test_c_epoll_http_server}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

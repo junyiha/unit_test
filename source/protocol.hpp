@@ -9,6 +9,7 @@
  * 
  */
 #pragma once 
+#include <map>
 #include <vector>
 #include <string>
 
@@ -214,6 +215,51 @@ public:
         std::hash<std::string> hasher;
 
         hash_id = std::to_string(hasher(meta.product + meta.vendor));
+    }
+};
+
+class NetworkMessage
+{
+public:
+    std::string method;
+    std::map<std::string, std::string> request_headers;
+    std::string path;
+    std::string body;
+    std::string response;
+    std::string response_type;
+
+public:
+    NetworkMessage()
+    {
+
+    }
+    NetworkMessage(const NetworkMessage& other)
+    {
+        method = other.method;
+        request_headers = other.request_headers;
+        path = other.path;
+        body = other.body;
+        response = other.response;
+        response_type = other.response_type;
+    }
+    ~NetworkMessage()
+    {
+        
+    }
+
+    NetworkMessage& operator=(const NetworkMessage& other)
+    {
+        if (this != &other)
+        {
+            method = other.method;
+            request_headers = other.request_headers;
+            path = other.path;
+            body = other.body;
+            response = other.response;
+            response_type = other.response_type;
+        }
+
+        return *this;
     }
 };
 

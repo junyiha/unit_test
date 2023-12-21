@@ -1421,6 +1421,185 @@ int test_c_epoll_http_server()
     return EXIT_SUCCESS;
 }
 
+void httplib_get_hello(const httplib::Request& req, httplib::Response& res)
+{
+    res.set_content("hello world", "text/plain");
+}
+
+void httplib_get_hi(const httplib::Request& req, httplib::Response& res)
+{
+    res.set_content("hi world", "text/plain");
+}
+
+void httplib_post_watch(const httplib::Request& req, httplib::Response& res)
+{
+    nlohmann::json parsed_data;
+    nlohmann::json reply_data;
+    if (req.has_header("Content-Type") && 
+        req.get_header_value("Content-Type") == "application/json")
+    {
+        try 
+        {
+            parsed_data = nlohmann::json::parse(req.body);
+            if (parsed_data["flag"] = 1)
+            {
+                reply_data["watch"] = true;
+            }
+            else 
+            {
+                reply_data["watch"] = false;
+            }
+        }
+        catch (nlohmann::json::parse_error& e)
+        {
+
+        }
+        catch (nlohmann::json::type_error& e)
+        {
+
+        }
+    }
+    else 
+    {
+        reply_data["watch"] = false;
+    }
+    res.set_content(reply_data.dump(), "application/json");
+
+    return;
+}
+
+int test_httplib_server_search_table()
+{
+    std::map<std::string, httplib::Server::Handler> get_uri_map = 
+    {
+        {"/api/hello", httplib_get_hello},
+        {"/api/hi", httplib_get_hi}
+    };
+    std::map<std::string, httplib::Server::Handler> post_uri_map = 
+    {
+        {"/api/watch", httplib_post_watch}
+    };
+
+    httplib::Server server;
+    for (auto& it : get_uri_map)
+    {
+        server.Get(it.first, it.second);
+    }
+    for (auto& it : post_uri_map)
+    {
+        server.Post(it.first, it.second);
+    }
+
+    server.listen("0.0.0.0", 13001);
+
+    return 1;
+}
+
+int test_httplib_server_in_class()
+{
+    class Network
+    {
+    private:
+        httplib::Server m_server;
+        std::string m_data;
+        int m_flag;
+
+    public:
+        Network() 
+        {
+            m_data = "hahahaha";
+        }
+        ~Network() 
+        {
+            m_data = "";
+        }
+
+        int Start(std::string ip, size_t port)
+        {
+            m_server.Get(R"(/api/(.*))", [this](const httplib::Request& req, httplib::Response& res){
+                NetworkMessage network_message;
+
+                network_message.path = req.path;
+                network_message.method = req.method;
+                for (auto& it : req.headers)
+                {
+                    network_message.request_headers[it.first] = it.second;
+                }
+                this->Dispatch(network_message);
+
+                res.set_content(network_message.response, network_message.response_type);
+            });
+            m_server.Post(R"(/api/(.*))", [this](const httplib::Request& req, httplib::Response& res){
+                NetworkMessage network_message;
+
+                network_message.path = req.path;
+                network_message.body = req.body;
+                network_message.method = req.method;
+                for (auto& it : req.headers)
+                {
+                    network_message.request_headers[it.first] = it.second;
+                }
+                this->Dispatch(network_message);
+
+                res.set_content(network_message.response, network_message.response_type);
+            });
+
+            m_server.listen(ip, port);
+            return 1;
+        }
+
+        void Dispatch(NetworkMessage& network_message)
+        {
+            if (network_message.path == "/api/get/robot")
+            {
+                network_message.response = "SIMRobot 3kg";
+                network_message.response_type = "text/plain";
+            }
+            else if (network_message.path == "/api/post/tool")
+            {
+                nlohmann::json parsed_data;
+                nlohmann::json reply_data;
+                LOG(INFO) << "request path: " << network_message.path << "\n"
+                          << "request body: " << network_message.body << "\n";
+                try 
+                {
+                    parsed_data = nlohmann::json::parse(network_message.body);
+                    m_flag = parsed_data["flag"];
+                    reply_data["code"] = 1;
+                }
+                catch (nlohmann::json::parse_error& e)
+                {
+                    reply_data["code"] = 0;
+                }
+                catch (nlohmann::json::type_error& e)
+                {
+                    reply_data["code"] = 0;
+                }
+
+                network_message.response = reply_data.dump();
+                network_message.response_type = "application/json";
+            }
+            else if (network_message.path == "/api/get/tool")
+            {
+                network_message.response = std::to_string(m_flag);
+                network_message.response_type = "text/plain";
+            }
+            else 
+            {
+                network_message.response = "invalid uri";
+                network_message.response_type = "text/plain";
+            }
+        }
+    };
+
+    Network network;
+
+    network.Start("0.0.0.0", 13001);
+
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -1460,7 +1639,9 @@ int test_anything(Message& message)
         {"--test-exception-logic-error", test_exception_logic_error},
         {"--test-c-http-server", test_c_http_server},
         {"--test-c-poll-http-server", test_c_poll_http_server},
-        {"--test-c-epoll-http-server", test_c_epoll_http_server}
+        {"--test-c-epoll-http-server", test_c_epoll_http_server},
+        {"--test-httplib-server-search-table", test_httplib_server_search_table},
+        {"--test-httplib-server-in-class", test_httplib_server_in_class}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

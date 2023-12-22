@@ -371,6 +371,159 @@ int mongoose_http_client(Message& message)
     return 1;
 }
 
+int test_httplib_server_async_close(Message& message)
+{
+    httplib::Server svr;
+    auto server_thread = [](httplib::Server* svr)
+    {
+        auto ret = svr->set_mount_point("/", "/home/user/zjy-190/Media/");
+        if (!ret)
+        {
+            LOG(ERROR) << "the specified base directory doesn't exist...\n";
+            return ;
+        }
+        svr->listen("0.0.0.0", 12001);
+    };
+
+    std::thread server(server_thread, &svr);
+
+    while (true)
+    {
+        int cmd;
+        LOG(INFO) << "input command: (0 to quit)\n";
+        std::cin >> cmd;
+        if (cmd == 0)
+        {
+            LOG(ERROR) << "quit...\n";
+            svr.stop();
+            if (server.joinable())
+            {
+                server.join();
+            }
+            break;
+        }
+    }
+
+    return 1;
+}
+
+int test_mongoose_server_async_close(Message& message)
+{
+    struct mg_mgr mgr;
+    struct mg_connection *connect;
+    mg_event_handler_t func = [](mg_connection *connect, int ev, void *ev_data, void *fn_data)
+    {
+        if (ev == MG_EV_HTTP_MSG)
+        {
+            struct mg_http_message *hm = (struct mg_http_message *) ev_data;
+            struct mg_http_serve_opts opts = {.root_dir = "/home/user/zjy-190/Media/"};
+            mg_http_serve_dir(connect, hm, &opts);
+        }
+    };
+
+    mg_mgr_init(&mgr);
+    connect = mg_http_listen(&mgr, "0.0.0.0:13000", func, nullptr);
+    bool done = false;
+    auto tmp_func = [](struct mg_mgr* mgr, bool* done)
+    {
+        for (;;)
+        {
+            if (*done)
+            {
+                LOG(WARNING) << "quit...\n";
+                break;
+            }
+            mg_mgr_poll(mgr, 1000);
+        }
+    };
+
+    std::thread server(tmp_func, &mgr, &done);
+
+    while (true)
+    {
+        int cmd;
+        LOG(INFO) << "input command: (0 to quit)\n";
+        std::cin >> cmd;
+        if (cmd == 0)
+        {
+            done = true;
+            if (server.joinable())
+            {
+                server.join();
+            }
+            break;
+        }
+    }
+
+    return 1;
+}
+
+int test_mongoose_server_async_close_in_class(Message& message)
+{
+    class RK
+    {
+    private:
+        bool m_done {false};
+
+    public:
+        void StartMediaServer()
+        {
+            auto tmp_func = [](bool* done)
+            {
+                struct mg_mgr mgr;
+                struct mg_connection *connect;
+                mg_event_handler_t func = [](mg_connection *connect, int ev, void *ev_data, void *fn_data)
+                {
+                    if (ev == MG_EV_HTTP_MSG)
+                    {
+                        struct mg_http_message *hm = (struct mg_http_message *) ev_data;
+                        struct mg_http_serve_opts opts = {.root_dir = "/home/user/zjy-190/Media/"};
+                        mg_http_serve_dir(connect, hm, &opts);
+                    }
+                };
+
+                mg_mgr_init(&mgr);
+                connect = mg_http_listen(&mgr, "0.0.0.0:13000", func, nullptr);
+                for (;;)
+                {
+                    if (*done)
+                    {
+                        LOG(WARNING) << "quit...\n";
+                        break;
+                    }
+                    mg_mgr_poll(&mgr, 1000);
+                }
+            };
+
+            std::thread server(tmp_func, &m_done);
+            server.detach();
+        }
+
+        void yield()
+        {
+            while (true)
+            {
+                int cmd;
+                LOG(INFO) << "input command: (0 to quit)\n";
+                std::cin >> cmd;
+                if (cmd == 0)
+                {
+                    m_done = true;
+                    break;
+                }
+            }
+        }
+    };
+
+    RK rk;
+
+    rk.StartMediaServer();
+    rk.yield();
+
+
+    return 1;
+}
+
 int test_network(Message& message)
 {
     LOG(INFO) << "----test network begin----\n";
@@ -382,7 +535,10 @@ int test_network(Message& message)
         {"mongoose-http-server", mongoose_http_server},
         {"mongoose-http-server-async", mongoose_http_server_async},
         {"mongoose-http-server-sync", mongoose_http_server_sync},
-        {"mongoose-http-client", mongoose_http_client}
+        {"mongoose-http-client", mongoose_http_client},
+        {"test-httplib-server-async-close", test_httplib_server_async_close},
+        {"test-mongoose-server-async-close", test_mongoose_server_async_close},
+        {"test-mongoose-server-async-close-in-class", test_mongoose_server_async_close_in_class}
     };
 
     std::string cmd = message.message_pool.at(2);

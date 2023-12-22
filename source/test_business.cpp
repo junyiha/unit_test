@@ -1257,6 +1257,31 @@ int test_template_robot_pool_in_class_hash_id()
     return 1;
 }
 
+int test_rk_sound_file_management()
+{
+    int res = 0;
+    const std::string sound_directory = "/home/user/zjy-190/Media/";
+    std::vector<std::string> directorys;
+    std::vector<std::string> files;
+
+    res = get_dir_and_file_from_path(sound_directory, directorys, files);
+    if (res != 1)
+    {
+        LOG(ERROR) << "invalid directory: " << sound_directory << "\n";
+        return 0;
+    }
+
+    nlohmann::json reply_data;
+    for (auto &file : files)
+    {
+        LOG(INFO) << "file: " << sound_directory + file << "\n";
+        reply_data["list"].push_back(file);
+    }
+    std::cerr << reply_data.dump() << "\n";
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -1280,7 +1305,8 @@ int test_business(Message& message)
         {"test-template-tool-pool", test_template_tool_pool},
         {"test-template-robot-pool-in-class", test_template_robot_pool_in_class},
         {"test-parse-devices-config", test_parse_devices_config},
-        {"test-template-robot-pool-in-class-hash-id", test_template_robot_pool_in_class_hash_id}
+        {"test-template-robot-pool-in-class-hash-id", test_template_robot_pool_in_class_hash_id},
+        {"test-rk-sound-file-management", test_rk_sound_file_management}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

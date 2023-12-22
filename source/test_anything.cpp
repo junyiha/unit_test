@@ -1600,6 +1600,17 @@ int test_httplib_server_in_class()
     return 1;
 }
 
+int test_generate_sql()
+{
+    std::stringstream os;
+
+    os << "ATTACH DATABASE 'testDB.db' as '" << std::string("TEMP") << "';";
+
+    LOG(INFO) << os.str() << "\n";
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -1641,7 +1652,8 @@ int test_anything(Message& message)
         {"--test-c-poll-http-server", test_c_poll_http_server},
         {"--test-c-epoll-http-server", test_c_epoll_http_server},
         {"--test-httplib-server-search-table", test_httplib_server_search_table},
-        {"--test-httplib-server-in-class", test_httplib_server_in_class}
+        {"--test-httplib-server-in-class", test_httplib_server_in_class},
+        {"--test-generate-sql", test_generate_sql}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

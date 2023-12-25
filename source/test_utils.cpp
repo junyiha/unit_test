@@ -42,3 +42,26 @@ int get_dir_and_file_from_path(const std::string path, std::vector<std::string>&
 
     return 1;
 }
+
+/**
+ * @brief using recursive method to obtain parameters
+ * 
+ * @param path 
+ * @param fields 
+ */
+void ExtractFields(const std::string& path, std::vector<std::string>& fields)
+{
+    size_t pos = path.find('/');
+
+    if (pos != std::string::npos)
+    {
+        std::string field = path.substr(0, pos);
+        fields.push_back(field);
+
+        ExtractFields(path.substr(pos + 1), fields);
+    }
+    else 
+    {
+        fields.push_back(path);
+    }
+}

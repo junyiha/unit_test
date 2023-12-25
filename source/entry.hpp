@@ -71,3 +71,11 @@ int test_network(Message& message);
  * @return int 1 success | 0 fail | other unknown
  */
 int get_dir_and_file_from_path(const std::string path, std::vector<std::string>& directorys, std::vector<std::string>& files);
+
+/**
+ * @brief using recursive method to obtain parameters
+ * 
+ * @param path 
+ * @param fields 
+ */
+void ExtractFields(const std::string& path, std::vector<std::string>& fields);

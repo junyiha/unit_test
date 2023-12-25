@@ -1611,6 +1611,78 @@ int test_generate_sql()
     return 1;
 }
 
+int test_parse_restful_path()
+{
+    const std::string path = "/api/algorithm/list";
+    std::vector<std::string> list;
+
+    ExtractFields(path, list);
+
+    for (auto& it : list)
+    {
+        LOG(INFO) << it << "\n";
+    }
+
+    LOG(INFO) << "input index: >>>" << "\n";
+    int cmd;
+    std::cin >> cmd;
+    try
+    {
+        LOG(INFO) << list.at(cmd) << "\n";
+    }
+    catch (std::out_of_range& e)
+    {
+        LOG(ERROR) << e.what() << "\n";
+        return 0;
+    }
+
+    return 1;
+}
+
+int test_map_class_member_function()
+{
+    class Dispatcher
+    {
+    private:
+        typedef void(Dispatcher::* p_f)(std::string);
+        std::map<std::string, p_f> m_map = 
+        {
+            {"say", &Dispatcher::say},
+            {"hello", &Dispatcher::hello}
+        };
+    public:
+        void Dispatch(std::string cmd)
+        {
+            auto it = m_map.find(cmd);
+            if (it != m_map.end())
+            {
+                (this->*m_map[cmd])("hhh");
+            }
+            else 
+            {
+                LOG(ERROR) << "invalid command: " << cmd << "\n";
+            }
+        }
+
+    private:
+        void say(std::string msg)
+        {
+            LOG(INFO) << "msg: " << msg << "\n";
+        }
+
+        void hello(std::string msg)
+        {
+            LOG(INFO) << "hello world\n" << msg << "\n";
+        }
+    };
+
+    Dispatcher d;
+
+    d.Dispatch("say");
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -1653,7 +1725,9 @@ int test_anything(Message& message)
         {"--test-c-epoll-http-server", test_c_epoll_http_server},
         {"--test-httplib-server-search-table", test_httplib_server_search_table},
         {"--test-httplib-server-in-class", test_httplib_server_in_class},
-        {"--test-generate-sql", test_generate_sql}
+        {"--test-generate-sql", test_generate_sql},
+        {"--test-parse-restful-path", test_parse_restful_path},
+        {"--test-map-class-member-function", test_map_class_member_function}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

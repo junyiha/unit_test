@@ -224,6 +224,7 @@ public:
     std::string method;
     std::map<std::string, std::string> request_headers;
     std::string path;
+    std::vector<std::string> path_array;
     std::string body;
     std::string response;
     std::string response_type;
@@ -238,6 +239,7 @@ public:
         method = other.method;
         request_headers = other.request_headers;
         path = other.path;
+        path_array = other.path_array;
         body = other.body;
         response = other.response;
         response_type = other.response_type;
@@ -254,12 +256,37 @@ public:
             method = other.method;
             request_headers = other.request_headers;
             path = other.path;
+            path_array = other.path_array;
             body = other.body;
             response = other.response;
             response_type = other.response_type;
         }
 
         return *this;
+    }
+
+public:
+    void ExtractPathArgument()
+    {
+        ExtractFields(path, path_array);
+    }
+
+private:
+    void ExtractFields(const std::string& path, std::vector<std::string>& fields)
+    {
+        size_t pos = path.find('/');
+
+        if (pos != std::string::npos)
+        {
+            std::string field = path.substr(0, pos);
+            fields.push_back(field);
+
+            ExtractFields(path.substr(pos + 1), fields);
+        }
+        else 
+        {
+            fields.push_back(path);
+        }
     }
 };
 

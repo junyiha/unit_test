@@ -1333,6 +1333,61 @@ int test_rk_sound_platform_list()
     return 1;
 }
 
+int test_vcr_get_vision_algorithm_list()
+{
+    std::string path = "/api/algorithm/list";
+    httplib::Client cli("192.169.4.16:13001");
+
+    auto res = cli.Get(path);
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_get_robotic_arm_list()
+{
+    std::string path = "/api/robot/list";
+    httplib::Client cli("192.169.4.16:13001");
+
+    auto res = cli.Get(path);
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_get_robotic_arm_unit_test()
+{
+    std::string path = "/api/robot/test";
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["speed_percent"] = 20;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -1360,7 +1415,10 @@ int test_business(Message& message)
         {"test-rk-sound-file-management", test_rk_sound_file_management},
         {"test-rk-sound-platform-append", test_rk_sound_platform_append},
         {"test-rk-sound-platform-clear", test_rk_sound_platform_clear},
-        {"test-rk-sound-platform-list", test_rk_sound_platform_list}
+        {"test-rk-sound-platform-list", test_rk_sound_platform_list},
+        {"test-vcr-get-vision-algorithm-list", test_vcr_get_vision_algorithm_list},
+        {"test-vcr-get-robotic-arm-list", test_vcr_get_robotic_arm_list},
+        {"test-vcr-get-robotic-arm-unit-test", test_vcr_get_robotic_arm_unit_test}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

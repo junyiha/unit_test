@@ -11,6 +11,7 @@
 
 #include "entry.hpp"
 #include "TargetPool.hpp"
+#include "SoundPlatform.hpp"
 
 static int generate_target(TargetPool &out)
 {
@@ -1282,6 +1283,56 @@ int test_rk_sound_file_management()
     return 1;
 }
 
+int test_rk_sound_platform_append()
+{
+    const std::string file = "http://192.168.3.12:13000/night.mp3";
+
+    SoundPlatform sp("ls20://0201EE5E4D31", "http://192.168.3.60:8888");
+
+    int res = sp.Append(50, "aaa", file);
+    if (res != 1)
+    {
+        LOG(ERROR) << "append failed\n";
+        return 0;
+    }
+
+    return 1;
+}
+
+int test_rk_sound_platform_clear()
+{
+    SoundPlatform sp("ls20://0201EE5E4D31", "192.168.3.60:8888");
+
+    int res = sp.Clear();
+    if (res != 1)
+    {
+        LOG(ERROR) << "clear failed\n";
+        return 0;
+    }
+
+    return 1;
+}
+
+int test_rk_sound_platform_list()
+{
+    std::vector<std::string> list;
+    SoundPlatform sp("ls20://0201EE5E4D31", "192.168.3.60:8888");
+
+    int res = sp.List(list);
+    if (res != 1)
+    {
+        LOG(ERROR) << "clear failed\n";
+        return 0;
+    }
+    LOG(INFO) << "songs list: \n";
+    for (auto& song : list)
+    {
+        LOG(INFO) << "song: " << song << "\n";
+    }
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -1306,7 +1357,10 @@ int test_business(Message& message)
         {"test-template-robot-pool-in-class", test_template_robot_pool_in_class},
         {"test-parse-devices-config", test_parse_devices_config},
         {"test-template-robot-pool-in-class-hash-id", test_template_robot_pool_in_class_hash_id},
-        {"test-rk-sound-file-management", test_rk_sound_file_management}
+        {"test-rk-sound-file-management", test_rk_sound_file_management},
+        {"test-rk-sound-platform-append", test_rk_sound_platform_append},
+        {"test-rk-sound-platform-clear", test_rk_sound_platform_clear},
+        {"test-rk-sound-platform-list", test_rk_sound_platform_list}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

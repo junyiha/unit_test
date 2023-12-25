@@ -13,7 +13,7 @@
 #include <string>
 
 #include "httplib.h"
-#include "old_src/json.hpp"
+#include "nlohmann/json.hpp"
 
 class SoundPlatform
 {
@@ -22,7 +22,8 @@ private:
     std::string m_sn;
     
 public:
-    SoundPlatform()
+    SoundPlatform() = delete;
+    SoundPlatform(std::string sn, std::string addr) : m_sn(sn), m_addr(addr)
     {
 
     }
@@ -41,13 +42,15 @@ public:
         data["sn"] = m_sn;
         data["type"] = "req";
         data["name"] = "songs_queue_append";
-        data["tid"] = "123";
-        data["vol"] = vol;
+        data["params"]["tid"] = "123";
+        data["params"]["vol"] = vol;
         item_data["name"] = name;
         item_data["uri"] = uri;
         data["params"]["urls"].push_back(item_data);
 
-        auto res = cli.Post("", data.dump(), "Content-Type: application/json");
+        std::cerr << data.dump() << "\n";
+
+        auto res = cli.Post("/", data.dump(), "Content-Type: application/json");
         if (res.error() == httplib::Error::Success)
         {
             return 1;
@@ -64,13 +67,49 @@ public:
         data["sn"] = m_sn;
         data["type"] = "req";
         data["name"] = "songs_queue_clear";
-
-        auto res = cli.Post("", data.dump(), "Content-Type: application/json");
+        auto res = cli.Post("/", data.dump(), "Content-Type: application/json");
         if (res.error() == httplib::Error::Success)
         {
             return 1;
         }
 
         return 0;
+    }
+
+    int List(std::vector<std::string>& list)
+    {
+        httplib::Client cli(m_addr);
+        nlohmann::json data;
+
+        data["sn"] = m_sn;
+        data["type"] = "req";
+        data["name"] = "songs_queue_list";
+        auto res = cli.Post("/", data.dump(), "Content-Type: application/json");
+        if (res.error() == httplib::Error::Success)
+        {
+            return 1;
+        }
+        
+        nlohmann::json parsed_data;
+        try
+        {
+            parsed_data = nlohmann::json::parse(res->body);
+            for (auto& it : parsed_data["params"]["songs_queue"])
+            {
+                list.push_back(std::string(it));
+            }
+        }
+        catch (nlohmann::json::parse_error& e)
+        {
+            std::cerr << "parse error, data: " << res->body << std::endl;
+            return 0;
+        }
+        catch (nlohmann::json::type_error& e)
+        {
+            std::cerr << "type error, data: " << res->body << std::endl;
+            return 0;
+        }
+
+        return 1;
     }
 };

@@ -1142,12 +1142,70 @@ int get_devices_config(const std::string config_path, std::vector<RoboticArmConf
     return 1;
 }
 
+int get_devices_config(const std::string config_path, 
+                       std::vector<RoboticArmConfig>& robotic_arm_configs, 
+                       std::vector<EndToolConfig>& end_tool_configs)
+{
+    std::ifstream file(config_path, std::ios::in);
+    if (!file.is_open())
+    {
+        LOG(ERROR) << "Invalid config path: " << config_path << "\n";
+        return 0;
+    }
+
+    nlohmann::json parsed_data;
+    try
+    {
+        file >> parsed_data;
+        for (auto& robotic_arm : parsed_data["robotic_arm"])
+        {
+            RoboticArmConfig robotic_arm_config;
+            robotic_arm_config.meta.product = robotic_arm["meta"]["product"];
+            robotic_arm_config.meta.vendor = robotic_arm["meta"]["vendor"];
+            robotic_arm_config.address.ip = robotic_arm["address"]["ip"];
+            robotic_arm_config.address.port = robotic_arm["address"]["port"];
+            robotic_arm_config.GenerateHashId();
+            robotic_arm_configs.push_back(robotic_arm_config);
+        }
+        for (auto& end_tool : parsed_data["end_tool"])
+        {
+            EndToolConfig end_tool_config;
+            end_tool_config.meta.product = end_tool["meta"]["product"];
+            end_tool_config.meta.vendor = end_tool["meta"]["vendor"];
+            end_tool_config.address.path = end_tool["address"]["path"];
+            end_tool_config.config.slave_id = end_tool["config"]["slave_id"];
+            end_tool_config.config.baudrate = end_tool["config"]["baudrate"];
+            end_tool_config.config.bits = end_tool["config"]["bits"];
+            end_tool_config.config.parity = end_tool["config"]["parity"];
+            end_tool_config.config.stop = end_tool["config"]["stop"];
+            end_tool_config.GenerateHashId();
+            end_tool_configs.push_back(end_tool_config);
+        }
+        file.close();
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        LOG(ERROR) << "parse error, config file path: " << config_path << "\n";
+        file.close();
+        return 0;
+    }
+    catch (nlohmann::json::type_error& e)
+    {
+        LOG(ERROR) << "type error, config file path: " << config_path << "\n";
+        file.close();
+        return 0;
+    }
+
+    return 1;
+}
+
 int test_parse_devices_config()
 {
     const std::string config_path = "/data/vcr/Configurations/devices.json";
     std::vector<RoboticArmConfig> robotic_arm_configs;
+    std::vector<EndToolConfig> end_tool_configs;
 
-    int res = get_devices_config(config_path, robotic_arm_configs);
+    int res = get_devices_config(config_path, robotic_arm_configs, end_tool_configs);
     if (res != 1)
     {
         return 0;
@@ -1158,6 +1216,15 @@ int test_parse_devices_config()
         LOG(INFO) << "product: " << robotic_arm_config.meta.product << "\n"
                   << "vendor: " << robotic_arm_config.meta.vendor << "\n"
                   << "hash id: " << robotic_arm_config.hash_id << "\n";
+    }
+    for (auto& end_tool_config : end_tool_configs)
+    {
+        LOG(INFO) << "product: " << end_tool_config.meta.product << "\n"
+                  << "vendor: " << end_tool_config.meta.vendor << "\n"
+                  << "address.path: " << end_tool_config.address.path << "\n"
+                  << "config.save_id: " << end_tool_config.config.slave_id << "\n"
+                  << "config.baudrate: " << end_tool_config.config.baudrate << "\n"
+                  << "hash id: " << end_tool_config.hash_id << "\n";
     }
 
     return 1;
@@ -1352,7 +1419,7 @@ int test_vcr_get_vision_algorithm_list()
 int test_vcr_get_robotic_arm_list()
 {
     std::string path = "/api/robot/list";
-    httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli("192.169.0.152:13001");
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1368,7 +1435,8 @@ int test_vcr_get_robotic_arm_list()
 int test_vcr_get_robotic_arm_unit_test()
 {
     std::string path = "/api/robot/test";
-    httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.4.16:13001");
     nlohmann::json data;
 
     std::string id;
@@ -1376,6 +1444,88 @@ int test_vcr_get_robotic_arm_unit_test()
 
     data["id"] = id;
     data["speed_percent"] = 20;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_get_tool_list()
+{
+    std::string path = "/api/tool/list";
+    httplib::Client cli("192.169.0.152:13001");
+
+    auto res = cli.Get(path);
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_tool_catch()
+{
+    std::string path = "/api/tool/catch";
+    httplib::Client cli("192.169.0.152:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_tool_release()
+{
+    std::string path = "/api/tool/release";
+    httplib::Client cli("192.169.0.152:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_tool_is_catch()
+{
+    std::string path = "/api/tool/isCatch";
+    httplib::Client cli("192.169.0.152:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
 
     auto res = cli.Post(path, data.dump(), "ContentType: application/json");
     if (res.error() != httplib::Error::Success)
@@ -1418,7 +1568,11 @@ int test_business(Message& message)
         {"test-rk-sound-platform-list", test_rk_sound_platform_list},
         {"test-vcr-get-vision-algorithm-list", test_vcr_get_vision_algorithm_list},
         {"test-vcr-get-robotic-arm-list", test_vcr_get_robotic_arm_list},
-        {"test-vcr-get-robotic-arm-unit-test", test_vcr_get_robotic_arm_unit_test}
+        {"test-vcr-get-robotic-arm-unit-test", test_vcr_get_robotic_arm_unit_test},
+        {"test-vcr-get-tool-list", test_vcr_get_tool_list},
+        {"test-vcr-tool-catch", test_vcr_tool_catch},
+        {"test-vcr-tool-release", test_vcr_tool_release},
+        {"test-vcr-tool-is-catch", test_vcr_tool_is_catch}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

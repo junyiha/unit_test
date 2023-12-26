@@ -214,7 +214,92 @@ public:
     {
         std::hash<std::string> hasher;
 
-        hash_id = std::to_string(hasher(meta.product + meta.vendor));
+        hash_id = std::to_string(hasher(meta.product + meta.vendor + address.ip + std::to_string(address.port)));
+    }
+};
+
+class EndToolConfig
+{
+public:
+    struct Meta_t 
+    {
+        std::string product;
+        std::string vendor;
+        Meta_t()
+        {
+            product = "";
+            vendor = "";
+        }
+    };
+    struct Address_t
+    {
+        std::string path;
+        std::string ip;
+        size_t port;
+        Address_t()
+        {
+            ip = "";
+            port = 0;
+            path = "";
+        }
+    };
+    struct Config_t
+    {
+        int slave_id;
+        size_t baudrate;
+        int bits;
+        int parity;
+        int stop;
+        Config_t()
+        {
+            slave_id = 0;
+            baudrate = 0;
+            bits = 0;
+            parity = 0;
+            stop = 0;
+        }
+    };
+
+    std::string hash_id;
+    Meta_t meta;
+    Address_t address;
+    Config_t config;
+
+public:
+    EndToolConfig()
+    {
+        hash_id = "";
+    }
+    EndToolConfig(const EndToolConfig& other)
+    {
+        hash_id = other.hash_id;
+        meta = other.meta;
+        address = other.address;
+        config = other.config;
+    }
+    ~EndToolConfig()
+    {
+
+    }
+
+    EndToolConfig& operator=(const EndToolConfig& other)
+    {
+        if (this != &other)
+        {
+            hash_id = other.hash_id;
+            meta = other.meta;
+            address = other.address;
+            config = other.config;
+        }
+
+        return *this;
+    }
+
+    void GenerateHashId()
+    {
+        std::hash<std::string> hasher;
+
+        hash_id = std::to_string(hasher(meta.product + meta.vendor + address.path + std::to_string(config.slave_id) + std::to_string(config.baudrate)));
     }
 };
 

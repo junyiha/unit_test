@@ -1683,10 +1683,114 @@ int test_map_class_member_function()
     return 1;
 }
 
+    class DDD
+    {
+    private:
+        std::string m_data;
+
+    public:
+        DDD() = delete;
+        DDD(const std::string in) : m_data(in)
+        {
+            
+        }
+        ~DDD()
+        {
+            
+        }
+    
+    public:
+        void Print()
+        {
+            LOG(INFO) << m_data << "\n";
+        }
+    };
+
+    class tmp 
+    {
+    private:
+        DDD m_d;
+
+    public:
+        static std::string data;
+
+    public:
+        tmp() : m_d(data)
+        {
+
+        }
+        ~tmp()
+        {
+            
+        }
+    
+    public:
+        void Echo()
+        {
+            m_d.Print();
+        }
+
+        static void Initialization()
+        {
+            data = "hhhhh";
+        }
+    };
+    std::string tmp::data = "";
+
+int test_class_static_member_function()
+{
+
+    DDD d("hello");
+
+    d.Print();
+
+    tmp::Initialization();
+
+    tmp t;
+    t.Echo();
+
+    return 1;
+}
+
+int test_nlohmann_json_vector()
+{
+    std::vector<int> nums = {1, 2, 3, 4};
+
+    nlohmann::json data;
+
+    data["num"] = nums;
+
+    LOG(INFO) << data.dump() << "\n";
+
+    return 1;
+}
+
+int test_nlohmann_json_array_to_vector()
+{
+    std::string json_string = R"(
+        {
+            "my_array": [1, 2, 3, 4]
+        }
+    )";
+
+    nlohmann::json data = nlohmann::json::parse(json_string);
+
+    std::vector<int> v = data["my_array"].get<std::vector<int>>();
+
+    for (auto& it : v)
+    {
+        LOG(INFO) << "value: " << it << "\n";
+    }
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
         {"--test-glog", test_glog},
+        {"--test-nlohmann-json-vector", test_nlohmann_json_vector},
+        {"--test-nlohmann-json-array-to-vector", test_nlohmann_json_array_to_vector},
         {"--test-httplib-server", test_httplib_server},
         {"--test-httplib-server-v2", test_httplib_server_v2},
         {"--test-httplib-client-v2", test_httplib_client_v2},
@@ -1727,7 +1831,8 @@ int test_anything(Message& message)
         {"--test-httplib-server-in-class", test_httplib_server_in_class},
         {"--test-generate-sql", test_generate_sql},
         {"--test-parse-restful-path", test_parse_restful_path},
-        {"--test-map-class-member-function", test_map_class_member_function}
+        {"--test-map-class-member-function", test_map_class_member_function},
+        {"--test-class-static-member-function", test_class_static_member_function}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

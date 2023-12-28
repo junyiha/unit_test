@@ -9,9 +9,11 @@
  * 
  */
 #pragma once 
+
 #include <map>
 #include <vector>
 #include <string>
+#include "robot_protocol.hpp"
 
 class Message
 {
@@ -109,6 +111,7 @@ public:
     int tracker_type;
     int trace_case;
     DetectorModel detector_model;
+    std::string hash_id;
 
 public:
     DetectorConfig()
@@ -119,6 +122,7 @@ public:
         detector_thresholds = 0;
         tracker_type = 0;
         trace_case = 0;
+        hash_id = "";
     }
     DetectorConfig(const DetectorConfig& other)
     {
@@ -129,6 +133,7 @@ public:
         tracker_type = other.tracker_type;
         trace_case = other.trace_case;
         detector_model = other.detector_model;
+        hash_id = other.hash_id;
     }
     ~DetectorConfig()
     {
@@ -138,6 +143,7 @@ public:
         detector_thresholds = 0;
         tracker_type = 0;
         trace_case = 0;
+        hash_id = "";
     }
     DetectorConfig& operator=(const DetectorConfig& other)
     {
@@ -150,10 +156,18 @@ public:
             tracker_type = other.tracker_type;
             trace_case = other.trace_case;
             detector_model = other.detector_model;
+            hash_id = other.hash_id;
         }
 
         return *this;
     }
+
+    void GenerateHashId()
+    {
+        std::hash<std::string> hasher;
+
+        hash_id = std::to_string(hasher(detector_model.name + detector_model.type));
+    }    
 };
 
 class RoboticArmConfig
@@ -173,6 +187,7 @@ public:
     std::string hash_id;
     Meta_t meta;
     Address_t address;
+    aicontrib::Robot::RobotToolArray robot_tool_array;
 
 public:
     RoboticArmConfig()
@@ -188,6 +203,7 @@ public:
         hash_id = other.hash_id;
         meta = other.meta;
         address = other.address;
+        robot_tool_array = other.robot_tool_array;
     }
     ~RoboticArmConfig()
     {
@@ -205,6 +221,7 @@ public:
             hash_id = other.hash_id;
             meta = other.meta;
             address = other.address;
+            robot_tool_array = other.robot_tool_array;
         }
 
         return *this;
@@ -302,6 +319,257 @@ public:
         hash_id = std::to_string(hasher(meta.product + meta.vendor + address.path + std::to_string(config.slave_id) + std::to_string(config.baudrate)));
     }
 };
+
+class CameraConfig
+{
+public:
+    struct Meta_t 
+    {
+        std::string product;
+        std::string vendor;
+        std::string brief;
+        Meta_t()
+        {
+            product = "";
+            vendor = "";
+            brief = "";
+        }
+    };
+    struct Address_t
+    {
+        std::string id;
+        std::string path;
+        std::string ip;
+        size_t port;
+        Address_t()
+        {
+            id = "";
+            ip = "";
+            port = 0;
+            path = "";
+        }
+    };
+    struct Config_t
+    {
+        int mode;
+        int slave_id;
+        size_t baudrate;
+        int bits;
+        int parity;
+        int stop;
+        Config_t()
+        {
+            mode = 0;
+            slave_id = 0;
+            baudrate = 0;
+            bits = 0;
+            parity = 0;
+            stop = 0;
+        }
+    };
+
+    std::string hash_id;
+    Meta_t meta;
+    Address_t address;
+    Config_t config;
+
+public:
+    CameraConfig()
+    {
+        hash_id = "";
+    }
+    CameraConfig(const CameraConfig& other)
+    {
+        hash_id = other.hash_id;
+        meta = other.meta;
+        address = other.address;
+        config = other.config;
+    }
+    ~CameraConfig()
+    {
+
+    }
+
+    CameraConfig& operator=(const CameraConfig& other)
+    {
+        if (this != &other)
+        {
+            hash_id = other.hash_id;
+            meta = other.meta;
+            address = other.address;
+            config = other.config;
+        }
+
+        return *this;
+    }
+
+    void GenerateHashId()
+    {
+        std::hash<std::string> hasher;
+
+        hash_id = std::to_string(hasher(meta.product + meta.vendor + meta.brief +address.id + std::to_string(config.mode)));
+    }
+};
+
+using VisionAlgorithmConfig = DetectorConfig;
+
+class TaskAlgorithmConfig
+{
+public:
+    struct Meta_t 
+    {
+        std::string product;
+        std::string vendor;
+        std::string brief;
+        Meta_t()
+        {
+            product = "";
+            vendor = "";
+            brief = "";
+        }
+    };
+    struct Address_t
+    {
+        std::string id;
+        std::string path;
+        std::string ip;
+        size_t port;
+        Address_t()
+        {
+            id = "";
+            ip = "";
+            port = 0;
+            path = "";
+        }
+    };
+    struct Config_t
+    {
+        int mode;
+        int slave_id;
+        size_t baudrate;
+        int bits;
+        int parity;
+        int stop;
+        Config_t()
+        {
+            mode = 0;
+            slave_id = 0;
+            baudrate = 0;
+            bits = 0;
+            parity = 0;
+            stop = 0;
+        }
+    };
+
+    std::string hash_id;
+    Meta_t meta;
+    Address_t address;
+    Config_t config;
+    RoboticArmConfig robotic_arm_config;
+    EndToolConfig end_tool_config;
+    CameraConfig camera_config;
+    VisionAlgorithmConfig vision_algorithm_config;
+
+public:
+    TaskAlgorithmConfig()
+    {
+        hash_id = "";
+    }
+    TaskAlgorithmConfig(const TaskAlgorithmConfig& other)
+    {
+        hash_id = other.hash_id;
+        meta = other.meta;
+        address = other.address;
+        config = other.config;
+        robotic_arm_config = other.robotic_arm_config;
+        end_tool_config = other.end_tool_config;
+        camera_config = other.camera_config;
+        vision_algorithm_config = other.vision_algorithm_config;
+    }
+    ~TaskAlgorithmConfig()
+    {
+
+    }
+
+    TaskAlgorithmConfig& operator=(const TaskAlgorithmConfig& other)
+    {
+        if (this != &other)
+        {
+            hash_id = other.hash_id;
+            meta = other.meta;
+            address = other.address;
+            config = other.config;
+            robotic_arm_config = other.robotic_arm_config;
+            end_tool_config = other.end_tool_config;
+            camera_config = other.camera_config;
+            vision_algorithm_config = other.vision_algorithm_config;
+        }
+
+        return *this;
+    }
+
+    void GenerateHashId()
+    {
+        std::hash<std::string> hasher;
+
+        hash_id = std::to_string(hasher(meta.brief));
+    }
+};
+
+class InitConfig
+{
+public:
+    int max_size;
+    std::string vision_algorithm;
+    std::string robotic_arm;
+    std::string end_tool;
+    std::string camera;
+    std::string task_algorithm;
+
+public:
+    InitConfig()
+    {
+        max_size = 0;
+        vision_algorithm = "";
+        robotic_arm = "";
+        end_tool = "";
+        camera = "";
+        task_algorithm = "";
+    }
+    InitConfig(const InitConfig& other)
+    {   
+        max_size = other.max_size;
+        vision_algorithm = other.vision_algorithm;
+        robotic_arm = other.robotic_arm;
+        end_tool = other.end_tool;
+        camera = other.camera;
+        task_algorithm = other.task_algorithm;
+    }
+    ~InitConfig()
+    {
+        max_size = 0;
+        vision_algorithm = "";
+        robotic_arm = "";
+        end_tool = "";
+        camera = "";
+        task_algorithm = "";  
+    }
+
+    InitConfig& operator=(const InitConfig& other)
+    {
+        if (this != std::addressof(other))
+        {
+            max_size = other.max_size;
+            vision_algorithm = other.vision_algorithm;
+            robotic_arm = other.robotic_arm;
+            end_tool = other.end_tool;
+            camera = other.camera;
+            task_algorithm = other.task_algorithm;
+        }
+
+        return *this;
+    }
+};  
 
 class NetworkMessage
 {

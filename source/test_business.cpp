@@ -518,6 +518,91 @@ int test_vcr_get_velocity()
     return 1;
 }
 
+int get_json_detector_files(const std::string config_dir, const std::string json_file_name, std::vector<std::string>& json_files)
+{
+    int ec {0};
+    std::vector<std::string> files;
+    std::vector<std::string> directorys;
+
+    ec = get_dir_and_file_from_path(config_dir, directorys, files);
+    if (ec != 1)
+    {
+        return 0;
+    }
+
+    for (const std::string& directory : directorys)
+    {
+        std::string tmp_dir_path = config_dir + directory;
+        std::vector<std::string> tmp_directorys;
+        std::vector<std::string> tmp_files;
+        ec = get_dir_and_file_from_path(tmp_dir_path, tmp_directorys, tmp_files);
+        if (ec != 1)
+        {
+            LOG(ERROR) << "Invalid directory value: " << tmp_dir_path << "\n";
+            continue;
+        }
+        for (const std::string& tmp_file : tmp_files)
+        {
+            if (tmp_file == json_file_name)
+            {
+                std::string tmp_dir = tmp_dir_path + "/" + tmp_file;
+                json_files.push_back(tmp_dir);
+            }
+        }
+    }
+
+    return 1;
+}
+
+int get_detector_config(std::vector<std::string> json_files, std::vector<DetectorConfig>& detector_configs)
+{
+    for (const std::string& json_config : json_files)
+    {
+        LOG(INFO) << "json configuration file path: " << json_config << "\n";
+        DetectorConfig detector_config;
+        nlohmann::json parsed_data;
+        std::ifstream file(json_config, std::ios::in);
+        
+        if (!file.is_open())
+        {
+            LOG(ERROR) << "Invalid json config file: " << json_config << "\n";
+            continue;
+        }
+        try 
+        {
+            file >> parsed_data;
+            detector_config.detector_type = parsed_data["detector-type"];
+            detector_config.detector_gap = parsed_data["detector-gap"];
+            detector_config.detector_fps = parsed_data["detector-fps"];
+            detector_config.detector_thresholds = parsed_data["detector-thresholds"];
+            detector_config.tracker_type = parsed_data["tracker-type"];
+            detector_config.trace_case = parsed_data["trace-case"];
+            detector_config.detector_model.name = parsed_data["detector-models"]["name"];
+            for (auto& file : parsed_data["detector-models"]["file"])
+            {
+                detector_config.detector_model.file.push_back(std::string(file));
+            }
+            detector_config.detector_model.type = parsed_data["detector-models"]["type"];
+        }
+        catch (nlohmann::json::parse_error &e)
+        {
+            LOG(ERROR) << "parse error: " << e.what() << "\n";
+            file.close();
+            continue;
+        }
+        catch (nlohmann::json::type_error &e)
+        {
+            LOG(ERROR) << "type error: " << e.what() << "\n";
+            file.close();
+            continue;
+        }
+        detector_config.GenerateHashId();
+        detector_configs.push_back(detector_config);
+    }
+
+    return 1;
+}
+
 int test_vcr_vision_algorithm()
 {
     int ec {0};
@@ -605,6 +690,127 @@ int test_vcr_vision_algorithm()
         {
             LOG(INFO) << "model file path: " << it << "\n";
         }
+    }
+
+    return 1;
+}
+
+int test_vcr_vision_algorithm_with_hash_id()
+{
+    int ec{0};
+    std::vector<std::string> json_files;
+    std::vector<DetectorConfig> detector_configs;
+    const std::string vision_algorithm_dir = "/data/vcr/VisionAlgorithms/";
+
+    ec = get_json_detector_files(vision_algorithm_dir, "detector.json", json_files);
+    if (ec != 1)
+    {
+        return 0;
+    }
+    
+    ec = get_detector_config(json_files, detector_configs);
+    if (ec != 1)
+    {
+        return 0;
+    }
+
+    for (auto& detector_config : detector_configs)
+    {
+        LOG(INFO) << "hash id: " << detector_config.hash_id << "\n"
+                  << "name: " << detector_config.detector_model.name << "\n"
+                  << "type: " << detector_config.detector_model.type << "\n";
+    }
+
+    return 1;
+}
+
+int get_task_algorithm_config(const std::string task_algorithm_dir, std::vector<TaskAlgorithmConfig>& task_algorithms)
+{
+    int ec{0};
+    std::vector<std::string> directorys;
+    std::vector<std::string> files;
+
+    ec = get_dir_and_file_from_path(task_algorithm_dir, directorys, files);
+    if (ec != 1)
+    {
+        return 0;
+    }
+
+    for (auto& dir : directorys)
+    {
+        std::string tmp = task_algorithm_dir + dir + "/";
+        std::vector<std::string> tmp_directorys;
+        std::vector<std::string> tmp_files;
+        ec = get_dir_and_file_from_path(tmp, tmp_directorys, tmp_files);
+        if (ec != 1)
+        {
+            LOG(ERROR) << "invalid directory: " << tmp << "\n";
+            continue;
+        }
+        for (auto& it : tmp_files)
+        {
+            if (it == "task.json")
+            {
+                TaskAlgorithmConfig task_algorithm;
+                std::string tmp_json = tmp + it;
+                std::ifstream file(tmp_json, std::ios::in);
+
+                if (!file.is_open())
+                {
+                    LOG(ERROR) << "invalid json file: " << tmp_json;
+                    continue;
+                }
+                nlohmann::json parsed_data;
+                try 
+                {
+                    file >> parsed_data;
+                    task_algorithm.robotic_arm_config.hash_id = parsed_data["robotic_arm"]["hash_id"];
+                    task_algorithm.end_tool_config.hash_id = parsed_data["end_tool"]["hash_id"];
+                    task_algorithm.camera_config.hash_id = parsed_data["camera"]["hash_id"];
+                    task_algorithm.vision_algorithm_config.hash_id = parsed_data["vision_algorithm"]["hash_id"];
+                }
+                catch (nlohmann::json::parse_error &e)
+                {
+                    LOG(ERROR) << "parse error: " << e.what() << "\n";
+                    file.close();
+                    continue;
+                }
+                catch (nlohmann::json::type_error &e)
+                {
+                    LOG(ERROR) << "type error: " << e.what() << "\n";
+                    file.close();
+                    continue;
+                }
+
+                task_algorithm.meta.brief = dir;
+                task_algorithms.push_back(task_algorithm);
+            }
+        }
+    }
+
+    return 1;
+}
+
+int test_vcr_task_algorithm()
+{
+    int ec{0};
+    const std::string task_algorithm_dir = "/data/vcr/TaskAlgorithms/";
+    std::vector<TaskAlgorithmConfig> task_algorithms;
+
+    ec = get_task_algorithm_config(task_algorithm_dir, task_algorithms);
+    if (ec != 1)
+    {
+        LOG(ERROR) << "get task algorithm config failed\n";
+        return 0;
+    }
+
+    for (auto& task_algorithm : task_algorithms)
+    {
+        LOG(INFO) << "brief: " << task_algorithm.meta.brief << "\n"
+                  << "robotic_arm.hash_id: " << task_algorithm.robotic_arm_config.hash_id << "\n"
+                  << "end_tool.hash_id: " << task_algorithm.end_tool_config.hash_id << "\n"
+                  << "camera.hash_id: " << task_algorithm.camera_config.hash_id << "\n"
+                  << "vision_algorithm.hash_id: " << task_algorithm.vision_algorithm_config.hash_id << "\n";
     }
 
     return 1;
@@ -1199,13 +1405,83 @@ int get_devices_config(const std::string config_path,
     return 1;
 }
 
+int get_devices_config(const std::string config_path, 
+                       std::vector<RoboticArmConfig>& robotic_arm_configs, 
+                       std::vector<EndToolConfig>& end_tool_configs,
+                       std::vector<CameraConfig>& camera_configs)
+{
+    std::ifstream file(config_path, std::ios::in);
+    if (!file.is_open())
+    {
+        LOG(ERROR) << "Invalid config path: " << config_path << "\n";
+        return 0;
+    }
+
+    nlohmann::json parsed_data;
+    try
+    {
+        file >> parsed_data;
+        for (auto& robotic_arm : parsed_data["robotic_arm"])
+        {
+            RoboticArmConfig robotic_arm_config;
+            robotic_arm_config.meta.product = robotic_arm["meta"]["product"];
+            robotic_arm_config.meta.vendor = robotic_arm["meta"]["vendor"];
+            robotic_arm_config.address.ip = robotic_arm["address"]["ip"];
+            robotic_arm_config.address.port = robotic_arm["address"]["port"];
+            robotic_arm_config.GenerateHashId();
+            robotic_arm_configs.push_back(robotic_arm_config);
+        }
+        for (auto& end_tool : parsed_data["end_tool"])
+        {
+            EndToolConfig end_tool_config;
+            end_tool_config.meta.product = end_tool["meta"]["product"];
+            end_tool_config.meta.vendor = end_tool["meta"]["vendor"];
+            end_tool_config.address.path = end_tool["address"]["path"];
+            end_tool_config.config.slave_id = end_tool["config"]["slave_id"];
+            end_tool_config.config.baudrate = end_tool["config"]["baudrate"];
+            end_tool_config.config.bits = end_tool["config"]["bits"];
+            end_tool_config.config.parity = end_tool["config"]["parity"];
+            end_tool_config.config.stop = end_tool["config"]["stop"];
+            end_tool_config.GenerateHashId();
+            end_tool_configs.push_back(end_tool_config);
+        }
+        for (auto& camera : parsed_data["camera"])
+        {
+            CameraConfig camera_config;
+            camera_config.meta.product = camera["meta"]["product"];
+            camera_config.meta.vendor = camera["meta"]["vendor"];
+            camera_config.meta.brief = camera["meta"]["brief"];
+            camera_config.address.id = camera["address"]["id"];
+            camera_config.config.mode = camera["config"]["mode"];
+            camera_config.GenerateHashId();
+            camera_configs.push_back(camera_config);
+        }
+        file.close();
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        LOG(ERROR) << "parse error, config file path: " << config_path << "\n";
+        file.close();
+        return 0;
+    }
+    catch (nlohmann::json::type_error& e)
+    {
+        LOG(ERROR) << "type error, config file path: " << config_path << "\n";
+        file.close();
+        return 0;
+    }
+
+    return 1;
+}
+
 int test_parse_devices_config()
 {
     const std::string config_path = "/data/vcr/Configurations/devices.json";
     std::vector<RoboticArmConfig> robotic_arm_configs;
     std::vector<EndToolConfig> end_tool_configs;
+    std::vector<CameraConfig> camera_configs;
 
-    int res = get_devices_config(config_path, robotic_arm_configs, end_tool_configs);
+    int res = get_devices_config(config_path, robotic_arm_configs, end_tool_configs, camera_configs);
     if (res != 1)
     {
         return 0;
@@ -1225,6 +1501,15 @@ int test_parse_devices_config()
                   << "config.save_id: " << end_tool_config.config.slave_id << "\n"
                   << "config.baudrate: " << end_tool_config.config.baudrate << "\n"
                   << "hash id: " << end_tool_config.hash_id << "\n";
+    }
+    for (auto& camera_config : camera_configs)
+    {
+        LOG(INFO) << "product: " << camera_config.meta.product << "\n"
+                  << "vendor: " << camera_config.meta.vendor << "\n"
+                  << "brief: " << camera_config.meta.brief << "\n"
+                  << "address.id: " << camera_config.address.id << "\n"
+                  << "config.mode: " << camera_config.config.mode << "\n"
+                  << "hash id: " << camera_config.hash_id << "\n";
     }
 
     return 1;
@@ -1402,7 +1687,23 @@ int test_rk_sound_platform_list()
 
 int test_vcr_get_vision_algorithm_list()
 {
-    std::string path = "/api/algorithm/list";
+    std::string path = "/api/visionAlgorithm/list";
+    httplib::Client cli("192.169.4.16:13001");
+
+    auto res = cli.Get(path);
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_get_task_algorithm_list()
+{
+    std::string path = "/api/taskAlgorithm/list";
     httplib::Client cli("192.169.4.16:13001");
 
     auto res = cli.Get(path);
@@ -1419,7 +1720,8 @@ int test_vcr_get_vision_algorithm_list()
 int test_vcr_get_robotic_arm_list()
 {
     std::string path = "/api/robot/list";
-    httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.0.152:13001");
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1459,7 +1761,8 @@ int test_vcr_get_robotic_arm_unit_test()
 int test_vcr_get_tool_list()
 {
     std::string path = "/api/tool/list";
-    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1538,6 +1841,219 @@ int test_vcr_tool_is_catch()
     return 1;
 }
 
+int test_vcr_get_camera_list()
+{
+    std::string path = "/api/camera/list";
+    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.0.152:13001");
+
+    auto res = cli.Get(path);
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_get_common_list()
+{
+    std::string path = "/api/common/list";
+    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.0.152:13001");
+
+    auto res = cli.Get(path);
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int get_init_config(const std::string config_path, InitConfig& init_config)
+{
+    std::ifstream file(config_path, std::ios::in);
+
+    if (!file.is_open())
+    {
+        return 0;
+    }
+
+    nlohmann::json parsed_data;
+    try 
+    {
+        file >> parsed_data;
+        init_config.max_size = parsed_data["max_size"],
+        init_config.vision_algorithm = parsed_data["vision_algorithm"];
+        init_config.robotic_arm = parsed_data["robotic_arm"];
+        init_config.end_tool = parsed_data["end_tool"];
+        init_config.camera = parsed_data["camera"];
+        init_config.task_algorithm = parsed_data["task_algorithm"];
+        file.close();
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        LOG(ERROR) << "parse error, config file path: " << config_path << "\n";
+        file.close();
+        return 0;
+    }
+    catch (nlohmann::json::type_error& e)
+    {
+        LOG(ERROR) << "type error, config file path: " << config_path << "\n";
+        file.close();
+        return 0;
+    }
+
+    return 1;
+}
+
+int test_get_init_config()
+{
+    const std::string config_path = "/data/vcr/Configurations/init.json";
+
+    InitConfig init_config;
+    get_init_config(config_path, init_config);
+
+    LOG(INFO) << "max_size: " << init_config.max_size << "\n"
+              << "vision_algorithm: " << init_config.vision_algorithm << "\n"
+              << "robotic_arm: " << init_config.robotic_arm << "\n";
+    
+    return 1;
+}
+
+int test_vcr_robotic_arm_status()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/status";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["speed_percent"] = 20;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_robotic_arm_get_tool()
+{
+    std::string path = "/api/safety/getTool";
+    // httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli("192.169.7.32:9999");
+    nlohmann::json data;
+
+    auto res = cli.Get(path);
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_create_tool()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/createTool";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["index"] = 20;
+    data["name"] = "unit test";
+    data["mass"] = 999;
+    data["position"] = std::vector<double>(6, 1);
+    data["center_of_mass"] = std::vector<double>(3, 2);
+    data["inertia"] = std::vector<double>(9, 3);
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_delete_tool()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/deleteTool";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["index"] = 20;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_enable_tool()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/enableTool";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["index"] = 20;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -1556,6 +2072,8 @@ int test_business(Message& message)
         {"test-cidr-to-decimal-subnet-mask", test_CIDRToDecimalSubnetMask},
         {"test-vcr-get-velocity", test_vcr_get_velocity},
         {"test-vcr-vision-algorithm", test_vcr_vision_algorithm},
+        {"test-vcr-task-algorithm", test_vcr_task_algorithm},
+        {"test-vcr-vision-algorithm-with-hash-id", test_vcr_vision_algorithm_with_hash_id},
         {"test-manage-multi-object", test_manage_multi_object},
         {"test-robot-pool", test_robot_pool},
         {"test-template-tool-pool", test_template_tool_pool},
@@ -1567,12 +2085,21 @@ int test_business(Message& message)
         {"test-rk-sound-platform-clear", test_rk_sound_platform_clear},
         {"test-rk-sound-platform-list", test_rk_sound_platform_list},
         {"test-vcr-get-vision-algorithm-list", test_vcr_get_vision_algorithm_list},
+        {"test-vcr-get-task-algorithm-list", test_vcr_get_task_algorithm_list},
         {"test-vcr-get-robotic-arm-list", test_vcr_get_robotic_arm_list},
         {"test-vcr-get-robotic-arm-unit-test", test_vcr_get_robotic_arm_unit_test},
         {"test-vcr-get-tool-list", test_vcr_get_tool_list},
         {"test-vcr-tool-catch", test_vcr_tool_catch},
         {"test-vcr-tool-release", test_vcr_tool_release},
-        {"test-vcr-tool-is-catch", test_vcr_tool_is_catch}
+        {"test-vcr-tool-is-catch", test_vcr_tool_is_catch},
+        {"test-vcr-get-camera-list", test_vcr_get_camera_list},
+        {"test-vcr-get-common-list", test_vcr_get_common_list},
+        {"test-get-init-config", test_get_init_config},
+        {"test-vcr-robotic-arm-status", test_vcr_robotic_arm_status},
+        {"test-robotic-arm-get-tool", test_robotic_arm_get_tool},
+        {"test-vcr-robotic-arm-create-tool", test_vcr_robotic_arm_create_tool},
+        {"test-vcr-robotic-arm-delete-tool", test_vcr_robotic_arm_delete_tool},
+        {"test-vcr-robotic-arm-enable-tool", test_vcr_robotic_arm_enable_tool}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

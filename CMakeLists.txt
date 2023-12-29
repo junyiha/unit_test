@@ -119,7 +119,8 @@ include_directories(${CMAKE_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/third_party/ty_lib/include
                     ${CMAKE_SOURCE_DIR}/third_party/ty_lib/common
                     # /mnt/remote/190-mnt/zhangjunyi/workspace/vca_dir/master/video_process/3party/GENERAL/x86_64-linux-gnu/gcc-9/include/pcl-1.12/
-                    ${CMAKE_SOURCE_DIR}/third_party/sqlite3/include/)   
+                    ${CMAKE_SOURCE_DIR}/third_party/sqlite3/include/
+                    ${CMAKE_SOURCE_DIR}/third_party/libuv/include/)   
 
 link_directories(${CMAKE_SOURCE_DIR}/third_party/opencv4/lib/
                  ${opencv_library_path}
@@ -129,7 +130,8 @@ link_directories(${CMAKE_SOURCE_DIR}/third_party/opencv4/lib/
                  ${CMAKE_SOURCE_DIR}/third_party/glog/lib/
                 #  /usr/local/TY_sdk/lib/linux/lib_x64/
                  ${CMAKE_SOURCE_DIR}/third_party/ty_lib/lib/linux/lib_x64
-                 /usr/local/lib/)
+                 /usr/local/lib/
+                 ${CMAKE_SOURCE_DIR}/third_party/libuv/lib/)
 
 aux_source_directory(${CMAKE_SOURCE_DIR}/source/ src_file_array)
 
@@ -187,5 +189,6 @@ foreach(executable ${executables})
 
                           ssl
                           crypto
+                          uv
                           )
 endforeach()

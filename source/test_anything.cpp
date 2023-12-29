@@ -1785,6 +1785,49 @@ int test_nlohmann_json_array_to_vector()
     return 1;
 }
 
+void parseHTTPRequest(const std::string& httpRequest) {
+    std::istringstream requestStream(httpRequest);
+    std::string requestLine;
+    std::getline(requestStream, requestLine);
+
+    // 解析请求行
+    std::istringstream requestLineStream(requestLine);
+    std::string method, path, protocol;
+    requestLineStream >> method >> path >> protocol;
+
+    // 输出请求行信息
+    std::cout << "Method: " << method << std::endl;
+    std::cout << "Path: " << path << std::endl;
+    std::cout << "Protocol: " << protocol << std::endl;
+
+    // 解析请求头部
+    std::string headerLine;
+    while (std::getline(requestStream, headerLine) && headerLine != "\r") {
+        std::cout << "Header: " << headerLine << std::endl;
+        // 在此处可以进一步解析头部信息并存储
+    }
+
+    // 解析请求数据（主体）
+    std::string requestBody;
+    std::getline(requestStream, requestBody, '\0'); // 读取请求主体
+    std::cout << "Request Body: " << requestBody << std::endl;
+}
+
+int test_parse_http_protocol()
+{
+    std::string httpRequest = "POST /path/to/resource HTTP/1.1\r\n"
+                              "Host: www.example.com\r\n"
+                              "User-Agent: Mozilla/5.0\r\n"
+                              "Content-Type: application/json\r\n"
+                              "Content-Length: 26\r\n"
+                              "\r\n"
+                              "{\"key\": \"value\", \"num\": 42}";
+
+    parseHTTPRequest(httpRequest);   
+    
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -1832,7 +1875,8 @@ int test_anything(Message& message)
         {"--test-generate-sql", test_generate_sql},
         {"--test-parse-restful-path", test_parse_restful_path},
         {"--test-map-class-member-function", test_map_class_member_function},
-        {"--test-class-static-member-function", test_class_static_member_function}
+        {"--test-class-static-member-function", test_class_static_member_function},
+        {"--test-parse-http-protocol", test_parse_http_protocol}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

@@ -524,6 +524,107 @@ int test_mongoose_server_async_close_in_class(Message& message)
     return 1;
 }
 
+void parse_http_request_data(const std::string& http_request)
+{
+    std::istringstream request_stream(http_request);
+
+    std::string request_line;
+    std::getline(request_stream, request_line, '\n');
+
+    std::istringstream request_line_stream(request_line);
+    std::string method, path, protocol;
+    request_line_stream >> method >> path >> protocol;
+    LOG(INFO) << "method: " << method << "\n"
+              << "path: " << path << "\n"
+              << "protocol: " << path << "\n";
+
+    std::string header_line;
+    while (std::getline(request_stream, header_line) && header_line != "\r")
+    {
+        LOG(INFO) << "header: " << header_line << "\n";
+    }
+
+    std::string request_body;
+    std::getline(request_stream, request_body, '\0');
+    LOG(INFO) << "body: " << request_body << "\n";
+}
+
+static void handle_request(int client_socket)
+{
+    size_t buffer_size = 1024 * 10;
+    char buffer[buffer_size];
+    memset(buffer, 0, buffer_size);
+
+    // read data from client
+    read(client_socket, buffer, buffer_size - 1);
+    printf("Received request:\n%s\n", buffer);
+    parse_http_request_data(std::string(buffer));
+
+    // send HTTP response
+    const char* response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<h1>Hello, this is a simple HTTP server in C</hi>";
+    write(client_socket, response, strlen(response));
+
+    // close connection of client
+    close(client_socket);
+}
+
+static int test_c_http_server(Message& message)
+{
+    const unsigned int port = 8080;
+    int server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    memset(&client_addr, 0, sizeof(client_addr));
+    socklen_t addr_len = sizeof(client_addr);
+
+    // create socket
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1)
+    {
+        perror("Socket creation failed\n");
+        return EXIT_FAILURE;
+    }
+
+    // set address and port 
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    server_addr.sin_port = htons(port);
+
+    // bind socket
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr))  == -1 )
+    {
+        perror("Socket listen failed");
+        close(server_socket);
+        return EXIT_FAILURE;
+    }
+
+    printf("Server running on port %d...\n", port);
+
+    if (listen(server_socket, 5) == -1)
+    {
+        perror("listen failed");
+        return EXIT_FAILURE;
+    }
+
+    while (1)
+    {
+        // accept connection of client
+        client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len);
+        if (client_socket == -1)
+        {
+            perror("Accept failed\n");
+            continue;;
+        }
+
+        // process request of client
+        handle_request(client_socket);
+    }
+
+    close(server_socket);
+
+    return EXIT_SUCCESS;
+}
+
 int test_network(Message& message)
 {
     LOG(INFO) << "----test network begin----\n";
@@ -538,7 +639,8 @@ int test_network(Message& message)
         {"mongoose-http-client", mongoose_http_client},
         {"test-httplib-server-async-close", test_httplib_server_async_close},
         {"test-mongoose-server-async-close", test_mongoose_server_async_close},
-        {"test-mongoose-server-async-close-in-class", test_mongoose_server_async_close_in_class}
+        {"test-mongoose-server-async-close-in-class", test_mongoose_server_async_close_in_class},
+        {"test-c-http-server", test_c_http_server}
     };
 
     std::string cmd = message.message_pool.at(2);

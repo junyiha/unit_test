@@ -60,6 +60,8 @@ int test_anything(Message& message);
 
 int test_network(Message& message);
 
+int test_libuv(Message& message);
+
 ///////////////////////////////////////////////////////////////
 
 /**

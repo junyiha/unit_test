@@ -1954,10 +1954,10 @@ int test_vcr_robotic_arm_status()
 
 int test_robotic_arm_get_tool()
 {
-    std::string path = "/api/safety/getTool";
+    std::string path = "/api/robot/getTool";
     // httplib::Client cli("192.169.0.152:13001");
-    // httplib::Client cli("192.169.4.16:13001");
-    httplib::Client cli("192.169.7.32:9999");
+    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.7.32:9999");
     nlohmann::json data;
 
     auto res = cli.Get(path);
@@ -2054,6 +2054,307 @@ int test_vcr_robotic_arm_enable_tool()
     return 1;
 }
 
+int test_vcr_robotic_arm_move_joint()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/moveJoint";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+    std::vector<double> target(6, 0);
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["speed_percent"] = 5;
+    target.at(2) = 1.57;
+    target.at(4) = 1.57;
+    data["target"] = target;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_move_relative()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/moveRelative";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+    std::vector<double> target(6, 0);
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["cart_vel"] = 0.2;
+    data["rot_vel"] = 1;
+    target.at(2) = -0.05;
+    data["target"] = target;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_clear_task()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/clearTask";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_pause_task()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/pauseTask";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_continue_task()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/continueTask";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_drag_mode_open()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/dragMode";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["drag_flag"] = true;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_drag_mode_close()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/dragMode";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["drag_flag"] = false;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_get_teach_point()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/getTeachPoint";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_save_teach_point()
+{
+    test_vcr_get_robotic_arm_list();
+
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    LOG(INFO) << "input robot's id: \n";
+    std::cin >> id;
+
+    data["id"] = id;
+
+    std::string status_path = "/api/robot/status";
+    auto res = cli.Post(status_path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+    nlohmann::json parsed_data;
+    try 
+    {
+        parsed_data = nlohmann::json::parse(res->body);
+        int index{0};
+        std::string name;
+        LOG(INFO) << "input teach point's index: \n";
+        std::cin >> index;
+        LOG(INFO) << "input teach point's name: \n";
+        std::cin >> name;
+        data["index"] = index;
+        data["name"] = name;
+        data["cart"] = parsed_data["cart"];
+        data["joint"] = parsed_data["joint"];
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        LOG(ERROR) << "parse error, config file path: " << res->body << "\n";
+        return 0;
+    }
+    catch (nlohmann::json::type_error& e)
+    {
+        LOG(ERROR) << "type error, config file path: " << res->body << "\n";
+        return 0;
+    }
+
+    std::string path = "/api/robot/saveTeachPoint";
+    auto tmp_res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (tmp_res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << tmp_res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_delete_teach_point()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/deleteTeachPoint";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    LOG(INFO) << "input robot's id: \n";
+    std::cin >> id;
+    int index{0};
+    LOG(INFO) << "input teach point's index: \n";
+    std::cin >> index;
+
+    data["id"] = id;
+    data["index"] = index;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -2099,7 +2400,17 @@ int test_business(Message& message)
         {"test-robotic-arm-get-tool", test_robotic_arm_get_tool},
         {"test-vcr-robotic-arm-create-tool", test_vcr_robotic_arm_create_tool},
         {"test-vcr-robotic-arm-delete-tool", test_vcr_robotic_arm_delete_tool},
-        {"test-vcr-robotic-arm-enable-tool", test_vcr_robotic_arm_enable_tool}
+        {"test-vcr-robotic-arm-enable-tool", test_vcr_robotic_arm_enable_tool},
+        {"test-vcr-robotic-arm-move-joint", test_vcr_robotic_arm_move_joint},
+        {"test-vcr-robotic-arm-move-relative", test_vcr_robotic_arm_move_relative},
+        {"test-vcr-robotic-arm-clear-task", test_vcr_robotic_arm_clear_task},
+        {"test-vcr-robotic-arm-pause-task", test_vcr_robotic_arm_pause_task},
+        {"test-vcr-robotic-arm-continue-task", test_vcr_robotic_arm_continue_task},
+        {"test-vcr-robotic-arm-drag-mode-open", test_vcr_robotic_arm_drag_mode_open},
+        {"test-vcr-robotic-arm-drag-mode-close", test_vcr_robotic_arm_drag_mode_close},
+        {"test-vcr-robotic-arm-get-teach-point", test_vcr_robotic_arm_get_teach_point},
+        {"test-vcr-robotic-arm-save-teach-point", test_vcr_robotic_arm_save_teach_point},
+        {"test-vcr-robotic-arm-delete-teach-point", test_vcr_robotic_arm_delete_teach_point}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

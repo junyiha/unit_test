@@ -16,6 +16,7 @@ int test_opencv_imencode(Message& message)
 {
     std::string img_path = "/data/home/user/workspace/unit_test/data/img-2.jpg";
     std::string save_img_path = "/data/home/user/workspace/unit_test/data/save-img-2.jpg";
+    std::string save_img_string = "/data/home/user/workspace/unit_test/data/save-string-img-2.txt";
 
     cv::Mat img = cv::imread(img_path);
     if (img.empty())
@@ -48,6 +49,38 @@ int test_opencv_imencode(Message& message)
         if (file)
         {   
             LOG(INFO) << "write image successfully\n";
+            std::string tmp_str = base64_encode(buffer.data(), buffer.size());
+            char* tmp_data_ptr = base64_encode(buffer.data(), buffer.size());
+            std::ofstream tmp_file(save_img_string, std::ios::out);
+            if (!tmp_file.is_open())
+            {
+                LOG(ERROR) << "invalid save string path: " << save_img_string << "\n";
+            }
+            else 
+            {
+                // tmp_file.write(tmp_str.c_str(), tmp_str.length());
+                tmp_file.write(tmp_data_ptr, sizeof(tmp_data_ptr));
+                if (tmp_file)
+                {   
+                    LOG(INFO) << "write image base64 string successfully\n";
+                    if (tmp_data_ptr)
+                    {
+                        free(tmp_data_ptr);
+                        tmp_data_ptr = nullptr;
+                    }
+                    return 1;
+                }
+                else 
+                {
+                    LOG(ERROR) << "write image base64 string failed \n";
+                    if (tmp_data_ptr)
+                    {
+                        free(tmp_data_ptr);
+                        tmp_data_ptr = nullptr;
+                    }
+                    return 0;
+                }
+            }
             return 1;
         }
         else 

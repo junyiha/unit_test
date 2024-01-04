@@ -41,6 +41,9 @@ extern "C"
 #include <thread>
 #include <memory>
 
+#include "openssl/bio.h"
+#include "openssl/buffer.h"
+
 #include <Eigen/Dense>
 
 #include "protocol.hpp"
@@ -83,3 +86,12 @@ int get_dir_and_file_from_path(const std::string path, std::vector<std::string>&
  * @param fields 
  */
 void ExtractFields(const std::string& path, std::vector<std::string>& fields);
+
+/**
+ * @brief 
+ * 
+ * @param input 
+ * @param length 
+ * @return char* 
+ */
+char *base64_encode(const unsigned char *input, int length) ;

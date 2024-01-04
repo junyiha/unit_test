@@ -1828,6 +1828,18 @@ int test_parse_http_protocol()
     return 1;
 }
 
+int test_openssl_base64_encode()
+{
+    const char *text = "Hello, this is a message to be encoded in Base64!";
+    int length = strlen(text);
+    char *encoded = base64_encode((const unsigned char *)text, length);
+
+    printf("Base64 Encoded: %s\n", encoded);
+
+    free(encoded);
+    return 0;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -1876,7 +1888,8 @@ int test_anything(Message& message)
         {"--test-parse-restful-path", test_parse_restful_path},
         {"--test-map-class-member-function", test_map_class_member_function},
         {"--test-class-static-member-function", test_class_static_member_function},
-        {"--test-parse-http-protocol", test_parse_http_protocol}
+        {"--test-parse-http-protocol", test_parse_http_protocol},
+        {"--test-openssl-base64-encode", test_openssl_base64_encode}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

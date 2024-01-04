@@ -47,7 +47,8 @@ int main(int argc, char *argv[])
         {"--test-anything", test_anything},
         {"--test-business", test_business},
         {"--test-network", test_network},
-        {"--test-libuv", test_libuv}
+        {"--test-libuv", test_libuv},
+        {"--test-opencv", test_opencv}
     };
 
     auto it = cmd_map.find(argv[1]);

@@ -62,6 +62,8 @@ int test_network(Message& message);
 
 int test_libuv(Message& message);
 
+int test_opencv(Message& message);
+
 ///////////////////////////////////////////////////////////////
 
 /**

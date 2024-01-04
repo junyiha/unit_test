@@ -1685,6 +1685,25 @@ int test_rk_sound_platform_list()
     return 1;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+int test_vcr_get_common_list()
+{
+    std::string path = "/api/common/list";
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli("192.169.0.152:13001");
+
+    auto res = cli.Get(path);
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
 int test_vcr_get_vision_algorithm_list()
 {
     std::string path = "/api/visionAlgorithm/list";
@@ -1761,8 +1780,8 @@ int test_vcr_get_robotic_arm_unit_test()
 int test_vcr_get_tool_list()
 {
     std::string path = "/api/tool/list";
-    // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.4.16:13001");
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1775,8 +1794,35 @@ int test_vcr_get_tool_list()
     return 1;
 }
 
+int test_vcr_get_tool_attribute_info()
+{
+    test_vcr_get_common_list();
+
+    std::string path = "/api/tool/info";
+    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
 int test_vcr_tool_catch()
 {
+    test_vcr_get_tool_list();
+
     std::string path = "/api/tool/catch";
     httplib::Client cli("192.169.0.152:13001");
     nlohmann::json data;
@@ -1799,6 +1845,8 @@ int test_vcr_tool_catch()
 
 int test_vcr_tool_release()
 {
+    test_vcr_get_tool_list();
+
     std::string path = "/api/tool/release";
     httplib::Client cli("192.169.0.152:13001");
     nlohmann::json data;
@@ -1821,7 +1869,33 @@ int test_vcr_tool_release()
 
 int test_vcr_tool_is_catch()
 {
+    test_vcr_get_tool_list();
+
     std::string path = "/api/tool/isCatch";
+    httplib::Client cli("192.169.0.152:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_tool_unit_test()
+{
+    test_vcr_get_tool_list();
+
+    std::string path = "/api/tool/test";
     httplib::Client cli("192.169.0.152:13001");
     nlohmann::json data;
 
@@ -1858,13 +1932,46 @@ int test_vcr_get_camera_list()
     return 1;
 }
 
-int test_vcr_get_common_list()
+int test_vcr_get_camera_attribute_info()
 {
-    std::string path = "/api/common/list";
+    test_vcr_get_common_list();
+
+    std::string path = "/api/camera/info";
     httplib::Client cli("192.169.4.16:13001");
     // httplib::Client cli("192.169.0.152:13001");
+    nlohmann::json data;
 
-    auto res = cli.Get(path);
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_camera_get_rgb()
+{
+    test_vcr_get_common_list();
+
+    std::string path = "/api/camera/getRGB";
+    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.0.152:13001");
+    nlohmann::json data;
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
     if (res.error() != httplib::Error::Success)
     {
         LOG(ERROR) << "invalid response body\n";
@@ -2355,6 +2462,32 @@ int test_vcr_robotic_arm_delete_teach_point()
     return 1;
 }
 
+int test_vcr_robotic_arm_attribute_info()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/info";
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli("192.169.4.16:13001");
+    nlohmann::json data;
+
+    std::string id;
+    LOG(INFO) << "input robot's id: \n";
+    std::cin >> id;
+
+    data["id"] = id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -2390,10 +2523,14 @@ int test_business(Message& message)
         {"test-vcr-get-robotic-arm-list", test_vcr_get_robotic_arm_list},
         {"test-vcr-get-robotic-arm-unit-test", test_vcr_get_robotic_arm_unit_test},
         {"test-vcr-get-tool-list", test_vcr_get_tool_list},
+        {"test-vcr-get-tool-attribute-info", test_vcr_get_tool_attribute_info},
         {"test-vcr-tool-catch", test_vcr_tool_catch},
         {"test-vcr-tool-release", test_vcr_tool_release},
         {"test-vcr-tool-is-catch", test_vcr_tool_is_catch},
+        {"test-vcr-tool-unit-test", test_vcr_tool_unit_test},
         {"test-vcr-get-camera-list", test_vcr_get_camera_list},
+        {"test-vcr-get-camera-attribute-info", test_vcr_get_camera_attribute_info},
+        {"test-vcr-camera-get-rgb", test_vcr_camera_get_rgb},
         {"test-vcr-get-common-list", test_vcr_get_common_list},
         {"test-get-init-config", test_get_init_config},
         {"test-vcr-robotic-arm-status", test_vcr_robotic_arm_status},
@@ -2410,7 +2547,8 @@ int test_business(Message& message)
         {"test-vcr-robotic-arm-drag-mode-close", test_vcr_robotic_arm_drag_mode_close},
         {"test-vcr-robotic-arm-get-teach-point", test_vcr_robotic_arm_get_teach_point},
         {"test-vcr-robotic-arm-save-teach-point", test_vcr_robotic_arm_save_teach_point},
-        {"test-vcr-robotic-arm-delete-teach-point", test_vcr_robotic_arm_delete_teach_point}
+        {"test-vcr-robotic-arm-delete-teach-point", test_vcr_robotic_arm_delete_teach_point},
+        {"test-vcr-robotic-arm-attribute-info", test_vcr_robotic_arm_attribute_info}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

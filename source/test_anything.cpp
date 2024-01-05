@@ -1840,6 +1840,65 @@ int test_openssl_base64_encode()
     return 0;
 }
 
+int test_poll()
+{
+    int res{0};
+    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1)
+    {
+        LOG(ERROR) << "socket creation failed\n";
+        return 0;
+    }
+
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    server_addr.sin_port = htons(12001);
+
+    int opt = 1;
+    res = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+    if (res == -1)
+    {
+        LOG(ERROR) << "set socket attribute failedn\n";
+        return 0;
+    }
+    res = bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    if (res == -1)
+    {
+        LOG(ERROR) << "set socket attribute failedn\n";
+        return 0;
+    }
+
+    res = listen(server_socket, 5);
+    if (res == -1)
+    {
+        LOG(ERROR) << "set socket attribute failedn\n";
+        return 0;
+    }
+
+    size_t num_clients = 0;
+    struct pollfd fds[10];
+    fds[0].fd = server_socket;
+    fds[0].events = POLLIN;
+    num_clients++;
+    struct sockaddr_in client_addr;
+    while (1)
+    {
+        int activity = poll(fds, num_clients, -1);
+        if (activity < 0)
+        {
+            LOG(ERROR) << "poll error \n";
+            return 0;
+        }
+        if (fds[0].revents & POLLIN)
+        {
+            int new_socket;
+            // new_socket = accept(server_socket, (struct sockaddr*)&client_addr, static_cast<socklen_t *>(std::addressof(sizeof(client_addr))));
+        }
+        
+    }
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {

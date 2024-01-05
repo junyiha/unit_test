@@ -1687,11 +1687,19 @@ int test_rk_sound_platform_list()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifdef DEVELOP_ENV
+const std::string vcr_server_addr = "192.169.4.16:13001";
+#endif
+#ifdef PRODUCT_ENV
+const std::string vcr_server_addr = "192.169.0.152:13001";
+#endif
+
 int test_vcr_get_common_list()
 {
     std::string path = "/api/common/list";
     // httplib::Client cli("192.169.4.16:13001");
-    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli(vcr_server_addr);
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1707,7 +1715,8 @@ int test_vcr_get_common_list()
 int test_vcr_get_vision_algorithm_list()
 {
     std::string path = "/api/visionAlgorithm/list";
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1723,7 +1732,8 @@ int test_vcr_get_vision_algorithm_list()
 int test_vcr_get_task_algorithm_list()
 {
     std::string path = "/api/taskAlgorithm/list";
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1739,8 +1749,10 @@ int test_vcr_get_task_algorithm_list()
 int test_vcr_get_robotic_arm_list()
 {
     std::string path = "/api/robot/list";
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
     // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli(vcr_server_addr);
+
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1756,8 +1768,9 @@ int test_vcr_get_robotic_arm_list()
 int test_vcr_get_robotic_arm_unit_test()
 {
     std::string path = "/api/robot/test";
-    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.0.152:13001");
     // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -1780,8 +1793,9 @@ int test_vcr_get_robotic_arm_unit_test()
 int test_vcr_get_tool_list()
 {
     std::string path = "/api/tool/list";
-    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.0.152:13001");
     // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1799,8 +1813,9 @@ int test_vcr_get_tool_attribute_info()
     test_vcr_get_common_list();
 
     std::string path = "/api/tool/info";
-    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.0.152:13001");
     // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -1824,7 +1839,8 @@ int test_vcr_tool_catch()
     test_vcr_get_tool_list();
 
     std::string path = "/api/tool/catch";
-    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -1848,7 +1864,8 @@ int test_vcr_tool_release()
     test_vcr_get_tool_list();
 
     std::string path = "/api/tool/release";
-    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -1872,7 +1889,8 @@ int test_vcr_tool_is_catch()
     test_vcr_get_tool_list();
 
     std::string path = "/api/tool/isCatch";
-    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -1896,7 +1914,8 @@ int test_vcr_tool_unit_test()
     test_vcr_get_tool_list();
 
     std::string path = "/api/tool/test";
-    httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -1918,8 +1937,9 @@ int test_vcr_tool_unit_test()
 int test_vcr_get_camera_list()
 {
     std::string path = "/api/camera/list";
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
     // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli(vcr_server_addr);
 
     auto res = cli.Get(path);
     if (res.error() != httplib::Error::Success)
@@ -1937,8 +1957,9 @@ int test_vcr_get_camera_attribute_info()
     test_vcr_get_common_list();
 
     std::string path = "/api/camera/info";
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
     // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -1962,8 +1983,9 @@ int test_vcr_camera_get_rgb()
     test_vcr_get_common_list();
 
     std::string path = "/api/camera/getRGB";
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
     // httplib::Client cli("192.169.0.152:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2039,7 +2061,8 @@ int test_vcr_robotic_arm_status()
 
     std::string path = "/api/robot/status";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2063,8 +2086,9 @@ int test_robotic_arm_get_tool()
 {
     std::string path = "/api/robot/getTool";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
     // httplib::Client cli("192.169.7.32:9999");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     auto res = cli.Get(path);
@@ -2084,7 +2108,8 @@ int test_vcr_robotic_arm_create_tool()
 
     std::string path = "/api/robot/createTool";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2115,7 +2140,8 @@ int test_vcr_robotic_arm_delete_tool()
 
     std::string path = "/api/robot/deleteTool";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2141,7 +2167,8 @@ int test_vcr_robotic_arm_enable_tool()
 
     std::string path = "/api/robot/enableTool";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2167,7 +2194,8 @@ int test_vcr_robotic_arm_move_joint()
 
     std::string path = "/api/robot/moveJoint";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
     std::vector<double> target(6, 0);
 
@@ -2197,7 +2225,8 @@ int test_vcr_robotic_arm_move_relative()
 
     std::string path = "/api/robot/moveRelative";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
     std::vector<double> target(6, 0);
 
@@ -2227,7 +2256,8 @@ int test_vcr_robotic_arm_clear_task()
 
     std::string path = "/api/robot/clearTask";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2252,7 +2282,8 @@ int test_vcr_robotic_arm_pause_task()
 
     std::string path = "/api/robot/pauseTask";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2277,7 +2308,8 @@ int test_vcr_robotic_arm_continue_task()
 
     std::string path = "/api/robot/continueTask";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2302,7 +2334,8 @@ int test_vcr_robotic_arm_drag_mode_open()
 
     std::string path = "/api/robot/dragMode";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2328,7 +2361,8 @@ int test_vcr_robotic_arm_drag_mode_close()
 
     std::string path = "/api/robot/dragMode";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2354,7 +2388,8 @@ int test_vcr_robotic_arm_get_teach_point()
 
     std::string path = "/api/robot/getTeachPoint";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2378,7 +2413,8 @@ int test_vcr_robotic_arm_save_teach_point()
     test_vcr_get_robotic_arm_list();
 
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2438,7 +2474,8 @@ int test_vcr_robotic_arm_delete_teach_point()
 
     std::string path = "/api/robot/deleteTeachPoint";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;
@@ -2468,7 +2505,8 @@ int test_vcr_robotic_arm_attribute_info()
 
     std::string path = "/api/robot/info";
     // httplib::Client cli("192.169.0.152:13001");
-    httplib::Client cli("192.169.4.16:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
     nlohmann::json data;
 
     std::string id;

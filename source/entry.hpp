@@ -94,4 +94,4 @@ void ExtractFields(const std::string& path, std::vector<std::string>& fields);
  * @param length 
  * @return char* 
  */
-char *base64_encode(const unsigned char *input, int length) ;
+char *base64_encode(const unsigned char *input, int length);

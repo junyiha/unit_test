@@ -1999,8 +1999,47 @@ int test_vcr_camera_get_rgb()
         LOG(ERROR) << "invalid response body\n";
         return 0;
     }
+    nlohmann::json parsed_data;
+    std::string img_str;
+    try 
+    {
+        parsed_data = nlohmann::json::parse(res->body);
+        img_str = parsed_data["image"];
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        LOG(ERROR) << "parse error, config file path: " << res->body << "\n";
+        return 0;
+    }
+    catch (nlohmann::json::type_error& e)
+    {
+        LOG(ERROR) << "type error, config file path: " << res->body << "\n";
+        return 0;
+    }
 
-    LOG(INFO) << res->body << "\n";
+    unsigned char *decode_data = base64_decode(img_str.c_str(), img_str.length());
+    std::ofstream file("/data/home/user/workspace/unit_test/data/get-rgb.jpg", std::ios::binary);
+
+    file.write(reinterpret_cast<const char *>(decode_data), sizeof(decode_data));
+
+    if (!file)
+    {
+        LOG(ERROR) << "decode image failed\n";
+        return 0;
+    }
+
+    std::ofstream str_file("/data/home/user/workspace/unit_test/data/get-rgb-string.txt", std::ios::out);
+
+    str_file.write(img_str.c_str(), img_str.length());
+    
+    if (!str_file)
+    {
+        LOG(ERROR) << "write image string failed\n";
+        return 0;
+    }
+
+    LOG(INFO) << "get rgb image successfully\n";
+
     return 1;
 }
 

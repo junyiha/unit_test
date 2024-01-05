@@ -1840,6 +1840,18 @@ int test_openssl_base64_encode()
     return 0;
 }
 
+int test_openssl_base64_decode()
+{
+    const char *encoded_text = "SGVsbG8sIHRoaXMgaXMgYSBtZXNzYWdlIHRvIGJlIGVuY29kZWQgaW4gQmFzZTY0IQ==";
+    int length = strlen(encoded_text);
+    unsigned char *decoded = base64_decode(encoded_text, length);
+
+    printf("Base64 Decoded: %s\n", decoded);
+
+    free(decoded);
+    return 0;
+}
+
 int test_poll()
 {
     int res{0};
@@ -1948,7 +1960,8 @@ int test_anything(Message& message)
         {"--test-map-class-member-function", test_map_class_member_function},
         {"--test-class-static-member-function", test_class_static_member_function},
         {"--test-parse-http-protocol", test_parse_http_protocol},
-        {"--test-openssl-base64-encode", test_openssl_base64_encode}
+        {"--test-openssl-base64-encode", test_openssl_base64_encode},
+        {"--test-openssl-base64-decode", test_openssl_base64_decode}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

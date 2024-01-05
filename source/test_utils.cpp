@@ -95,3 +95,28 @@ char *base64_encode(const unsigned char *input, int length)
 
     return encoded;
 }
+
+/**
+ * @brief 
+ * 
+ * @param input 
+ * @param length 
+ * @return unsigned char* 
+ */
+unsigned char *base64_decode(const char *input, int length) 
+{
+    BIO *bio, *b64;
+    unsigned char *buffer = (unsigned char *)malloc(length);
+    memset(buffer, 0, length);
+
+    b64 = BIO_new(BIO_f_base64());
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    bio = BIO_new_mem_buf((void *)input, length);
+    bio = BIO_push(b64, bio);
+
+    BIO_read(bio, buffer, length);
+
+    BIO_free_all(bio);
+
+    return buffer;
+}

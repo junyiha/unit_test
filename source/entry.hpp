@@ -95,3 +95,12 @@ void ExtractFields(const std::string& path, std::vector<std::string>& fields);
  * @return char* 
  */
 char *base64_encode(const unsigned char *input, int length);
+
+/**
+ * @brief 
+ * 
+ * @param input 
+ * @param length 
+ * @return unsigned char* 
+ */
+unsigned char *base64_decode(const char *input, int length);

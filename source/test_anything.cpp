@@ -1889,11 +1889,15 @@ int test_poll()
     }
 
     size_t num_clients = 0;
-    struct pollfd fds[10];
+    int max_size = 10;
+    int client_sockets[max_size];
+    memset(client_sockets, 0, sizeof(client_sockets));
+    struct pollfd fds[max_size];
     fds[0].fd = server_socket;
     fds[0].events = POLLIN;
     num_clients++;
     struct sockaddr_in client_addr;
+    
     while (1)
     {
         int activity = poll(fds, num_clients, -1);
@@ -1905,10 +1909,57 @@ int test_poll()
         if (fds[0].revents & POLLIN)
         {
             int new_socket;
-            // new_socket = accept(server_socket, (struct sockaddr*)&client_addr, static_cast<socklen_t *>(std::addressof(sizeof(client_addr))));
+            socklen_t len = sizeof(client_addr);
+            new_socket = accept(server_socket, (struct sockaddr*)&client_addr, &len);
+            if (new_socket < 0)
+            {
+                LOG(ERROR) << "accept failed\n";
+                return 0;
+            }
+
+            int i;
+            for (i = 1; i < max_size; i++)
+            {
+                if (client_sockets[i] == 0)
+                {
+                    client_sockets[i] = new_socket;
+                    fds[i].fd = new_socket;
+                    fds[i].events = POLLIN;
+                    num_clients++;
+                    break;
+                }
+            }
         }
         
+        for (int i = 1; i < num_clients; i++)
+        {
+            if (fds[i].revents & POLLIN)
+            {
+                int valread;
+                size_t buffer_max_size = 10240;
+                char buffer[buffer_max_size];
+                if ((valread = read(fds[i].fd, buffer, buffer_max_size)) <= 0)
+                {
+                    close(fds[i].fd);
+                    client_sockets[i] = 0;
+                    fds[i].fd = -1;
+                    num_clients--;
+                }
+                else 
+                {
+                    // handle request and send response
+                    printf("Received request:\n%s\n", std::string(buffer, valread).c_str());
+                    const char* response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<h1>Hello, this is a simple HTTP server in C</hi>\n";
+                    write(fds[i].fd, response, strlen(response));
+                    close(fds[i].fd);
+                }
+            }
+        }
     }
+
+    close(server_socket);
+
+    return 1;
 }
 
 int test_anything(Message& message)

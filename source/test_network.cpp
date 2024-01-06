@@ -625,6 +625,145 @@ static int test_c_http_server(Message& message)
     return EXIT_SUCCESS;
 }
 
+int StartListen()
+{
+    size_t port = 8080;
+    struct sockaddr_in server_addr;
+    int server_socket = -1;
+    memset(&server_addr, 0, sizeof(server_addr));
+
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1)
+    {
+        LOG(ERROR) << "socket creation failed\n";
+        return 0;
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    server_addr.sin_port = htons(port);
+
+    int opt = 1;
+    int res = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+    if (res < 0)
+    {
+        LOG(ERROR) << "setsockopt failed\n";
+        return 0;
+    }
+
+    res = bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    if (res == -1)
+    {
+        LOG(ERROR) << "socket listen failed, port: " << port << "\n";
+        return 0;
+    }
+
+    res = listen(server_socket, 10);
+    if (res == -1)
+    {
+        LOG(ERROR) << "listen failed\n";
+        return 0;
+    }
+
+    return server_socket;
+}
+
+int StartWaiting(bool &flag, struct pollfd *fds, int max_size)
+{
+    while (1)
+    {
+        if (flag)
+        {
+            break;
+        }
+        int activity = poll(fds, max_size, 5);
+        if (activity < 0)
+        {
+            LOG(ERROR) << "poll error \n";
+            return 0;
+        }
+
+        if (fds[0].revents & POLLIN)
+        {
+            int new_socket;
+            struct sockaddr_in client_addr;
+            memset(&client_addr, 0, sizeof(client_addr));
+            socklen_t len = sizeof(client_addr);
+            new_socket = accept(fds[0].fd, (struct sockaddr *)&client_addr, &len);
+            if (new_socket < 0)
+            {
+                LOG(ERROR) << "accept failed\n";
+                return 0;
+            }
+
+            for (int i = 1; i < max_size; i++)
+            {
+                if (fds[i].fd == 0)
+                {
+                    fds[i].fd = new_socket;
+                    fds[i].events = POLLIN;
+                }
+            }
+        }
+    }
+
+    return 1;
+}
+
+int test_start_server(Message& message)
+{
+    const int max_size = 100;
+    int server_socket = StartListen();
+
+    if (server_socket == 0)
+    {
+        LOG(ERROR) << "start listen \n";
+        return 0;
+    }
+
+    bool flag = false;
+    struct pollfd fds[max_size];
+    fds[0].fd = server_socket;
+    fds[0].events = POLLIN;
+    for (int i = 1; i < max_size; i++)
+    {
+        fds[i].fd = 0;
+    }
+
+    std::thread tmp = std::thread(StartWaiting, std::ref(flag), fds, max_size);
+
+    while (1)
+    {
+        for (int i = 1; i < max_size; i++)
+        {
+            if (fds[i].fd != 0 && fds[i].revents & POLLIN)
+            {
+                int valread;
+                size_t buffer_max_size = 10240;
+                char buffer[buffer_max_size];
+                valread = read(fds[i].fd, buffer, buffer_max_size);
+                if (valread <= 0)
+                {
+                    close(fds[i].fd);
+                    fds[i].fd = 0;
+                }
+                else 
+                {
+                    printf("Received request:\n%s\n", std::string(buffer, valread).c_str());
+                    const char* response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<h1>Hello, this is a simple HTTP server in C</hi>\n";
+                    write(fds[i].fd, response, strlen(response));
+                    close(fds[i].fd);
+                    fds[i].fd = 0;
+                }
+            }
+        }
+    }
+
+    close(server_socket);
+    flag = true;
+    return 1;
+}
+
 int test_network(Message& message)
 {
     LOG(INFO) << "----test network begin----\n";
@@ -640,7 +779,8 @@ int test_network(Message& message)
         {"test-httplib-server-async-close", test_httplib_server_async_close},
         {"test-mongoose-server-async-close", test_mongoose_server_async_close},
         {"test-mongoose-server-async-close-in-class", test_mongoose_server_async_close_in_class},
-        {"test-c-http-server", test_c_http_server}
+        {"test-c-http-server", test_c_http_server},
+        {"test-start-server", test_start_server}
     };
 
     std::string cmd = message.message_pool.at(2);

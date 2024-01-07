@@ -764,6 +764,107 @@ int test_start_server(Message& message)
     return 1;
 }
 
+int test_httpd(Message& message)
+{
+    Httpd httpd(100);
+    Httpd::httpd_ret res;
+
+    res = httpd.Listen();
+    if (res != Httpd::httpd_ret::SUCCESS)
+    {
+        LOG(ERROR) << "listen failed \n";
+        return 0;
+    }
+
+    res = httpd.Start();
+    if (res != Httpd::httpd_ret::SUCCESS)
+    {
+        LOG(ERROR) << "start failed \n";
+        return 0;
+    }
+
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::vector<struct pollfd> client_fds;
+        res = httpd.PopEvent(client_fds);
+        if (res != Httpd::httpd_ret::SUCCESS)
+        {
+            LOG(ERROR) << "empty event  \n";
+            continue;
+        }
+        for (auto& fds : client_fds)
+        {
+            if (fds.revents & POLLIN)
+            {
+                int valread;
+                size_t buffer_max_size = 10240;
+                std::vector<char> buffer(buffer_max_size);
+                valread = read(fds.fd, buffer.data(), buffer.size());
+                if (valread <= 0)
+                {
+                    close(fds.fd);
+                    continue;
+                }
+
+                printf("Received request:\n%s\n", std::string(buffer.data(), valread).c_str());
+                const char* response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<h1>Hello, this is a simple HTTP server in C</hi>\n";
+                std::string version = "HTTP/1.1 200 OK";
+                std::string response_header = "Content-Type: application/json";
+                std::string response_body = R"({"hello":"world"})";
+                httpd.HTTPResponse(fds, version, response_header, response_body);
+            }
+        }
+    }
+
+    httpd.Stop();
+
+    return 1;
+}
+
+int test_httpdv2(Message& message)
+{
+    Httpd httpd(100);
+    Httpd::httpd_ret res;
+
+    res = httpd.Listen();
+    if (res != Httpd::httpd_ret::SUCCESS)
+    {
+        LOG(ERROR) << "listen failed \n";
+        return 0;
+    }
+
+    res = httpd.Start();
+    if (res != Httpd::httpd_ret::SUCCESS)
+    {
+        LOG(ERROR) << "start failed \n";
+        return 0;
+    }
+
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        struct pollfd fds;
+        std::string request_body;
+        res = httpd.HTTPRequest(fds, request_body);
+        if (res != Httpd::httpd_ret::SUCCESS)
+        {
+            LOG(ERROR) << "empty event  \n";
+            continue;
+        }
+
+        LOG(INFO) << "request data: \n" << request_body << "\n";
+        std::string version = "HTTP/1.1 200 OK";
+        std::string response_header = "Content-Type: application/json";
+        std::string response_body = R"({"hello":"world"})";
+        httpd.HTTPResponse(fds, version, response_header, response_body);
+    }
+
+    httpd.Stop();
+
+    return 1;
+}
+
 int test_network(Message& message)
 {
     LOG(INFO) << "----test network begin----\n";
@@ -780,7 +881,9 @@ int test_network(Message& message)
         {"test-mongoose-server-async-close", test_mongoose_server_async_close},
         {"test-mongoose-server-async-close-in-class", test_mongoose_server_async_close_in_class},
         {"test-c-http-server", test_c_http_server},
-        {"test-start-server", test_start_server}
+        {"test-start-server", test_start_server},
+        {"test-httpd", test_httpd},
+        {"test-httpdv2", test_httpdv2}
     };
 
     std::string cmd = message.message_pool.at(2);

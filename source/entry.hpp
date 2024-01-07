@@ -55,6 +55,8 @@ extern "C"
 
 #include "glog/logging.h"
 
+#include "Httpd.hpp"
+
 int test_business(Message& message);
 
 int test_asio(Message& message);

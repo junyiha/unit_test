@@ -865,6 +865,54 @@ int test_httpdv2(Message& message)
     return 1;
 }
 
+int test_httpdv3(Message& message)
+{
+    Httpd httpd(100);
+    Httpd::httpd_ret res;
+
+    res = httpd.Listen();
+    if (res != Httpd::httpd_ret::SUCCESS)
+    {
+        LOG(ERROR) << "listen failed \n";
+        return 0;
+    }
+
+    res = httpd.Start();
+    if (res != Httpd::httpd_ret::SUCCESS)
+    {
+        LOG(ERROR) << "start failed \n";
+        return 0;
+    }
+
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        struct pollfd fds;
+        Httpd::Request_t request;
+        std::string request_body;
+        res = httpd.HTTPRequest(request);
+        if (res != Httpd::httpd_ret::SUCCESS)
+        {
+            LOG(ERROR) << "empty event  \n";
+            continue;
+        }
+
+        LOG(INFO) << "request data: \n" << request.body << "\n";
+        Httpd::Response_t response;
+        response.fds = request.fds;
+        response.protocol = "HTTP/1.1";
+        response.code = 200;
+        response.status = "OK";
+        response.header_arr.push_back(std::string("Content-Type: application/json"));
+        response.body = R"({"hello":"world"})";
+        httpd.HTTPResponse(response);
+    }
+
+    httpd.Stop();
+
+    return 1;
+}
+
 int test_network(Message& message)
 {
     LOG(INFO) << "----test network begin----\n";
@@ -883,7 +931,8 @@ int test_network(Message& message)
         {"test-c-http-server", test_c_http_server},
         {"test-start-server", test_start_server},
         {"test-httpd", test_httpd},
-        {"test-httpdv2", test_httpdv2}
+        {"test-httpdv2", test_httpdv2},
+        {"test-httpdv3", test_httpdv3}
     };
 
     std::string cmd = message.message_pool.at(2);

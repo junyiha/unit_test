@@ -15,6 +15,8 @@ extern "C"
     #include <sys/socket.h>
     #include <sys/poll.h>
     #include <arpa/inet.h>
+    #include <string.h>
+    #include <unistd.h>
 }
 
 #include <algorithm>
@@ -24,6 +26,7 @@ extern "C"
 #include <atomic>
 #include <vector>
 #include <mutex>
+#include <map>
 
 class Httpd
 {
@@ -33,6 +36,28 @@ public:
         SUCCESS = 1,
         FAIL
     };
+
+    struct Request_t 
+    {
+        struct pollfd fds;
+        std::string method;
+        std::string path;
+        std::string protocol;
+        std::map<std::string, std::string> header_map;
+        std::vector<std::string> header_arr;
+        std::string body;
+    };
+
+    struct Response_t
+    {   
+        struct pollfd fds;
+        std::string protocol;
+        size_t code;
+        std::string status;
+        std::map<std::string, std::string> header_map;
+        std::vector<std::string> header_arr;
+        std::string body;
+    };  
 
 private:
     size_t m_port;
@@ -194,6 +219,38 @@ public:
         return httpd_ret::SUCCESS;
     }
 
+    httpd_ret HTTPRequest(Request_t &request)
+    {
+        if (m_client_fds.empty())
+        {
+            return httpd_ret::FAIL;
+        }
+
+        auto it = std::find_if(m_client_fds.begin(), m_client_fds.end(), [](struct pollfd& tmp){
+            return tmp.revents & POLLIN;
+        });
+
+        if (it == m_client_fds.end())
+        {
+            return httpd_ret::FAIL;
+        }
+        std::vector<char> recv_buf(m_buffer_size);
+        int valread = read(it->fd, recv_buf.data(), recv_buf.size());
+        request.fds = *it;
+        m_mutex.lock();
+        m_client_fds.erase(it);
+        m_mutex.unlock();
+        if (valread <= 0)
+        {
+            return httpd_ret::FAIL;
+        }
+
+        std::string request_string = std::string(recv_buf.data(), valread);
+        parseHTTPRequest(request_string, request);
+
+        return httpd_ret::SUCCESS;
+    }
+
     httpd_ret HTTPResponse(struct pollfd fds,std::string version, std::string response_header, std::string response_body)
     {
         std::stringstream os_out;
@@ -214,9 +271,65 @@ public:
         return httpd_ret::SUCCESS;
     }
 
-private:
-    void ProcessEvent()
+    httpd_ret HTTPResponse(Response_t response)
     {
+        std::stringstream os_out;
+        
+        os_out << response.protocol << " "
+               << response.code << " "
+               << response.status << "\n";
+        for (auto& header : response.header_arr)
+        {
+            os_out << header << "\n";
+        }
+        os_out << "\n"
+               << response.body << "\n";
 
+        std::string data = os_out.str();
+        std::cerr << "response data: \n" << data << "\n";
+        int res = write(response.fds.fd, data.c_str(), data.size());
+        close(response.fds.fd);
+        if (res < 0)
+        {
+            std::cerr << "write data failed\n";
+            return httpd_ret::FAIL;
+        }
+
+        return httpd_ret::SUCCESS;
+    }
+
+private:
+    void parseHTTPRequest(const std::string& httpRequest, Request_t &out) 
+    {
+        std::istringstream requestStream(httpRequest);
+        std::string requestLine;
+        std::getline(requestStream, requestLine);
+
+        // 解析请求行
+        std::istringstream requestLineStream(requestLine);
+        std::string method, path, protocol;
+        requestLineStream >> method >> path >> protocol;
+
+        // 输出请求行信息
+        std::cout << "Method: " << method << std::endl;
+        std::cout << "Path: " << path << std::endl;
+        std::cout << "Protocol: " << protocol << std::endl;
+        out.method = method;
+        out.path = path;
+        out.protocol = protocol;
+
+        // 解析请求头部
+        std::string headerLine;
+        while (std::getline(requestStream, headerLine) && headerLine != "\r") {
+            std::cout << "Header: " << headerLine << std::endl;
+            // 在此处可以进一步解析头部信息并存储
+            out.header_arr.push_back(headerLine);
+        }
+
+        // 解析请求数据（主体）
+        std::string requestBody;
+        std::getline(requestStream, requestBody, '\0'); // 读取请求主体
+        std::cout << "Request Body: " << requestBody << std::endl;
+        out.body = requestBody;
     }
 };

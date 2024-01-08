@@ -130,6 +130,48 @@ public:
         return httpd_ret::SUCCESS;
     }
 
+    httpd_ret Listen(size_t port)
+    {
+        m_port = port;
+        m_server_socket = socket(AF_INET, SOCK_STREAM, 0);
+        if (m_server_socket == -1)
+        {
+            std::cerr << "socket creation failed\n" << std::endl;
+            return httpd_ret::FAIL;
+        }
+
+        m_server_addr.sin_family = AF_INET;
+        m_server_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+        m_server_addr.sin_port = htons(m_port);
+
+        int opt = 1;
+        int res = setsockopt(m_server_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+        if (res < 0)
+        {
+            std::cout << "setsockopt failed\n" << std::endl;
+            return httpd_ret::FAIL;
+        }
+
+        res = bind(m_server_socket, (struct sockaddr *)&m_server_addr, sizeof(m_server_addr));
+        if (res < 0)
+        {
+            std::cout << "socket listen failed, port: " << m_port << "\n" << std::endl;
+            return httpd_ret::FAIL;
+        }
+
+        res = listen(m_server_socket, 10);
+        if (res == -1)
+        {
+            std::cout << "listen failed\n" << std::endl;
+            return httpd_ret::FAIL;
+        }
+
+        m_fds[0].fd = m_server_socket;
+        m_fds[0].events = POLLIN;
+
+        return httpd_ret::SUCCESS;
+    }
+
     httpd_ret Start()
     {
         auto tmp = [](Httpd* this_p)

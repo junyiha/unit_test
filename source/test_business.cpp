@@ -2020,7 +2020,7 @@ int test_vcr_camera_get_rgb()
     unsigned char *decode_data = base64_decode(img_str.c_str(), img_str.length());
     std::ofstream file("/data/home/user/workspace/unit_test/data/get-rgb.jpg", std::ios::binary);
 
-    file.write(reinterpret_cast<const char *>(decode_data), sizeof(decode_data));
+    file.write(reinterpret_cast<const char *>(decode_data), img_str.length());
 
     if (!file)
     {
@@ -2245,6 +2245,42 @@ int test_vcr_robotic_arm_move_joint()
     data["speed_percent"] = 5;
     target.at(2) = 1.57;
     target.at(4) = 1.57;
+    data["target"] = target;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int test_vcr_robotic_arm_move_cart()
+{
+    test_vcr_get_robotic_arm_list();
+
+    std::string path = "/api/robot/moveCart";
+    // httplib::Client cli("192.169.0.152:13001");
+    // httplib::Client cli("192.169.4.16:13001");
+    httplib::Client cli(vcr_server_addr);
+    nlohmann::json data;
+    std::vector<double> target(6, 0);
+
+    std::string id;
+    std::cin >> id;
+
+    data["id"] = id;
+    data["cart_vel"] = 0.02;
+    data["rot_vel"] = 0.2;
+    target.at(0) = -0.101099;
+    target.at(1) = -0.297817;
+    target.at(2) = 0.0557633;
+    target.at(3) = -2.208710;
+    target.at(4) = 2.1390289;
+    target.at(5) = 0.104835;
     data["target"] = target;
 
     auto res = cli.Post(path, data.dump(), "ContentType: application/json");
@@ -2616,6 +2652,7 @@ int test_business(Message& message)
         {"test-vcr-robotic-arm-delete-tool", test_vcr_robotic_arm_delete_tool},
         {"test-vcr-robotic-arm-enable-tool", test_vcr_robotic_arm_enable_tool},
         {"test-vcr-robotic-arm-move-joint", test_vcr_robotic_arm_move_joint},
+        {"test-vcr-robotic-arm-move-cart", test_vcr_robotic_arm_move_cart},
         {"test-vcr-robotic-arm-move-relative", test_vcr_robotic_arm_move_relative},
         {"test-vcr-robotic-arm-clear-task", test_vcr_robotic_arm_clear_task},
         {"test-vcr-robotic-arm-pause-task", test_vcr_robotic_arm_pause_task},

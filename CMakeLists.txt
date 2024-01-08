@@ -13,8 +13,8 @@ set(CMAKE_BUILD_TYPE "Debug")
 
 add_definitions(-DBOOST_LOG_DYN_LINK=1)
 add_definitions(-DLOG_V2=1)
-# add_definitions(-DPRODUCT_ENV=1)
-add_definitions(-DDEVELOP_ENV=1)
+add_definitions(-DPRODUCT_ENV=1)
+# add_definitions(-DDEVELOP_ENV=1)
 
 set( executables 
     #  test_boost

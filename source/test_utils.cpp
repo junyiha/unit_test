@@ -97,7 +97,7 @@ char *base64_encode(const unsigned char *input, int length)
 }
 
 /**
- * @brief 
+ * @brief return the unsigned char*'s size is the input arugment's length
  * 
  * @param input 
  * @param length 

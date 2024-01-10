@@ -174,7 +174,7 @@ public:
 
     httpd_ret Start()
     {
-        auto tmp = [](Httpd* this_p)
+        auto tmp = [](Httpd* this_p)->httpd_ret
         {
             while (this_p->m_flag.load())
             {
@@ -203,6 +203,8 @@ public:
                     this_p->m_mutex.unlock();
                 }
             }
+
+            return httpd_ret::SUCCESS;
         };
 
         m_event_tread = std::thread(tmp, this);

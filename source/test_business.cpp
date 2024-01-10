@@ -12,6 +12,7 @@
 #include "entry.hpp"
 #include "TargetPool.hpp"
 #include "SoundPlatform.hpp"
+#include "TaskParser.hpp"
 
 static int generate_target(TargetPool &out)
 {
@@ -2926,8 +2927,8 @@ int operator_while(TaskVariant_t task_variant)
                     for (auto& it : task_variant.task_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
                         {
                             continue;
                         }
@@ -2975,8 +2976,8 @@ int operator_if(TaskVariant_t task_variant)
                     for (auto& it : task_variant.true_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
                         {
                             continue;
                         }
@@ -2996,8 +2997,8 @@ int operator_if(TaskVariant_t task_variant)
                     for (auto& it : task_variant.false_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
                         {
                             continue;
                         }
@@ -3020,8 +3021,8 @@ int operator_if(TaskVariant_t task_variant)
                     for (auto& it : task_variant.true_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
                         {
                             continue;
                         }
@@ -3041,8 +3042,8 @@ int operator_if(TaskVariant_t task_variant)
                     for (auto& it : task_variant.false_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
                         {
                             continue;
                         }
@@ -3190,6 +3191,32 @@ int test_vcr_task_parserv2()
     return 1;
 }
 
+int test_task_parser()
+{
+    const std::string task_file = "/data/home/user/workspace/unit_test/data/test_task.json";
+    TaskParser task_parser;
+    std::string task_id;
+
+    int res = task_parser.ParseFromFile(task_file, task_id);
+    if (res != 1)
+    {
+        LOG(ERROR) << "parse file fail: " << task_file << "\n";
+        return 0;
+    }
+
+    LOG(INFO) << "parse file success\n"
+              << "task id: " << task_id << "\n";
+
+    res = task_parser.Execute(task_id);
+    if (res != 1)
+    {
+        LOG(ERROR) << "task execute failed, id: " << task_id << "\n";
+        return 0;
+    }
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -3253,7 +3280,8 @@ int test_business(Message& message)
         {"test-vcr-robotic-arm-save-teach-point", test_vcr_robotic_arm_save_teach_point},
         {"test-vcr-robotic-arm-delete-teach-point", test_vcr_robotic_arm_delete_teach_point},
         {"test-vcr-robotic-arm-attribute-info", test_vcr_robotic_arm_attribute_info},
-        {"test-vcr-task-parserv2", test_vcr_task_parserv2}
+        {"test-vcr-task-parserv2", test_vcr_task_parserv2},
+        {"test-task-parser", test_task_parser}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

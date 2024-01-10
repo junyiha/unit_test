@@ -268,6 +268,24 @@ int generateRandomMixedString() {
     return 0;
 }
 
+int test_generate_random_id()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> ds(1, 9);
+
+    std::string random_id;
+    for (int i = 1; i < 10; i++)
+    {
+        int random_num = ds(gen);
+        random_id = random_id + std::to_string(random_num);
+        LOG(INFO) << "random_num: " << random_num << "\n";
+    }
+    LOG(INFO) << "random id: " << random_id << "\n";
+
+    return 1;
+}
+
 int GetMemInfo()
 {
     int ret;
@@ -2039,6 +2057,7 @@ int test_anything(Message& message)
         {"--test-hashmap-1", test_hashmap_1},
         {"--test-get-memery-info", GetMemInfo},
         {"--test-generate-random-id", generateRandomMixedString},
+        {"--test-generate-random-id-v2", test_generate_random_id},
         {"--test-eigen-hello", test_eigen_hello},
         {"--test-eigen-vector3f", test_eigen_vector3f},
         {"--test-ascii", test_ascii},

@@ -16,60 +16,60 @@
 #include <string>
 #include <variant>
 
-enum class TaskKeyWord : unsigned int
-{
-    INVALID = 1,
-    START,
-    STOP,
-    MOVE_LINE,
-    MOVE_JOINT,
-    CATCH,
-    RELEASE,
-    PAUSE,
-    SLEEP,
-    ERROR_NUM,
-    TIMER,
-    COUNTER,
-    WHILE,
-    IF
-};
+// enum class TaskKeyWord : unsigned int
+// {
+//     INVALID = 1,
+//     START,
+//     STOP,
+//     MOVE_LINE,
+//     MOVE_JOINT,
+//     CATCH,
+//     RELEASE,
+//     PAUSE,
+//     SLEEP,
+//     ERROR_NUM,
+//     TIMER,
+//     COUNTER,
+//     WHILE,
+//     IF
+// };
 
-extern std::map<std::string, TaskKeyWord> TaskKeyWordMap;
+// extern std::map<std::string, TaskKeyWord> TaskKeyWordMap;
 
-union TaskArgument
-{
-    char id[1024];
-    double speed_percent;
-    double cart_vel;
-    double rot_vel;
-    double target[6];
-    size_t count_number;
-};
+// union TaskArgument
+// {
+//     char id[1024];
+//     double speed_percent;
+//     double cart_vel;
+//     double rot_vel;
+//     double target[6];
+//     size_t count_number;
+// };
 
-struct TaskArgument_t 
-{
-    std::string id;
-    double speed_percent;
-    double cart_vel;
-    double rot_vel;
-    std::vector<double> target;
-    int sleep;
-    size_t counter;
-    size_t condition_value;
-    std::string condition_operator;
-};
+// struct TaskArgument_t 
+// {
+//     std::string id;
+//     double speed_percent;
+//     double cart_vel;
+//     double rot_vel;
+//     std::vector<double> target;
+//     int sleep;
+//     size_t counter;
+//     size_t condition_value;
+//     std::string condition_operator;
+// };
 
-struct TaskVariant_t
-{
-    TaskKeyWord key_word;
-    TaskKeyWord condition_key_word;
-    TaskArgument_t argument;
-    std::vector<TaskVariant_t> task_variant_arr;
-    std::vector<TaskVariant_t> true_variant_arr;
-    std::vector<TaskVariant_t> false_variant_arr;
-};
+// struct TaskVariant_t
+// {
+//     TaskKeyWord key_word;
+//     TaskKeyWord condition_key_word;
+//     TaskArgument_t argument;
+//     std::vector<TaskVariant_t> task_variant_arr;
+//     std::vector<TaskVariant_t> true_variant_arr;
+//     std::vector<TaskVariant_t> false_variant_arr;
+// };
 
-extern std::map<TaskKeyWord, std::function<int(TaskVariant_t)>> TaskKeyWordOperatorMap;
+// extern std::map<TaskKeyWord, std::function<int(TaskVariant_t)>> TaskKeyWordOperatorMap;
 class Message
 {
 public:

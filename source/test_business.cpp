@@ -2927,8 +2927,8 @@ int operator_while(TaskVariant_t task_variant)
                     for (auto& it : task_variant.task_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap->find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap->end())
                         {
                             continue;
                         }
@@ -2976,8 +2976,8 @@ int operator_if(TaskVariant_t task_variant)
                     for (auto& it : task_variant.true_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap->find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap->end())
                         {
                             continue;
                         }
@@ -2997,8 +2997,8 @@ int operator_if(TaskVariant_t task_variant)
                     for (auto& it : task_variant.false_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap->find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap->end())
                         {
                             continue;
                         }
@@ -3021,8 +3021,8 @@ int operator_if(TaskVariant_t task_variant)
                     for (auto& it : task_variant.true_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap->find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap->end())
                         {
                             continue;
                         }
@@ -3042,8 +3042,8 @@ int operator_if(TaskVariant_t task_variant)
                     for (auto& it : task_variant.false_variant_arr)
                     {
                         LOG(INFO) << "id: " << it.argument.id << "\n";
-                        auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
-                        if (tmp_it == it.TaskKeyWordOperatorMap.end())
+                        auto tmp_it = it.TaskKeyWordOperatorMap->find(it.key_word);
+                        if (tmp_it == it.TaskKeyWordOperatorMap->end())
                         {
                             continue;
                         }

@@ -69,7 +69,7 @@ struct TaskVariant_t
     std::vector<TaskVariant_t> true_variant_arr;
     std::vector<TaskVariant_t> false_variant_arr;
 
-    std::map<TaskKeyWord, std::function<int(TaskVariant_t)>> TaskKeyWordOperatorMap;
+    std::map<TaskKeyWord, std::function<int(TaskVariant_t)>> *TaskKeyWordOperatorMap;
 };
 
 extern std::map<TaskKeyWord, std::function<int(TaskVariant_t)>> TaskKeyWordOperatorMap;
@@ -179,12 +179,12 @@ public:
         {
             TaskVariant_t sub_task_variant;
             ParseTask(item, sub_task_variant);
-            sub_task_variant.TaskKeyWordOperatorMap = TaskKeyWordOperatorMap;
+            sub_task_variant.TaskKeyWordOperatorMap = std::addressof(TaskKeyWordOperatorMap);
             task_variant.task_variant_arr.push_back(sub_task_variant);
             std::cerr << "key word: " << item["key_word"] << "\n"
                       << "id: " << sub_task_variant.argument.id << "\n";
         }
-        task_variant.TaskKeyWordOperatorMap = TaskKeyWordOperatorMap;
+        task_variant.TaskKeyWordOperatorMap = std::addressof(TaskKeyWordOperatorMap);
         task_id = generate_id();
         m_task_map[task_id] = task_variant;
 
@@ -199,21 +199,48 @@ public:
             std::cerr << "invalid task id: " << task_id << "\n";
             return 0;
         }
+        it->second.m_timer = std::chrono::steady_clock::now();
 
-        for (auto& it : it->second.task_variant_arr)
+        std::atomic<bool> flag{false};
+
+        std::thread tmp_thread = std::thread([](TaskVariant_t &task_variant, std::atomic<bool> &flag){
+            while (true)
+            {
+                if (flag.load())
+                {
+                    std::cerr << "quit...\n";
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                std::chrono::duration<double> duration = std::chrono::steady_clock::now() - task_variant.m_timer;
+                std::cerr << "counter: " << task_variant.m_counter << "\n"
+                          << "timer: " << duration.count() << "\n"
+                          << "error number: " << task_variant.m_error_number << "\n";
+            }
+        }, std::ref((*it).second), std::ref(flag));
+
+        for (auto& sub_it : it->second.task_variant_arr)
         {
-            auto tmp_it = it.TaskKeyWordOperatorMap.find(it.key_word);
-            if (tmp_it == it.TaskKeyWordOperatorMap.end())
+            auto tmp_it = sub_it.TaskKeyWordOperatorMap->find(sub_it.key_word);
+            if (tmp_it == sub_it.TaskKeyWordOperatorMap->end())
             {
                 continue;
             }
-            int res = tmp_it->second(it);
+            int res = tmp_it->second(sub_it);
+            it->second.m_counter++;
+            it->second.m_error_number = res;
             if (res != 1)
             {
                 std::cerr << "fail\n";
                 continue;
             }
             std::cerr << "success\n";
+        }
+
+        flag.store(true);
+        if (tmp_thread.joinable())
+        {
+            tmp_thread.join();
         }
 
         return 1;

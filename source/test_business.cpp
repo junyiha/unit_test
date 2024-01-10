@@ -724,6 +724,51 @@ int test_vcr_vision_algorithm_with_hash_id()
     return 1;
 }
 
+int test_vcr_vision_algorithm_with_hash_id_to_vca()
+{
+    int ec{0};
+    std::vector<std::string> json_files;
+    std::vector<std::string> directorys;
+    std::vector<DetectorConfig> detector_configs;
+    const std::string vision_algorithm_dir = "/data/vcr/VisionAlgorithms/";
+
+    ec = get_json_detector_files(vision_algorithm_dir, "detector.json", json_files);
+    if (ec != 1)
+    {
+        return 0;
+    }
+    
+    ec = get_detector_config(json_files, detector_configs);
+    if (ec != 1)
+    {
+        return 0;
+    }
+
+    for (auto& detector_config : detector_configs)
+    {
+        LOG(INFO) << "hash id: " << detector_config.hash_id << "\n"
+                  << "name: " << detector_config.detector_model.name << "\n"
+                  << "type: " << detector_config.detector_model.type << "\n";
+        std::stringstream os_out;
+        os_out << "@--file@";
+        for (auto& file : detector_config.detector_model.file)
+        {
+            os_out << vision_algorithm_dir + file << "@";
+        }
+        os_out << "--detector-type@" << detector_config.detector_type << "@"
+               << "--type@" << detector_config.detector_model.type << "@"
+               << "--detector-gap@" << detector_config.detector_gap << "@"
+               << "--detector-fps@" << detector_config.detector_fps << "@"
+               << "--detector-thresholds@" << detector_config.detector_thresholds << "@"
+               << "--detector-thresholds-nms@" << 0.2 << "@"
+               << "--tracker-type@" << detector_config.tracker_type << "@"
+               << "--trace-cast@" << detector_config.trace_case << "@";
+        LOG(INFO) << os_out.str() << "\n";
+    }
+
+    return 1;
+}
+
 int get_task_algorithm_config(const std::string task_algorithm_dir, std::vector<TaskAlgorithmConfig>& task_algorithms)
 {
     int ec{0};
@@ -2601,6 +2646,550 @@ int test_vcr_robotic_arm_attribute_info()
     return 1;
 }
 
+static size_t global_counter = 0;
+static std::chrono::steady_clock::time_point global_timer;
+static int global_error_number = 0;
+
+std::map<std::string, TaskKeyWord> TaskKeyWordMap = {
+    {"start", TaskKeyWord::START},
+    {"stop", TaskKeyWord::STOP},
+    {"move_line", TaskKeyWord::MOVE_LINE},
+    {"move_joint", TaskKeyWord::MOVE_JOINT},
+    {"catch", TaskKeyWord::CATCH},
+    {"release", TaskKeyWord::RELEASE},
+    {"pause", TaskKeyWord::PAUSE},
+    {"sleep", TaskKeyWord::SLEEP},
+    {"error_num", TaskKeyWord::ERROR_NUM},
+    {"timer", TaskKeyWord::TIMER},
+    {"counter", TaskKeyWord::COUNTER},
+    {"while", TaskKeyWord::WHILE},
+    {"if", TaskKeyWord::IF}
+};
+
+void parse_condition(const nlohmann::json item_data, TaskVariant_t& out)
+{
+    switch (TaskKeyWordMap[item_data["condition_key_word"]])
+    {
+        case TaskKeyWord::COUNTER:
+        {
+            out.condition_key_word = TaskKeyWord::COUNTER;
+            out.argument.condition_operator = item_data["condition_operator"];
+            out.argument.condition_value = std::stoi(std::string(item_data["condition_value"]));
+            break;
+        }
+        case TaskKeyWord::TIMER:
+        {
+
+            break;
+        }
+        case TaskKeyWord::ERROR_NUM:
+        {
+
+            break;
+        }
+        default:
+        {
+
+        }
+    }
+}
+
+void parse_task(const nlohmann::json task_data, TaskVariant_t& out)
+{
+    switch (TaskKeyWordMap[task_data["key_word"]])
+    {
+        case TaskKeyWord::MOVE_LINE:
+        {
+            out.key_word = TaskKeyWord::MOVE_LINE;
+            out.argument.id = task_data["argument_id"];
+            out.argument.cart_vel = task_data["argument_cart_vel"];
+            out.argument.rot_vel = task_data["argument_rot_vel"];
+            out.argument.target = task_data["argument_target"].get<std::vector<double>>();
+
+            break;
+        }
+        case TaskKeyWord::MOVE_JOINT:
+        {
+            out.key_word = TaskKeyWord::MOVE_JOINT;
+            out.argument.id = task_data["argument_id"];
+            out.argument.speed_percent = task_data["argument_speedpercent"];
+            out.argument.target = task_data["argument_target"].get<std::vector<double>>();
+
+            break;
+        }
+        case TaskKeyWord::CATCH:
+        {
+            out.key_word = TaskKeyWord::CATCH;
+            out.argument.id = task_data["argument_id"];
+
+            break;
+        }
+        case TaskKeyWord::RELEASE:
+        {
+            out.key_word = TaskKeyWord::RELEASE;
+            out.argument.id = task_data["argument_id"];
+
+            break;
+        }
+        case TaskKeyWord::PAUSE:
+        {
+            out.key_word = TaskKeyWord::PAUSE;
+            out.argument.id = task_data["argument_id"];
+
+            break;
+        }
+        case TaskKeyWord::SLEEP:
+        {
+            out.key_word = TaskKeyWord::SLEEP;
+            out.argument.sleep = task_data["argument_sleep"];
+
+            break;
+        }
+        case TaskKeyWord::ERROR_NUM:
+        {
+            out.key_word = TaskKeyWord::ERROR_NUM;
+            out.argument.id = " ";
+
+            break;
+        }
+        case TaskKeyWord::TIMER:
+        {
+            out.key_word = TaskKeyWord::TIMER;
+            out.argument.id = " ";
+
+            break;
+        }
+        case TaskKeyWord::COUNTER:
+        {
+            out.key_word = TaskKeyWord::COUNTER;
+            out.argument.id = " ";
+
+            break;
+        }
+        case TaskKeyWord::WHILE:
+        {
+            out.key_word = TaskKeyWord::WHILE;
+            out.argument.id = " ";
+            parse_condition(task_data, out);
+            for (auto& sub_data : task_data["process"])
+            {
+                TaskVariant_t sub_task_variant;
+                parse_task(sub_data, sub_task_variant);
+                out.task_variant_arr.push_back(sub_task_variant);
+            }
+
+            break;
+        }
+        case TaskKeyWord::IF:
+        {
+            out.key_word = TaskKeyWord::IF;
+            out.argument.id = " ";
+            parse_condition(task_data, out);
+            for (auto& sub_data : task_data["true_process"])
+            {
+                TaskVariant_t sub_task_variant;
+                parse_task(sub_data, sub_task_variant);
+                out.true_variant_arr.push_back(sub_task_variant);
+            }
+            for (auto& sub_data : task_data["false_process"])
+            {
+                TaskVariant_t sub_task_variant;
+                parse_task(sub_data, sub_task_variant);
+                out.false_variant_arr.push_back(sub_task_variant);
+            }
+
+            break;
+        }
+        default:
+        {
+            LOG(ERROR) << "invalid key word: " << task_data["key_word"] << "\n";
+            out.key_word = TaskKeyWord::INVALID;
+            out.argument.id = " ";
+            break;
+        }
+    }
+}
+
+int operator_move_joint(TaskVariant_t task_variant)
+{
+    std::string path = "/api/robot/moveJoint";
+    httplib::Client cli(vcr_server_addr);
+    nlohmann::json data;
+    std::vector<double> target(6, 0);
+
+    data["id"] = task_variant.argument.id;
+    data["speed_percent"] = task_variant.argument.speed_percent;
+    data["target"] = task_variant.argument.target;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        global_error_number = 9999;
+        return 0;
+    }
+
+    global_counter++;
+    global_error_number = 0;
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int operator_move_line(TaskVariant_t task_variant)
+{
+    std::string path = "/api/robot/moveCart";
+    httplib::Client cli(vcr_server_addr);
+    nlohmann::json data;
+
+    data["id"] = task_variant.argument.id;
+    data["cart_vel"] = task_variant.argument.cart_vel;
+    data["rot_vel"] = task_variant.argument.rot_vel;
+    data["target"] = task_variant.argument.target;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        global_error_number = 9999;
+        return 0;
+    }
+
+    global_counter++;
+    global_error_number = 0;
+    LOG(INFO) << res->body << "\n";
+    return 1;
+}
+
+int operator_catch(TaskVariant_t task_variant)
+{
+    std::string path = "/api/tool/catch";
+    httplib::Client cli(vcr_server_addr);
+    nlohmann::json data;
+
+    data["id"] = task_variant.argument.id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        global_error_number = 9999;
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    global_error_number = 0;
+    return 1;
+}
+
+int operator_release(TaskVariant_t task_variant)
+{
+    std::string path = "/api/tool/release";
+    httplib::Client cli(vcr_server_addr);
+    nlohmann::json data;
+
+    data["id"] = task_variant.argument.id;
+
+    auto res = cli.Post(path, data.dump(), "ContentType: application/json");
+    if (res.error() != httplib::Error::Success)
+    {
+        LOG(ERROR) << "invalid response body\n";
+        global_error_number = 9999;
+        return 0;
+    }
+
+    LOG(INFO) << res->body << "\n";
+    global_error_number = 0;
+    return 1;
+}
+
+int operator_sleep(TaskVariant_t task_variant)
+{
+    LOG(INFO) << "sleep: " << task_variant.argument.sleep << "\n";
+    std::this_thread::sleep_for(std::chrono::seconds(task_variant.argument.sleep));
+
+    return 1;
+}
+
+int operator_while(TaskVariant_t task_variant)
+{
+    switch (task_variant.condition_key_word)
+    {
+        case TaskKeyWord::COUNTER:
+        {
+            int counter = task_variant.argument.condition_value;
+            if (task_variant.argument.condition_operator == "<")
+            {
+                int cnt{0};
+                while (cnt < counter)
+                {
+                    LOG(INFO) << "cnt: " << cnt << "\n";
+                    for (auto& it : task_variant.task_variant_arr)
+                    {
+                        LOG(INFO) << "id: " << it.argument.id << "\n";
+                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        {
+                            continue;
+                        }
+                        int res = tmp_it->second(it);
+                        if (res == 1)
+                        {
+                            LOG(INFO) << "success\n";
+                        }
+                        else 
+                        {
+                            LOG(ERROR) << "fail\n";
+                        }   
+                    }
+                    cnt++;
+                }
+            }
+            else 
+            {
+                LOG(ERROR) << "invalid operator!\n";
+                return 0;
+            }
+            break;
+        }
+        default:
+        {
+            LOG(ERROR) << "invalid condition!\n";
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+int operator_if(TaskVariant_t task_variant)
+{
+    switch (task_variant.condition_key_word)
+    {
+        case TaskKeyWord::COUNTER:
+        {
+            int condition_value = task_variant.argument.condition_value;
+            if (task_variant.argument.condition_operator == "<")
+            {
+                if (global_counter < condition_value)
+                {
+                    for (auto& it : task_variant.true_variant_arr)
+                    {
+                        LOG(INFO) << "id: " << it.argument.id << "\n";
+                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        {
+                            continue;
+                        }
+                        int res = tmp_it->second(it);
+                        if (res == 1)
+                        {
+                            LOG(INFO) << "success\n";
+                        }
+                        else 
+                        {
+                            LOG(ERROR) << "fail\n";
+                        }   
+                    }
+                }
+                else 
+                {
+                    for (auto& it : task_variant.false_variant_arr)
+                    {
+                        LOG(INFO) << "id: " << it.argument.id << "\n";
+                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        {
+                            continue;
+                        }
+                        int res = tmp_it->second(it);
+                        if (res == 1)
+                        {
+                            LOG(INFO) << "success\n";
+                        }
+                        else 
+                        {
+                            LOG(ERROR) << "fail\n";
+                        }   
+                    }
+                }
+            }
+            else if (task_variant.argument.condition_operator == ">")
+            {
+                if (global_counter > condition_value)
+                {
+                    for (auto& it : task_variant.true_variant_arr)
+                    {
+                        LOG(INFO) << "id: " << it.argument.id << "\n";
+                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        {
+                            continue;
+                        }
+                        int res = tmp_it->second(it);
+                        if (res == 1)
+                        {
+                            LOG(INFO) << "success\n";
+                        }
+                        else 
+                        {
+                            LOG(ERROR) << "fail\n";
+                        }   
+                    }
+                }
+                else 
+                {
+                    for (auto& it : task_variant.false_variant_arr)
+                    {
+                        LOG(INFO) << "id: " << it.argument.id << "\n";
+                        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
+                        if (tmp_it == TaskKeyWordOperatorMap.end())
+                        {
+                            continue;
+                        }
+                        int res = tmp_it->second(it);
+                        if (res == 1)
+                        {
+                            LOG(INFO) << "success\n";
+                        }
+                        else 
+                        {
+                            LOG(ERROR) << "fail\n";
+                        }   
+                    }
+                }
+            }
+            else 
+            {
+                LOG(ERROR) << "invalid operator!\n";
+                return 0;
+            }
+            break;
+        }
+        default:
+        {
+            LOG(ERROR) << "invalid condition!\n";
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+std::map<TaskKeyWord, std::function<int(TaskVariant_t)>> TaskKeyWordOperatorMap = 
+{
+    {TaskKeyWord::MOVE_JOINT, operator_move_joint},
+    {TaskKeyWord::MOVE_LINE, operator_move_line},
+    {TaskKeyWord::CATCH, operator_catch},
+    {TaskKeyWord::RELEASE, operator_release},
+    {TaskKeyWord::SLEEP, operator_sleep},
+    {TaskKeyWord::WHILE, operator_while},
+    {TaskKeyWord::IF, operator_if}
+};
+
+int test_vcr_task_parserv2()
+{
+    std::string task_file = "/data/home/user/workspace/unit_test/data/test_task.json";
+
+    nlohmann::json parse_data;
+    std::ifstream file(task_file, std::ios::in);
+
+    if (!file.is_open())
+    {
+        LOG(ERROR) << "invalid task file : " << task_file << "\n";
+        return 0;
+    }
+
+    try 
+    {
+        file >> parse_data;
+        file.close();
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        LOG(ERROR) << "parse error, config file path: " << task_file << "\n";
+        file.close();
+        return 0;
+    }
+    catch (nlohmann::json::type_error& e)
+    {
+        LOG(ERROR) << "type error, config file path: " << task_file << "\n";
+        file.close();
+        return 0;
+    }
+
+    for (auto& key_word : parse_data["key_word_list"])
+    {
+        LOG(INFO) << "key: " << key_word["key"] << ", value: " << key_word["value"] << "\n";
+    }
+
+    // 检查start和stop
+    nlohmann::json task_data = parse_data["task_id"];
+
+    auto first_data = task_data.front();
+    auto last_data = task_data.back();
+    if (first_data["key_word"] != "start" || last_data["key_word"] != "stop")
+    {
+        LOG(ERROR) << "invalid task\n";
+        return 0;
+    }
+
+    std::vector<TaskVariant_t> task_variant_arr;
+    for (auto& item : task_data)
+    {
+        TaskVariant_t task_variant;
+        parse_task(item, task_variant);
+        task_variant_arr.push_back(task_variant);
+        LOG(INFO) << "key word: " << item["key_word"] << "\n"
+                  << "id: " << task_variant.argument.id << "\n";
+    }
+
+    std::atomic<bool> flag{false};
+
+    std::thread tmp_print = std::thread([](std::atomic<bool>& flag){
+        while (true)
+        {
+            if (flag.load())
+            {
+                break;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            std::chrono::duration<double> duration = std::chrono::steady_clock::now() - global_timer;
+            LOG(INFO) << "global counter: " << global_counter << "\n"
+                      << "global timer: " << duration.count() << "\n"
+                      << "global error number: " << global_error_number << "\n";
+        }
+    }, std::ref(flag));
+
+    global_timer = std::chrono::steady_clock::now();
+
+    for (auto& it : task_variant_arr)
+    {
+        LOG(INFO) << "id: " << it.argument.id << "\n";
+        auto tmp_it = TaskKeyWordOperatorMap.find(it.key_word);
+        if (tmp_it == TaskKeyWordOperatorMap.end())
+        {
+            continue;
+        }
+        int res = tmp_it->second(it);
+        if (res == 1)
+        {
+            LOG(INFO) << "success\n";
+        }
+        else 
+        {
+            LOG(ERROR) << "fail\n";
+        }
+    }
+
+    flag.store(true);
+    if (tmp_print.joinable())
+    {
+        tmp_print.join();
+    }
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -2621,6 +3210,7 @@ int test_business(Message& message)
         {"test-vcr-vision-algorithm", test_vcr_vision_algorithm},
         {"test-vcr-task-algorithm", test_vcr_task_algorithm},
         {"test-vcr-vision-algorithm-with-hash-id", test_vcr_vision_algorithm_with_hash_id},
+        {"test-vcr-vision-algorithm-with-hash-id-to-vca", test_vcr_vision_algorithm_with_hash_id_to_vca},
         {"test-manage-multi-object", test_manage_multi_object},
         {"test-robot-pool", test_robot_pool},
         {"test-template-tool-pool", test_template_tool_pool},
@@ -2662,7 +3252,8 @@ int test_business(Message& message)
         {"test-vcr-robotic-arm-get-teach-point", test_vcr_robotic_arm_get_teach_point},
         {"test-vcr-robotic-arm-save-teach-point", test_vcr_robotic_arm_save_teach_point},
         {"test-vcr-robotic-arm-delete-teach-point", test_vcr_robotic_arm_delete_teach_point},
-        {"test-vcr-robotic-arm-attribute-info", test_vcr_robotic_arm_attribute_info}
+        {"test-vcr-robotic-arm-attribute-info", test_vcr_robotic_arm_attribute_info},
+        {"test-vcr-task-parserv2", test_vcr_task_parserv2}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

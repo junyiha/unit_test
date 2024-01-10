@@ -6,6 +6,7 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 17)
+add_compile_options(-pg)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -13,7 +14,10 @@ set(CMAKE_BUILD_TYPE "Debug")
 
 add_definitions(-DBOOST_LOG_DYN_LINK=1)
 add_definitions(-DLOG_V2=1)
+# 生产环境
 add_definitions(-DPRODUCT_ENV=1)
+
+# 开发环境
 # add_definitions(-DDEVELOP_ENV=1)
 
 set( executables 

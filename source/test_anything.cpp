@@ -1962,6 +1962,64 @@ int test_poll()
     return 1;
 }
 
+void signal_handler(int signum)
+{
+    printf("receive signal: %d\n", signum);
+    exit(signum);
+}
+
+int test_signal()
+{
+    signal(SIGINT, signal_handler);
+
+    std::thread tmp = std::thread([](){
+        while (1)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            LOG(INFO) << "hhh" << "\n";
+        }
+    });
+    tmp.detach();
+
+    std::this_thread::sleep_for(std::chrono::minutes(1));
+
+    return 1;
+}
+
+std::condition_variable cv;
+std::mutex mtx;
+int test_condition_variable()
+{
+    auto tmp = [](){
+        LOG(INFO) << "thread id: " << std::this_thread::get_id() << "\n";
+        while (true)
+        {
+            std::unique_lock<std::mutex> lock(mtx);
+            // cv.wait(lock, [])
+            LOG(INFO) << "hello \n";
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+
+        LOG(INFO) << "lambda function quit...\n";
+    };
+
+    std::thread tmp_thread = std::thread(tmp);
+
+    tmp_thread.detach();
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+    
+    std::string cmd;
+    std::cin >> cmd;
+    if (cmd == "kill")
+    {
+        cv.notify_one();
+    }
+
+    LOG(INFO) << "function quit...\n";
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -2012,7 +2070,9 @@ int test_anything(Message& message)
         {"--test-class-static-member-function", test_class_static_member_function},
         {"--test-parse-http-protocol", test_parse_http_protocol},
         {"--test-openssl-base64-encode", test_openssl_base64_encode},
-        {"--test-openssl-base64-decode", test_openssl_base64_decode}
+        {"--test-openssl-base64-decode", test_openssl_base64_decode},
+        {"--test-signal", test_signal},
+        {"--test-condition-variable", test_condition_variable}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

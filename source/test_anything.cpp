@@ -2004,35 +2004,24 @@ int test_signal()
     return 1;
 }
 
-std::condition_variable cv;
-std::mutex mtx;
 int test_condition_variable()
 {
-    auto tmp = [](){
-        LOG(INFO) << "thread id: " << std::this_thread::get_id() << "\n";
-        while (true)
-        {
-            std::unique_lock<std::mutex> lock(mtx);
-            // cv.wait(lock, [])
-            LOG(INFO) << "hello \n";
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
+    // std::mutex mutex;
+    // std::condition_variable cv;
 
-        LOG(INFO) << "lambda function quit...\n";
-    };
+    // std::thread work_thread = std::thread([=](){
+    //     while (true)
+    //     {
+    //         std::this_thread::sleep_for(std::chrono::seconds(2));
+    //         std::unique_lock<std::mutex> lock(mutex);
+    //         cv.wait(lock, [](){
 
-    std::thread tmp_thread = std::thread(tmp);
+    //         });
+    //         LOG(INFO) << "work...\n";
+    //     }
+    // });
 
-    tmp_thread.detach();
-
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-    
-    std::string cmd;
-    std::cin >> cmd;
-    if (cmd == "kill")
-    {
-        cv.notify_one();
-    }
+    // std::this_thread::sleep_for(std::chrono::minutes(2));
 
     LOG(INFO) << "function quit...\n";
     return 1;

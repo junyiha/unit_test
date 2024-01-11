@@ -2006,22 +2006,32 @@ int test_signal()
 
 int test_condition_variable()
 {
-    // std::mutex mutex;
-    // std::condition_variable cv;
+    std::mutex mutex;
+    std::condition_variable cv;
 
-    // std::thread work_thread = std::thread([=](){
-    //     while (true)
-    //     {
-    //         std::this_thread::sleep_for(std::chrono::seconds(2));
-    //         std::unique_lock<std::mutex> lock(mutex);
-    //         cv.wait(lock, [](){
+    std::thread work_thread = std::thread([](std::mutex &mutex, std::condition_variable &cv){
+        while (true)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::unique_lock<std::mutex> lock(mutex);
+            cv.wait(lock, [](){
+                LOG(INFO) << "this is in cv.wait()\n";
+                return false;
+            });
+            LOG(INFO) << "work...\n";
+        }
+    }, std::ref(mutex), std::ref(cv));
 
-    //         });
-    //         LOG(INFO) << "work...\n";
-    //     }
-    // });
-
-    // std::this_thread::sleep_for(std::chrono::minutes(2));
+    std::string cmd;
+    std::cin >> cmd;
+    if (cmd == "notify")
+    {
+        cv.notify_one();
+    }
+    if (work_thread.joinable())
+    {
+        work_thread.join();
+    }
 
     LOG(INFO) << "function quit...\n";
     return 1;

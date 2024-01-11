@@ -59,9 +59,9 @@ struct TaskArgument_t
 
 struct TaskVariant_t
 {
-    size_t m_counter {0};
-    int m_error_number {0};
-    std::chrono::steady_clock::time_point m_timer;
+    size_t counter {0};
+    int error_number {0};
+    std::chrono::steady_clock::time_point timer;
     TaskKeyWord key_word;
     TaskKeyWord condition_key_word;
     TaskArgument_t argument;
@@ -90,10 +90,6 @@ int operator_if(TaskVariant_t task_variant);
 class TaskParser 
 {
 private:
-    size_t m_counter{0};
-    int m_error_number{0};
-    std::chrono::steady_clock::time_point m_timer;
-    std::vector<TaskVariant_t> m_task_variant_arr;
     std::map<std::string, TaskVariant_t> m_task_map;
 
 public:
@@ -199,7 +195,7 @@ public:
             std::cerr << "invalid task id: " << task_id << "\n";
             return 0;
         }
-        it->second.m_timer = std::chrono::steady_clock::now();
+        it->second.timer = std::chrono::steady_clock::now();
 
         std::atomic<bool> flag{false};
 
@@ -212,10 +208,10 @@ public:
                     break;
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                std::chrono::duration<double> duration = std::chrono::steady_clock::now() - task_variant.m_timer;
-                std::cerr << "counter: " << task_variant.m_counter << "\n"
+                std::chrono::duration<double> duration = std::chrono::steady_clock::now() - task_variant.timer;
+                std::cerr << "counter: " << task_variant.counter << "\n"
                           << "timer: " << duration.count() << "\n"
-                          << "error number: " << task_variant.m_error_number << "\n";
+                          << "error number: " << task_variant.error_number << "\n";
             }
         }, std::ref((*it).second), std::ref(flag));
 
@@ -227,8 +223,8 @@ public:
                 continue;
             }
             int res = tmp_it->second(sub_it);
-            it->second.m_counter++;
-            it->second.m_error_number = res;
+            it->second.counter++;
+            it->second.error_number = res;
             if (res != 1)
             {
                 std::cerr << "fail\n";

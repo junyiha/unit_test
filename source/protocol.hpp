@@ -159,25 +159,19 @@ public:
 class DetectorConfig
 {
 public:
-    int detector_type;
-    int detector_gap;
-    int detector_fps;
-    double detector_thresholds;
-    int tracker_type;
-    int trace_case;
+    int detector_type{0};
+    int detector_gap{0};
+    int detector_fps{0};
+    double detector_thresholds{0.0};
+    int tracker_type{0};
+    int trace_case{0};
     DetectorModel detector_model;
-    std::string hash_id;
+    std::string config_str{};
+    std::string hash_id{};
 
 public:
     DetectorConfig()
     {
-        detector_type = 0;
-        detector_gap = 0;
-        detector_fps = 0;
-        detector_thresholds = 0;
-        tracker_type = 0;
-        trace_case = 0;
-        hash_id = "";
     }
     DetectorConfig(const DetectorConfig& other)
     {
@@ -192,13 +186,6 @@ public:
     }
     ~DetectorConfig()
     {
-        detector_type = 0;
-        detector_gap = 0;
-        detector_fps = 0;
-        detector_thresholds = 0;
-        tracker_type = 0;
-        trace_case = 0;
-        hash_id = "";
     }
     DetectorConfig& operator=(const DetectorConfig& other)
     {
@@ -211,6 +198,7 @@ public:
             tracker_type = other.tracker_type;
             trace_case = other.trace_case;
             detector_model = other.detector_model;
+            config_str = other.config_str;
             hash_id = other.hash_id;
         }
 

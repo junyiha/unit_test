@@ -747,9 +747,6 @@ int test_vcr_vision_algorithm_with_hash_id_to_vca()
 
     for (auto& detector_config : detector_configs)
     {
-        LOG(INFO) << "hash id: " << detector_config.hash_id << "\n"
-                  << "name: " << detector_config.detector_model.name << "\n"
-                  << "type: " << detector_config.detector_model.type << "\n";
         std::stringstream os_out;
         os_out << "@--file@";
         for (auto& file : detector_config.detector_model.file)
@@ -764,7 +761,15 @@ int test_vcr_vision_algorithm_with_hash_id_to_vca()
                << "--detector-thresholds-nms@" << 0.2 << "@"
                << "--tracker-type@" << detector_config.tracker_type << "@"
                << "--trace-cast@" << detector_config.trace_case << "@";
-        LOG(INFO) << os_out.str() << "\n";
+        detector_config.config_str = os_out.str();
+    }
+
+    for (auto& detector_config : detector_configs)
+    {
+        LOG(INFO) << "hash id: " << detector_config.hash_id << "\n"
+                  << "name: " << detector_config.detector_model.name << "\n"
+                  << "type: " << detector_config.detector_model.type << "\n"
+                  << "config str: " << detector_config.config_str << "\n";
     }
 
     return 1;

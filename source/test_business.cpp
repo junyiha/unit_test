@@ -578,12 +578,10 @@ int get_detector_config(std::vector<std::string> json_files, std::vector<Detecto
             detector_config.detector_thresholds = parsed_data["detector-thresholds"];
             detector_config.tracker_type = parsed_data["tracker-type"];
             detector_config.trace_case = parsed_data["trace-case"];
-            detector_config.detector_model.name = parsed_data["detector-models"]["name"];
-            for (auto& file : parsed_data["detector-models"]["file"])
+            for (auto& detector_model : parsed_data["detector-models"])
             {
-                detector_config.detector_model.file.push_back(std::string(file));
+                detector_config.detector_model_arr.push_back(std::make_pair(std::string(detector_model["name"]), std::string(detector_model["config-file"])));
             }
-            detector_config.detector_model.type = parsed_data["detector-models"]["type"];
         }
         catch (nlohmann::json::parse_error &e)
         {
@@ -748,13 +746,12 @@ int test_vcr_vision_algorithm_with_hash_id_to_vca()
     for (auto& detector_config : detector_configs)
     {
         std::stringstream os_out;
-        os_out << "@--file@";
-        for (auto& file : detector_config.detector_model.file)
+        os_out << "@--detector-models@";
+        for (auto& file : detector_config.detector_model_arr)
         {
-            os_out << vision_algorithm_dir + file << "@";
+            os_out << file.second << "@";
         }
         os_out << "--detector-type@" << detector_config.detector_type << "@"
-               << "--type@" << detector_config.detector_model.type << "@"
                << "--detector-gap@" << detector_config.detector_gap << "@"
                << "--detector-fps@" << detector_config.detector_fps << "@"
                << "--detector-thresholds@" << detector_config.detector_thresholds << "@"
@@ -767,8 +764,6 @@ int test_vcr_vision_algorithm_with_hash_id_to_vca()
     for (auto& detector_config : detector_configs)
     {
         LOG(INFO) << "hash id: " << detector_config.hash_id << "\n"
-                  << "name: " << detector_config.detector_model.name << "\n"
-                  << "type: " << detector_config.detector_model.type << "\n"
                   << "config str: " << detector_config.config_str << "\n";
     }
 
@@ -3222,6 +3217,53 @@ int test_task_parser()
     return 1;
 }
 
+int test_parse_task_json()
+{
+    std::string data_file = "/data/home/user/workspace/unit_test/data/1.json";
+
+    std::ifstream file(data_file, std::ios::in);
+    if (!file.is_open())
+    {
+        return 0;
+    }
+
+    nlohmann::json parsed_data;
+    try 
+    {   
+        file >> parsed_data;
+        file.close();
+    }
+    catch (nlohmann::json::parse_error &e)
+    {
+        LOG(ERROR) << "parse error\n";
+        file.close();
+        return 0;
+    }
+    try 
+    {
+        LOG(INFO) << "json data: " << parsed_data.dump() << "\n";
+        for (auto& item : parsed_data["task_id"])
+        {
+            auto tmp = [](const nlohmann::json tmp_data)
+            {
+                LOG(INFO) << "id: " << tmp_data["key_word"] << "\n";
+            };
+            if (!item.contains("key_word"))
+            {
+                continue;
+            }
+            tmp(item);
+        }
+    }
+    catch (nlohmann::json::type_error &e)
+    {
+        LOG(ERROR) << "type error\n";
+        return 0;
+    }
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -3286,7 +3328,8 @@ int test_business(Message& message)
         {"test-vcr-robotic-arm-delete-teach-point", test_vcr_robotic_arm_delete_teach_point},
         {"test-vcr-robotic-arm-attribute-info", test_vcr_robotic_arm_attribute_info},
         {"test-vcr-task-parserv2", test_vcr_task_parserv2},
-        {"test-task-parser", test_task_parser}
+        {"test-task-parser", test_task_parser},
+        {"test-parse-task-json", test_parse_task_json}
     };
     std::string cmd = message.message_pool[2];
     auto it = cmd_map.find(cmd);

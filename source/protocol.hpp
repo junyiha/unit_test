@@ -166,6 +166,7 @@ public:
     int tracker_type{0};
     int trace_case{0};
     DetectorModel detector_model;
+    std::vector<std::pair<std::string, std::string>> detector_model_arr;
     std::string config_str{};
     std::string hash_id{};
 
@@ -182,6 +183,7 @@ public:
         tracker_type = other.tracker_type;
         trace_case = other.trace_case;
         detector_model = other.detector_model;
+        detector_model_arr = other.detector_model_arr;
         hash_id = other.hash_id;
     }
     ~DetectorConfig()
@@ -199,6 +201,7 @@ public:
             trace_case = other.trace_case;
             detector_model = other.detector_model;
             config_str = other.config_str;
+            detector_model_arr = other.detector_model_arr;
             hash_id = other.hash_id;
         }
 

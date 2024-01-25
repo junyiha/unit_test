@@ -3331,7 +3331,7 @@ int test_business(Message& message)
         {"test-task-parser", test_task_parser},
         {"test-parse-task-json", test_parse_task_json}
     };
-    std::string cmd = message.message_pool[2];
+    std::string cmd = message.second_layer;
     auto it = cmd_map.find(cmd);
     if (it != cmd_map.end())
     {

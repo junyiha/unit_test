@@ -73,17 +73,14 @@
 class Message
 {
 public:
-    std::string first_layer;
-    std::string second_layer;
-    std::string third_layer;
+    std::string first_layer{""};
+    std::string second_layer{""};
+    std::string third_layer{""};
     std::vector<std::string> message_pool;
 
 public:
     Message()
     {
-        first_layer = "";
-        second_layer = "";
-        third_layer = "";
         message_pool.resize(0);
     }
     Message(const Message& other)
@@ -95,9 +92,6 @@ public:
     }
     ~Message()
     {
-        first_layer = "";
-        second_layer = "";
-        third_layer = "";
         message_pool.clear();
     }
 

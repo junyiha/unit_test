@@ -10,8 +10,16 @@
  */
 #include "entry.hpp"
 
+DEFINE_string(module_cmd, "test-anything", "module argument");
+DEFINE_string(function_cmd, "--test-signal", "function argument");
+
 int main(int argc, char *argv[])
 {
+    gflags::SetUsageMessage("this is a unit test set.");
+    gflags::ParseCommandLineFlags(&argc, &argv, true);
+    LOG(INFO) << argv[0] << " [options] \n"
+              << gflags::ProgramUsage() << "\n";
+
     google::InitGoogleLogging(argv[0]);
     google::EnableLogCleaner(1);
     
@@ -41,17 +49,19 @@ int main(int argc, char *argv[])
     {
         message.message_pool.push_back(argv[i]);
     }
+    message.first_layer = FLAGS_module_cmd;
+    message.second_layer = FLAGS_function_cmd;
     
     std::map<std::string, std::function<int(Message& message)>> cmd_map = {
-        {"--test-asio", test_asio},
-        {"--test-anything", test_anything},
-        {"--test-business", test_business},
-        {"--test-network", test_network},
-        {"--test-libuv", test_libuv},
-        {"--test-opencv", test_opencv}
+        {"test-asio", test_asio},
+        {"test-anything", test_anything},
+        {"test-business", test_business},
+        {"test-network", test_network},
+        {"test-libuv", test_libuv},
+        {"test-opencv", test_opencv}
     };
 
-    auto it = cmd_map.find(argv[1]);
+    auto it = cmd_map.find(message.first_layer);
     if (it != cmd_map.end())
     {
         it->second(message);
@@ -62,6 +72,7 @@ int main(int argc, char *argv[])
     }
 
     google::ShutdownGoogleLogging();
+    gflags::ShutDownCommandLineFlags();
 
     return 0;
 }

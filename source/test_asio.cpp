@@ -345,7 +345,7 @@ int test_asio(Message& message)
         {"asio-tcp-client", asio_tcp_client}
     };
 
-    std::string cmd = message.message_pool[2];
+    std::string cmd = message.second_layer;
 
     auto it = cmd_map.find(cmd);
     if (it != cmd_map.end())

@@ -104,7 +104,7 @@ int test_opencv(Message& message)
         {"test-opencv-imencode", test_opencv_imencode}
     };
 
-    std::string cmd = message.message_pool.at(2);
+    std::string cmd = message.second_layer;
     auto it = cmd_map.find(cmd);
     if (it != cmd_map.end())
     {

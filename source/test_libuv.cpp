@@ -94,7 +94,7 @@ int test_libuv(Message& message)
         {"test-libuv-http-server", test_libuv_http_server}
     };
 
-    std::string cmd = message.message_pool.at(2);
+    std::string cmd = message.second_layer;
     auto it = cmd_map.find(cmd);
     if (it != cmd_map.end())
     {

@@ -11,7 +11,7 @@
 #include "entry.hpp"
 
 DEFINE_string(module_cmd, "test-anything", "module argument");
-DEFINE_string(function_cmd, "--test-signal", "function argument");
+DEFINE_string(function_cmd, "test-signal", "function argument");
 
 int main(int argc, char *argv[])
 {
@@ -58,7 +58,8 @@ int main(int argc, char *argv[])
         {"test-business", test_business},
         {"test-network", test_network},
         {"test-libuv", test_libuv},
-        {"test-opencv", test_opencv}
+        {"test-opencv", test_opencv},
+        {"test-leetcode", test_leetcode}
     };
 
     auto it = cmd_map.find(message.first_layer);

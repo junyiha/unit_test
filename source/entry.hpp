@@ -71,6 +71,8 @@ int test_libuv(Message& message);
 
 int test_opencv(Message& message);
 
+int test_leetcode(Message& message);
+
 ///////////////////////////////////////////////////////////////
 
 /**

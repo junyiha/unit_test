@@ -14,3 +14,4 @@ web_root
 *.db
 build
 data/*
+*.bundle

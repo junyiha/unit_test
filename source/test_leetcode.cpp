@@ -199,25 +199,68 @@ int test_26(Message& message)
 
     std::vector<int> nums{1,1,2};
 
-    std::vector<int> tmp;
-    for (int i = 0; i < nums.size() - 1; i++)
-    {
-        if (nums.at(i) == nums.at(i + 1))
-        {
-            tmp.push_back(i + 1);
-            i++;
-        }
-    }
-    for (auto& it : tmp)
-    {
-        nums.erase(nums.begin() + it);
-    }
+    // std::vector<int> tmp;
+    // for (int i = 0; i < nums.size() - 1; i++)
+    // {
+    //     if (nums.at(i) == nums.at(i + 1))
+    //     {
+    //         tmp.push_back(i + 1);
+    //         i++;
+    //     }
+    // }
+    // for (auto& it : tmp)
+    // {
+    //     nums.erase(nums.begin() + it);
+    // }
+
+    auto it = std::unique(nums.begin(), nums.end());
+    nums.erase(it, nums.end());
 
     LOG(INFO) << "nums' size: " << nums.size() << "\n";
     for (auto& it : nums)
     {
         LOG(INFO) << "value: " << it << "\n";
     }
+
+    return 1;
+}
+
+int test_171(Message& message)
+{
+    LOG(INFO) << "test 171: Excel 表列序号\n";
+    std::string demo = R"(
+        给你一个字符串 columnTitle ，表示 Excel 表格中的列名称。返回 该列名称对应的列序号 。
+
+        例如：
+
+        A -> 1
+        B -> 2
+        C -> 3
+        ...
+        Z -> 26
+        AA -> 27
+        AB -> 28 
+        ...
+        
+
+        示例 1:
+
+        输入: columnTitle = "A"
+        输出: 1
+    )";
+    LOG(INFO) << "demo: \n" << demo << "\n";
+
+    std::string columnTitle{"AB"};
+
+    const int change = 'A' - 1;
+    int sum{0};
+    for (auto& alt : columnTitle)
+    {
+        sum *= 26;
+        sum += alt - change;
+    }
+
+    LOG(INFO) << "sum: " << sum << "\n";
 
     return 1;
 }
@@ -230,7 +273,8 @@ int test_leetcode(Message& message)
         {"test-2859", test_2859},
         {"test-88", test_88},
         {"test-27", test_27},
-        {"test-26", test_26}
+        {"test-26", test_26},
+        {"test-171", test_171}
     };
 
     std::string cmd = message.second_layer;

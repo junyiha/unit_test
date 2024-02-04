@@ -14,6 +14,8 @@
 #include "SoundPlatform.hpp"
 #include "TaskParser.hpp"
 
+#include "opencv4/opencv2/opencv.hpp"
+
 static int generate_target(TargetPool &out)
 {
     std::random_device rd;
@@ -3264,6 +3266,166 @@ int test_parse_task_json()
     return 1;
 }
 
+int test_axis_angle_to_euler_angle()
+{
+    double rx = 1.57;
+    double ry = 0;
+    double rz = 0;
+
+    double angle;
+    Eigen::Vector3d axis;
+    Eigen::Vector3d angle_axisd(rx, ry, rz);
+
+    angle = angle_axisd.norm();
+    axis = angle_axisd / angle;
+    Eigen::AngleAxisd rvector(angle, axis);
+
+    Eigen::Matrix3d rotation_matrix = rvector.toRotationMatrix();
+    Eigen::Vector3d euler_angle = rotation_matrix.eulerAngles(2, 1, 0);
+
+    double x_angle, y_angle, z_angle;
+    x_angle = euler_angle[2];
+    y_angle = euler_angle[1];
+    z_angle = euler_angle[0];
+
+    LOG(INFO) << "\nangle axisd(轴角) x y z [input]: " << rx << " " << ry << " " << rz
+              << "\neulerAngle(欧拉角) x y z  [output]: " << x_angle << " " << y_angle << " " << z_angle 
+              << "\neulerAngle(欧拉角) x y z  [output]: " << x_angle * 180 / M_PI << " " 
+                                                         << y_angle * 180 / M_PI << " " 
+                                                         << z_angle * 180 / M_PI << "\n";
+
+    return 1;
+}
+
+// 计算两个向量的叉积
+double crossProduct(double x1, double y1, double x2, double y2, double x3, double y3) {
+    return (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
+}
+
+// 判断点是否在四边形内
+bool isPointInsideQuadrilateral(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
+    bool isInside = false;
+
+    double cross1 = crossProduct(x1, y1, x2, y2, x, y);
+    double cross2 = crossProduct(x2, y2, x3, y3, x, y);
+    double cross3 = crossProduct(x3, y3, x4, y4, x, y);
+    double cross4 = crossProduct(x4, y4, x1, y1, x, y);
+
+    // 如果四个叉积的符号都相同，则点在四边形内
+    if ((cross1 >= 0 && cross2 >= 0 && cross3 >= 0 && cross4 >= 0) ||
+        (cross1 <= 0 && cross2 <= 0 && cross3 <= 0 && cross4 <= 0)) {
+        isInside = true;
+    }
+
+    return isInside;
+}
+
+
+int test_2d_point()
+{
+    // 示例坐标
+    double x1 = -0.5, y1 = -0.2;
+    double x2 = -0.5, y2 = -0.7;
+    double x3 = 0.1, y3 = -0.2;
+    double x4 = 0.1, y4 = -0.7;
+
+    // 待判断的点坐标
+    double x = -0.27, y = -0.503;
+
+    // 判断点是否在四边形内
+    if (isPointInsideQuadrilateral(x, y, x1, y1, x2, y2, x3, y3, x4, y4)) {
+        LOG(INFO ) << "点在四边形内" << "\n";
+    } else {
+        LOG(INFO) << "点不在四边形内" << "\n";
+    }
+
+    return 0;
+}
+
+// 计算两个向量的叉积
+void crossProduct(double v1[], double v2[], double result[]) {
+    result[0] = v1[1] * v2[2] - v1[2] * v2[1];
+    result[1] = v1[2] * v2[0] - v1[0] * v2[2];
+    result[2] = v1[0] * v2[1] - v1[1] * v2[0];
+}
+
+// 判断点是否在长方体内
+bool isPointInsideCuboid(double x, double y, double z, double x1, double y1, double z1, double x2, double y2, double z2) {
+    double v1[3] = {x1 - x2, y1 - y2, z1 - z2};
+    double v2[3] = {x - x2, y - y2, z - z2};
+
+    double normal1[3];
+    crossProduct(v1, v2, normal1);
+
+    double normal2[3];
+
+    // 重复计算叉积，得到长方体的六个面的法向量
+    crossProduct(v1, v1, normal2);
+    if (normal1[0] * normal2[0] < 0 || normal1[1] * normal2[1] < 0 || normal1[2] * normal2[2] < 0) {
+        return false;
+    }
+
+    crossProduct(v2, v1, normal2);
+    if (normal1[0] * normal2[0] < 0 || normal1[1] * normal2[1] < 0 || normal1[2] * normal2[2] < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+int test_3d_point()
+{
+    // 示例坐标
+    double x1 = -0.5, y1 = -0.2, z1 = 0;
+    double x2 = 0.1, y2 = -0.7, z2 = 0.1;
+
+    // 待判断的点坐标
+    // double x = 0.32, y = -0.45, z = 0.06;
+    double x = -0.27, y = -0.503, z = 0.057;
+
+    // 判断点是否在长方体内
+    if (isPointInsideCuboid(x, y, z, x1, y1, z1, x2, y2, z2)) {
+        LOG(INFO) << "点在长方体内" << "\n";
+    } else {
+        LOG(INFO) << "点不在长方体内" << "\n";
+    }
+
+    return 0;
+}
+
+int test_2d_point_use_opencv()
+{
+   // 定义四边形的四个顶点
+    std::vector<cv::Point2f> quadPoints;
+    // quadPoints.push_back(cv::Point2f(-0.5,-0.2));
+    // quadPoints.push_back(cv::Point2f(-0.5,-0.7));
+    // quadPoints.push_back(cv::Point2f(0.1,-0.2));
+    // quadPoints.push_back(cv::Point2f(0.1,-0.7));
+
+    quadPoints.push_back(cv::Point2f(-0.15,-0.2));
+    quadPoints.push_back(cv::Point2f(-0.15,-0.6));
+    quadPoints.push_back(cv::Point2f(0.45,-0.2));
+    quadPoints.push_back(cv::Point2f(0.45,-0.6));
+
+    // 定义要检查的点坐标
+    // cv::Point2f testPoint(-0.27, -0.503);
+    cv::Point2f testPoint(0.29, -0.52);
+
+    // 利用pointPolygonTest函数判断点是否在四边形内
+    double result = cv::pointPolygonTest(quadPoints, testPoint, true);
+
+    // 打印结果
+    if (result > 0) {
+        LOG(INFO) << "点在四边形内\n";
+    } else if (result < 0) {
+        LOG(INFO) << "点在四边形外\n";
+    } else {
+        LOG(INFO) << "点在四边形上\n";
+    }
+
+    return 0;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -3329,7 +3491,11 @@ int test_business(Message& message)
         {"test-vcr-robotic-arm-attribute-info", test_vcr_robotic_arm_attribute_info},
         {"test-vcr-task-parserv2", test_vcr_task_parserv2},
         {"test-task-parser", test_task_parser},
-        {"test-parse-task-json", test_parse_task_json}
+        {"test-parse-task-json", test_parse_task_json},
+        {"test-axis-angle-to-euler-angle", test_axis_angle_to_euler_angle},
+        {"test-2d-point", test_2d_point},
+        {"test-3d-point", test_3d_point},
+        {"test-2d-point-use-opencv", test_2d_point_use_opencv}
     };
     std::string cmd = message.second_layer;
     auto it = cmd_map.find(cmd);

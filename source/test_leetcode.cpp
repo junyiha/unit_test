@@ -265,6 +265,43 @@ int test_171(Message& message)
     return 1;
 }
 
+int test_35(Message& message)
+{
+    LOG(INFO) << "test 35: 搜索插入位置\n";
+    std::string demo = R"(
+        给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。
+
+        请必须使用时间复杂度为 O(log n) 的算法。
+
+        示例 1:
+
+        输入: nums = [1,3,5,6], target = 5
+        输出: 2
+    )";
+    LOG(INFO) << "demo: \n" << demo << "\n";
+
+    int target{5};
+    std::vector<int> nums{1,3,5,6};
+
+    int index{0};
+    __FIND:
+    auto it = std::find(nums.begin(), nums.end(), target);
+    if (it != nums.end())
+    {
+        index = std::distance(nums.begin(), it);
+    }
+    else 
+    {
+        nums.push_back(target);
+        std::sort(nums.begin(), nums.end());
+        goto __FIND;
+    }
+
+    LOG(INFO) << "index: " << index << "\n";
+
+    return 1;
+}
+
 int test_leetcode(Message& message)
 {
     LOG(INFO) << "----test leetcode begin----\n";
@@ -274,7 +311,8 @@ int test_leetcode(Message& message)
         {"test-88", test_88},
         {"test-27", test_27},
         {"test-26", test_26},
-        {"test-171", test_171}
+        {"test-171", test_171},
+        {"test-35", test_35}
     };
 
     std::string cmd = message.second_layer;

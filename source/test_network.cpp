@@ -143,7 +143,9 @@ static void handle_request(const http::request<http::string_body>& req, http::re
     }
     else 
     {
-        res.result(http::status::not_found);
+        res.result(http::status::ok);
+        res.set(http::field::server, "AsyncBoostServer");
+        res.set(http::field::content_type, "text/plain");
         res.keep_alive(req.keep_alive());
         res.body() = "Not Found";
         res.prepare_payload();
@@ -963,6 +965,15 @@ int test_httpdv4(Message& message)
     return 1;
 }
 
+#include "http_server_async.hpp"
+
+int tmp_test_http_server_async(Message& message)
+{
+    test_http_server_async();
+
+    return 1;
+}
+
 int test_network(Message& message)
 {
     LOG(INFO) << "----test network begin----\n";
@@ -983,7 +994,8 @@ int test_network(Message& message)
         {"test-httpd", test_httpd},
         {"test-httpdv2", test_httpdv2},
         {"test-httpdv3", test_httpdv3},
-        {"test-httpdv4", test_httpdv4}
+        {"test-httpdv4", test_httpdv4},
+        {"test-http-server-async", tmp_test_http_server_async}
     };
 
     std::string cmd = message.second_layer;

@@ -217,11 +217,15 @@ int beast_http_server_async(Message& message)
 
 static void handle_event(mg_connection *connect, int ev, void *ev_data, void *fn_data)
 {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> ds(1, 300);
     struct mg_http_message* hm = (struct mg_http_message*)ev_data;
     LOG(INFO) << "ev: " << ev << "\n";
     switch (ev)
     {
         case MG_EV_HTTP_MSG:
+            std::this_thread::sleep_for(std::chrono::milliseconds(ds(gen)));
             mg_http_reply(connect, 200, "text/plain", "hello, mongoose");
             connect->is_draining = 1;
             break;
@@ -238,7 +242,7 @@ int mongoose_http_server(Message& message)
 
     mg_mgr_init(&mgr);
 
-    connect = mg_http_listen(&mgr, "0.0.0.0:13000", func, nullptr);
+    connect = mg_http_listen(&mgr, "0.0.0.0:13001", func, nullptr);
 
     for (;;)
     {
@@ -974,6 +978,137 @@ int tmp_test_http_server_async(Message& message)
     return 1;
 }
 
+class EventDispather
+{
+public:
+    void Dispatch(NetworkMessage &network_message)
+    {
+        LOG(INFO) << "dispatch network message\n"
+                  << "request path: " << network_message.path << "\n";
+        if (network_message.path == "/api/task")
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(3));
+        }
+    }
+};
+
+class NetworkWithMongoose
+{
+private:
+    struct mg_mgr mgr;
+    struct mg_connection *connect;
+    EventDispather m_event_dispather;
+    std::atomic<bool> m_flag{false};
+    std::thread m_thread;
+
+public:
+    NetworkWithMongoose() = delete;
+    NetworkWithMongoose(InitConfig init_config)
+    {
+        mg_mgr_init(&mgr);
+    }
+    ~NetworkWithMongoose()
+    {
+        mg_mgr_free(&mgr);
+    }
+
+    int Start(std::string ip, size_t port)
+    {
+        connect = mg_http_listen(&mgr, "0.0.0.0:13001", handle_event, this);
+
+        auto dpfunc = [](NetworkWithMongoose* this_ptr)->void 
+        {
+            while (true)
+            {
+                if (this_ptr->m_flag.load())
+                {
+                    LOG(WARNING) << "network module quit...\n";
+                    break;
+                }
+                mg_mgr_poll(&(this_ptr->mgr), 1000);
+            }
+        };
+
+        m_thread = std::thread(dpfunc, this);
+        m_thread.detach();
+
+        return 1;
+    }
+
+    void Dispath(NetworkMessage &network_message)
+    {
+        network_message.ExtractPathArgument();
+        m_event_dispather.Dispatch(network_message);
+    }
+
+private:
+    static void handle_event(mg_connection *connect, int ev, void *ev_data, void *fn_data)
+    {
+        NetworkWithMongoose* this_ptr = static_cast<NetworkWithMongoose*>(fn_data);
+        struct mg_http_message* hm = (struct mg_http_message*)ev_data;
+        LOG(INFO) << "ev: " << ev << "\n";
+        switch (ev)
+        {
+            case MG_EV_HTTP_MSG:
+            {
+                NetworkMessage network_message;
+                network_message.path = std::string(hm->uri.ptr, hm->uri.len);
+                network_message.method = std::string(hm->method.ptr, hm->method.len);
+                network_message.body = std::string(hm->body.ptr, hm->body.len);
+
+                std::thread tmp_thread = std::thread([](NetworkMessage network_message, NetworkWithMongoose* this_ptr, mg_connection *connect)
+                {
+
+                    this_ptr->Dispath(network_message);
+
+                    std::string response_data = R"(
+                        {
+                            "data":"hello, mongoose"
+                        }
+                    )";
+            
+                    mg_http_reply(connect, 200, "application/json", response_data.c_str());
+                    connect->is_draining = 1;
+                }, network_message, this_ptr, connect);
+                tmp_thread.detach();
+
+                break;
+            }
+            default:
+                break;
+        }
+    }
+};
+
+static std::atomic<bool> network_mongoose_object_flag{false};
+
+static void signal_handler(int signum)
+{
+    printf("receive signal: %d\n", signum);
+    network_mongoose_object_flag.store(true);
+}
+
+int network_mongoose_object(Message& message)
+{
+    signal(SIGINT, signal_handler);
+
+    InitConfig init_config;
+    NetworkWithMongoose network(init_config);
+
+    network.Start("0.0.0.0", 13001);
+
+    while (true)
+    {
+        if (network_mongoose_object_flag.load())
+        {
+            LOG(WARNING) << "function quit...\n";
+            break;
+        }
+    }
+
+    return 1;
+}
+
 int test_network(Message& message)
 {
     LOG(INFO) << "----test network begin----\n";
@@ -995,7 +1130,8 @@ int test_network(Message& message)
         {"test-httpdv2", test_httpdv2},
         {"test-httpdv3", test_httpdv3},
         {"test-httpdv4", test_httpdv4},
-        {"test-http-server-async", tmp_test_http_server_async}
+        {"test-http-server-async", tmp_test_http_server_async},
+        {"network-mongoose-object", network_mongoose_object}
     };
 
     std::string cmd = message.second_layer;

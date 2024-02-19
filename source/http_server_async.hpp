@@ -424,7 +424,7 @@ static int test_http_server_async()
 {
     // Check command line arguments.
     auto const address = net::ip::make_address("0.0.0.0");
-    auto const port = static_cast<unsigned short>(13000);
+    auto const port = static_cast<unsigned short>(13001);
     auto const doc_root = std::make_shared<std::string>("/home/user/");
     auto const threads = std::max<int>(1, 10);
 
@@ -440,6 +440,7 @@ static int test_http_server_async()
     // Run the I/O service on the requested number of threads
     std::vector<std::thread> v;
     v.reserve(threads - 1);
+    // 使用lambda构造std::thread对象并存入std::vector<std::thread>容器
     for(auto i = threads - 1; i > 0; --i)
         v.emplace_back(
         [&ioc]

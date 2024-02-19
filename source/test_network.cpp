@@ -181,37 +181,14 @@ static void do_session(tcp::socket& socket)
         LOG(ERROR) << "Error writing HTTP response: " << ec.message() << std::endl;
         return;
     }
+    socket.shutdown(tcp::socket::shutdown_both, ec);
 }
 
 int beast_http_server_async(Message& message)
 {
-    std::string address = "0.0.0.0";
-    unsigned int port = 13000;
-    net::io_context io_context;
+    boost::asio::ip::tcp::endpoint end_point(boost::asio::ip::make_address("0.0.0.0"), 13001);
+    boost::asio::io_context ioc{4};
 
-    try 
-    {
-        tcp::acceptor acceptor(io_context, tcp::endpoint(net::ip::address_v4::from_string(address), port));
-        acceptor.listen();
-        for (;;)
-        {
-            tcp::socket socket(io_context);
-            acceptor.async_accept(socket, [&](const beast::error_code& ec){
-                if (!ec)
-                {
-                    do_session(socket);
-                }
-            });
-
-            io_context.run();
-        }
-    }
-    catch (std::exception& e)
-    {
-        LOG(ERROR) << "Exception: " << e.what() << std::endl;
-        return 0;
-    }
-    
     return 1;
 }
 

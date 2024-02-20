@@ -189,6 +189,82 @@ int beast_http_server_async(Message& message)
     boost::asio::ip::tcp::endpoint end_point(boost::asio::ip::make_address("0.0.0.0"), 13001);
     boost::asio::io_context ioc{4};
 
+    beast::error_code ec;
+    boost::asio::ip::tcp::acceptor acceptor(boost::asio::make_strand(ioc));
+    const std::string doc_root{"/home/user"};
+
+    acceptor.open(end_point.protocol(), ec);
+    if (ec)
+    {
+        LOG(ERROR) << "open failed\n";
+        return 0;
+    }
+
+    acceptor.set_option(boost::asio::socket_base::reuse_address(true), ec);
+    if (ec)
+    {
+        LOG(ERROR) << "set option failed\n";
+        return 0;
+    }
+
+    acceptor.bind(end_point, ec);
+    if (ec)
+    {
+        LOG(ERROR) << "bind failed\n";
+        return 0;
+    }
+
+    acceptor.listen(boost::asio::socket_base::max_listen_connections, ec);
+    if (ec)
+    {
+        LOG(ERROR) << "listen failed\n";
+        return 0;
+    }
+
+    auto handle_accept = [](boost::beast::error_code ec, boost::asio::ip::tcp::socket socket)
+    {
+        if (ec)
+        {
+            LOG(ERROR) << "accept failed\n";
+            return;
+        }
+
+        boost::beast::tcp_stream stream(std::move(socket));
+        boost::asio::dispatch(stream.get_executor(), [&]()
+        {
+            boost::beast::http::request<http::string_body> req = {};
+            beast::flat_buffer buffer;
+
+            stream.expires_after(std::chrono::seconds(30));
+            boost::beast::http::async_read(stream, buffer, req, [&](boost::beast::error_code ec, std::size_t bytes_transferred)
+            {
+                boost::ignore_unused(bytes_transferred);
+                if (ec == boost::beast::http::error::end_of_stream)
+                {
+                    stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+                }
+
+                if (ec)
+                {
+                    LOG(ERROR) << "read failed\n";
+                    return;
+                }
+
+                boost::beast::http::response<http::string_body> res;
+                res.version(11);
+                res.result(boost::beast::http::status::ok);
+                res.set(boost::beast::http::field::server, "Boost.Beast");
+                boost::beast::http::message msg(res);
+                // 放弃了，这个boost.beast真tm难用
+            });
+        });
+
+    };
+
+    acceptor.async_accept(boost::asio::make_strand(ioc), std::bind(handle_accept, std::placeholders::_1, std::move(boost::asio::make_strand(ioc))));
+
+
+
     return 1;
 }
 

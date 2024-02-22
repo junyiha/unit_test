@@ -327,6 +327,26 @@ int asio_tcp_client()
     return 1;
 }
 
+int test_io_context_sync()
+{
+    asio::io_context io_context;
+    // asio::io_context::work work(io_context);
+    std::shared_ptr<asio::io_context::work> work(new asio::io_context::work(io_context));
+    work.reset();
+
+    io_context.run();
+
+    LOG(INFO) << "Do you reckon this line displays?\n";
+
+    // for (int x = 0; x < 42; ++x)
+    // {
+    //     io_context.poll();
+    //     LOG(INFO) << "Counter: " << x << "\n";
+    // }
+
+    return 1;
+}
+
 int test_asio(Message& message)
 {
     LOG(INFO) << "test asio begin..." << "\n";
@@ -342,7 +362,8 @@ int test_asio(Message& message)
         {"asio-bind-executor", asio_bind_executor},
         {"asio-tcp-hello", asio_tcp_hello},
         {"asio-tcp-asychronous", asio_tcp_synchronous},
-        {"asio-tcp-client", asio_tcp_client}
+        {"asio-tcp-client", asio_tcp_client},
+        {"asio-io-context-sync", test_io_context_sync}
     };
 
     std::string cmd = message.second_layer;

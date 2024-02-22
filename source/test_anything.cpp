@@ -2037,6 +2037,42 @@ int test_condition_variable()
     return 1;
 }
 
+int process_record_video()
+{
+    std::string root_dir{"/home/user/zjy-190/Videos/gh-rk-1012"};
+    std::string target_dir{"/home/user/zjy-190/Videos/gh-rk-1012/video-99/"};
+    std::string exclude_dir{"video-99"};
+    std::vector<std::string> files;
+    std::vector<std::string> directorys;
+
+    get_dir_and_file_from_path(root_dir, directorys, files);
+
+    std::size_t counter{1};
+    for (auto& dir : directorys)
+    {
+        if (dir == exclude_dir)
+        {
+            continue;
+        }
+        LOG(INFO) << "directory: " << dir << "\n";
+        std::vector<std::string> sub_files;
+        std::vector<std::string> sub_directorys;
+
+        std::string sub_root_dir = root_dir + "/" + dir;
+        get_dir_and_file_from_path(sub_root_dir, sub_directorys, sub_files);
+        for (auto& file : sub_files)
+        {
+            std::string abs_file = sub_root_dir + "/" + file;
+            LOG(INFO) << "sub file: " << abs_file << "\n";
+            std::string command = "cp " + abs_file + " " + target_dir + "/gh-rk-1012-video-" + std::to_string(counter);
+            std::system(command.c_str());
+            counter++;
+        }
+    }
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -2090,7 +2126,8 @@ int test_anything(Message& message)
         {"test-openssl-base64-encode", test_openssl_base64_encode},
         {"test-openssl-base64-decode", test_openssl_base64_decode},
         {"test-signal", test_signal},
-        {"test-condition-variable", test_condition_variable}
+        {"test-condition-variable", test_condition_variable},
+        {"process-record-video", process_record_video}
     };
     std::string cmd = message.second_layer;
     auto it = cmd_map.find(cmd);

@@ -830,7 +830,7 @@ public:
 
 bool compareByYear(const Book& a, const Book& b)
 {
-    return a.year < b.year;
+    return a.year > b.year;
 }
 
 int test_sort_book_class()

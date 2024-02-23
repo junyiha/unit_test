@@ -2037,6 +2037,28 @@ int test_condition_variable()
     return 1;
 }
 
+std::vector<int> extract_index_from_name(const std::string &root_dir)
+{
+    std::vector<std::string> files;
+    std::vector<std::string> directorys;
+    std::vector<int> index_container;
+
+    get_dir_and_file_from_path(root_dir, directorys, files);
+    for (auto& file : files)
+    {
+        auto pos = file.find_last_of('-');
+        std::string index = file.substr(pos + 1);
+        LOG(INFO) << "file: " << file << ", index: " << index << "\n";
+        index_container.push_back(std::stoi(index));
+    }
+
+    std::sort(index_container.begin(), index_container.end());
+
+    LOG(INFO) << "index_container's begin(): " << index_container.front() << ", and it's end(): " << index_container.back() << "\n" ;
+
+    return index_container;
+}
+
 int process_record_video()
 {
     std::string root_dir{"/home/user/zjy-190/Videos/gh-rk-1012"};
@@ -2068,6 +2090,35 @@ int process_record_video()
             std::system(command.c_str());
             counter++;
         }
+    }
+
+    return 1;
+}
+
+int process_record_video_v2()
+{
+    std::string root_dir{"/home/user/zjy-190/Videos/gh-rk-1012/video-"};
+    std::string target_root_dir{"/home/user/zjy-190/Videos/gh-rk-1012/video-99/"};
+
+    std::string input_index;
+    LOG(INFO) << "input directory's index : ";
+    std::cin >> input_index;
+    root_dir = root_dir + input_index;
+
+    auto index_container = extract_index_from_name(target_root_dir);
+    std::vector<std::string> files;
+    std::vector<std::string> directorys;
+
+    get_dir_and_file_from_path(root_dir, directorys, files);
+
+    std::size_t counter = index_container.back() + 1;
+    for (auto& file : files)
+    {
+        std::string abs_file = root_dir + "/" + file;
+        LOG(INFO) << "file: " << abs_file << ", counter: " << counter << "\n";
+        std::string command = "cp " + abs_file + " " + target_root_dir + "/gh-rk-1012-video-" + std::to_string(counter);
+        std::system(command.c_str());
+        counter++;
     }
 
     return 1;
@@ -2127,7 +2178,8 @@ int test_anything(Message& message)
         {"test-openssl-base64-decode", test_openssl_base64_decode},
         {"test-signal", test_signal},
         {"test-condition-variable", test_condition_variable},
-        {"process-record-video", process_record_video}
+        {"process-record-video", process_record_video},
+        {"process-record-video-v2", process_record_video_v2}
     };
     std::string cmd = message.second_layer;
     auto it = cmd_map.find(cmd);

@@ -2124,6 +2124,50 @@ int process_record_video_v2()
     return 1;
 }
 
+int math_vector_xyz()
+{
+    float distance{0.06};
+    std::vector<double> src_cart(6, 0);
+    std::vector<double> vector_xyz(3, 0);
+    std::vector<double> relative_cart(3, 0);
+
+    src_cart = {0.0269178, -0.46257, 0.0508646, 0.462005, -3.09833, 0.0442486};
+    vector_xyz = {-0.0242417, -0.280985, 0.959406};
+
+    float t = distance / std::sqrt(std::pow(vector_xyz.at(0), 2) + std::pow(vector_xyz.at(1), 2) + std::pow(vector_xyz.at(2), 2));
+    relative_cart.at(0) = vector_xyz.at(0) * t;
+    relative_cart.at(1) = vector_xyz.at(1) * t;
+    relative_cart.at(2) = vector_xyz.at(2) * t;
+
+    LOG(INFO) << "relative_cart: \n";
+    for (auto& it : relative_cart)
+    {
+        LOG(INFO) << it << ", ";
+    }
+
+    return 1;
+}
+
+int test_index()
+{
+    int place_shold{2};
+
+    int index{0};
+
+    while (index < place_shold)
+    {
+        for (int i = 0; i < place_shold - index; i++)
+        {
+            LOG(INFO) << "i: " << i << "\n";
+        }
+
+        LOG(INFO) << "index: " << index << "\n";
+        index++;
+    }
+
+    return 1;
+}
+
 int test_anything(Message& message)
 {
     std::map<std::string, std::function<int()>> cmd_map = {
@@ -2179,7 +2223,9 @@ int test_anything(Message& message)
         {"test-signal", test_signal},
         {"test-condition-variable", test_condition_variable},
         {"process-record-video", process_record_video},
-        {"process-record-video-v2", process_record_video_v2}
+        {"process-record-video-v2", process_record_video_v2},
+        {"math-vector-xyz", math_vector_xyz},
+        {"test-index", test_index}
     };
     std::string cmd = message.second_layer;
     auto it = cmd_map.find(cmd);

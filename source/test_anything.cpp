@@ -129,6 +129,19 @@ int test_eigen_vector3f()
     return 0;
 }
 
+int test_eigen_angle_axisd()
+{
+    Eigen::Vector3d rotation_vector(0.404435, -3.10924, 0.0442371);
+
+    LOG(INFO) << "angle: " << rotation_vector.norm() << ", " << "axis: " << rotation_vector.normalized() << "\n";
+
+    Eigen::AngleAxisd rotation_vector_aa(rotation_vector.norm(), rotation_vector.normalized());
+
+    LOG(INFO) << "angle: " << rotation_vector_aa.angle() << ", " << "axis: " << rotation_vector_aa.axis() << "\n";
+
+    return 1;
+}
+
 class MyClass {
 private:
     int privateData;
@@ -2190,6 +2203,7 @@ int test_anything(Message& message)
         {"test-generate-random-id-v2", test_generate_random_id},
         {"test-eigen-hello", test_eigen_hello},
         {"test-eigen-vector3f", test_eigen_vector3f},
+        {"test-eigen-angle-axisd", test_eigen_angle_axisd},
         {"test-ascii", test_ascii},
         {"test-asan", test_asan},
         {"process-request", processRequest},

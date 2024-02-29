@@ -131,13 +131,33 @@ int test_eigen_vector3f()
 
 int test_eigen_angle_axisd()
 {
-    Eigen::Vector3d rotation_vector(0.404435, -3.10924, 0.0442371);
+    Eigen::Vector3d ideal_pose(0.404435, -3.10924, 0.0442371);
+    LOG(INFO) << "angle: " << ideal_pose.norm() << ", " << "axis: " << ideal_pose.normalized() << "\n";
 
-    LOG(INFO) << "angle: " << rotation_vector.norm() << ", " << "axis: " << rotation_vector.normalized() << "\n";
+    Eigen::AngleAxisd rotation_vector_aa(ideal_pose.norm(), ideal_pose.normalized());
+    Eigen::Matrix3d rotation = rotation_vector_aa.matrix();
+    LOG(INFO) << rotation << "\n";
 
-    Eigen::AngleAxisd rotation_vector_aa(rotation_vector.norm(), rotation_vector.normalized());
+    // Eigen::AngleAxisd new_rot(-0.344, Eigen::Vector3d(0,0,1)); // z
+    // Eigen::AngleAxisd new_rot(-0.344, Eigen::Vector3d(0,1,0)); // y
+    Eigen::AngleAxisd new_rot(-0.344, Eigen::Vector3d(1,0,0)); // x
+    Eigen::Matrix3d new_rotation = new_rot.matrix();
+    LOG(INFO) << new_rotation << "\n";
 
-    LOG(INFO) << "angle: " << rotation_vector_aa.angle() << ", " << "axis: " << rotation_vector_aa.axis() << "\n";
+    auto new_pose = new_rotation * rotation;
+    Eigen::AngleAxisd new_angle_axisd(new_pose);
+    LOG(INFO) << new_angle_axisd.angle() << ", " << new_angle_axisd.axis() << "\n";
+
+    Eigen::Vector3d tmp_vec = new_angle_axisd.angle() * new_angle_axisd.axis();
+    LOG(INFO) << new_angle_axisd.angle() * new_angle_axisd.axis() << "\n";
+
+    // LOG(INFO) << "angle: " << rotation_vector_aa.angle() << ", " << "axis: " << rotation_vector_aa.axis() << "\n";
+
+    Eigen::Vector3d non_ideal_pose(0.664209, 3.06471, -0.0370462);
+    LOG(INFO) << "angle: " << non_ideal_pose.norm() << ", " << "axis: " << non_ideal_pose.normalized() << "\n";
+
+    Eigen::Vector3d place_pose(3.1400748728138406, -0.001278210673984829, -0.0015324470036047781);
+    LOG(INFO) << "angle: " << place_pose.norm() << ", " << "axis: " << place_pose.normalized() << "\n";
 
     return 1;
 }

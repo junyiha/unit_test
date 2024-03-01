@@ -3426,6 +3426,40 @@ int test_2d_point_use_opencv()
     return 0;
 }
 
+int test_vcr_pose_control()
+{
+    const std::string cmd_config = "/data/home/user/workspace/unit_test/data/cmd_config.json";
+    const Eigen::Vector3d axis_x(1, 0, 0);
+    const Eigen::Vector3d axis_y(0, 1, 0);
+    const Eigen::Vector3d axis_z(0, 0, 1);
+
+    nlohmann::json parsed_data;
+    std::ifstream file(cmd_config, std::ios::in);
+
+    file >> parsed_data;
+    std::vector<double> pose(3, 0.0);
+    pose = parsed_data["pose"].get<std::vector<double>>();
+
+    std::transform(pose.begin(), pose.end(), pose.begin(), [](double val){return val * M_PI / 180.0;});
+
+    Eigen::AngleAxisd angle_axisd_x(pose.at(0), axis_x);
+    Eigen::Matrix3d rotation_matrix_x = angle_axisd_x.matrix();
+
+    Eigen::AngleAxisd angle_axisd_y(pose.at(1), axis_y);
+    Eigen::Matrix3d rotation_matrix_y = angle_axisd_y.matrix();
+
+    Eigen::AngleAxisd angle_axisd_z(pose.at(2), axis_z);
+    Eigen::Matrix3d rotation_matrix_z = angle_axisd_z.matrix();
+
+    Eigen::Matrix3d rotation_target = rotation_matrix_z * rotation_matrix_y * rotation_matrix_x;
+    Eigen::AngleAxisd angle_axisd_target(rotation_target);
+    
+    Eigen::Vector3d rotate_vector_target = angle_axisd_target.angle() * angle_axisd_target.axis();
+    LOG(INFO) << "rotate vector: " << std::setprecision(6) << rotate_vector_target.x() << ", " << rotate_vector_target.y() << ", " << rotate_vector_target.z() << "\n";
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -3495,7 +3529,8 @@ int test_business(Message& message)
         {"test-axis-angle-to-euler-angle", test_axis_angle_to_euler_angle},
         {"test-2d-point", test_2d_point},
         {"test-3d-point", test_3d_point},
-        {"test-2d-point-use-opencv", test_2d_point_use_opencv}
+        {"test-2d-point-use-opencv", test_2d_point_use_opencv},
+        {"test-vcr-pose-control",test_vcr_pose_control}
     };
     std::string cmd = message.second_layer;
     auto it = cmd_map.find(cmd);

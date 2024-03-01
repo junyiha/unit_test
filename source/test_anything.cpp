@@ -139,8 +139,16 @@ int test_eigen_angle_axisd()
     LOG(INFO) << rotation << "\n";
 
     // Eigen::AngleAxisd new_rot(-0.344, Eigen::Vector3d(0,0,1)); // z
-    // Eigen::AngleAxisd new_rot(-0.344, Eigen::Vector3d(0,1,0)); // y
-    Eigen::AngleAxisd new_rot(-0.344, Eigen::Vector3d(1,0,0)); // x
+    Eigen::AngleAxisd new_rot(180 * M_PI / 180, Eigen::Vector3d(0,1,0)); // y
+    auto tmp_new_vec = new_rot.angle() * new_rot.axis();
+    LOG(INFO) << "new rot vector: " << tmp_new_vec[0] << ", " << tmp_new_vec[1] << ", " << tmp_new_vec[2] << "\n";
+    Eigen::AngleAxisd rot_off(20 * M_PI / 180, Eigen::Vector3d(0,1,0)); // y
+    Eigen::Matrix3d rotation2 = rot_off.matrix() * new_rot.matrix();
+    Eigen::AngleAxisd tmp2(rotation2);
+    auto tmp_new_vec2 = tmp2.angle() * tmp2.axis();
+    LOG(INFO) << "tmp new rot vector2: " << tmp_new_vec2[0] << ", " << tmp_new_vec2[1] << ", " << tmp_new_vec2[2] << "\n";
+
+    // Eigen::AngleAxisd new_rot(-0.344, Eigen::Vector3d(1,0,0)); // x
     Eigen::Matrix3d new_rotation = new_rot.matrix();
     LOG(INFO) << new_rotation << "\n";
 
@@ -149,7 +157,13 @@ int test_eigen_angle_axisd()
     LOG(INFO) << new_angle_axisd.angle() << ", " << new_angle_axisd.axis() << "\n";
 
     Eigen::Vector3d tmp_vec = new_angle_axisd.angle() * new_angle_axisd.axis();
-    LOG(INFO) << new_angle_axisd.angle() * new_angle_axisd.axis() << "\n";
+    LOG(INFO) << "旋转向量: " << tmp_vec[0] << ", " << tmp_vec[1] << ", " << tmp_vec[2] << "\n";
+
+    // 右乘不可使用
+    // auto end_pose = rotation * new_rotation;
+    // Eigen::AngleAxisd end_new_angle_axisd(end_pose);
+    // Eigen::Vector3d end_tmp_vec = end_new_angle_axisd.angle() * end_new_angle_axisd.axis();
+    // LOG(INFO) << end_tmp_vec[1] << ", " << end_tmp_vec[1] << ", " << end_tmp_vec[2] << "\n";
 
     // LOG(INFO) << "angle: " << rotation_vector_aa.angle() << ", " << "axis: " << rotation_vector_aa.axis() << "\n";
 

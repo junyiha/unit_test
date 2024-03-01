@@ -3460,6 +3460,32 @@ int test_vcr_pose_control()
     return 1;
 }
 
+/**
+ * @brief 由姿态逆推出三个正交轴的旋转分量是不可行的。因为一个姿态可以由多种旋转方式，也就是一对多的关系
+ * 
+ * @return int 
+ */
+int test_vcr_pose_inverse_rotate()
+{
+    const std::string cmd_config = "/data/home/user/workspace/unit_test/data/cmd_config.json";
+
+    nlohmann::json parsed_data;
+    std::ifstream file(cmd_config, std::ios::in);
+
+    file >> parsed_data;
+    std::vector<double> rotate_vector(3, 0.0);
+    rotate_vector = parsed_data["rotate_vector"].get<std::vector<double>>();
+
+    Eigen::Vector3d rotate_vec(rotate_vector.at(0), rotate_vector.at(1), rotate_vector.at(2));
+    Eigen::AngleAxisd angle_axisd(rotate_vec.norm(), rotate_vec.normalized());
+    Eigen::Matrix3d rotation_matrix = angle_axisd.matrix();
+
+    Eigen::Vector3d euler_angles = rotation_matrix.eulerAngles(2, 1, 0);  // ZYX
+    LOG(INFO) << "euler angle(ZYX): " << euler_angles(0) << ", " << euler_angles(1) << ", " << euler_angles(2) << "\n";
+
+    return 1;
+}
+
 int test_business(Message& message)
 {
     LOG(INFO) << "test business begin..." << "\n";
@@ -3530,7 +3556,8 @@ int test_business(Message& message)
         {"test-2d-point", test_2d_point},
         {"test-3d-point", test_3d_point},
         {"test-2d-point-use-opencv", test_2d_point_use_opencv},
-        {"test-vcr-pose-control",test_vcr_pose_control}
+        {"test-vcr-pose-control",test_vcr_pose_control},
+        {"test-vcr-pose-inverse-rotate", test_vcr_pose_inverse_rotate}
     };
     std::string cmd = message.second_layer;
     auto it = cmd_map.find(cmd);
